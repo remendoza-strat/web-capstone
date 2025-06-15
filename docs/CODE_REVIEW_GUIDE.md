@@ -1,20 +1,23 @@
-# Code Review & Collaboration Guide
+# Code Review & Collaboration Guide for Individual Development
 
 ## Overview
 
-Code reviews are a cornerstone of professional software development. They help ensure code quality, share knowledge, and maintain consistency across the team. This guide outlines our code review process and best practices.
+While each intern works on their own fork independently, code reviews remain valuable for learning and knowledge sharing. This guide outlines optional code review processes and collaboration best practices for individual development with peer learning.
 
-## Code Review Process
+## Individual Development with Optional Peer Review
 
-### 1. Before Creating a Pull Request
+### 1. Self-Review Process (Required)
+
+Since you own your entire codebase, self-review becomes crucial:
 
 #### Self-Review Checklist
 - [ ] Code follows TypeScript and ESLint rules
-- [ ] All tests pass locally (`npm test`)
-- [ ] Code is properly formatted (`npm run lint:fix`)
+- [ ] All tests pass locally (`pnpm test`)
+- [ ] Code is properly formatted (`pnpm lint:fix`)
 - [ ] No console.log statements or debugging code
 - [ ] Meaningful commit messages following convention
-- [ ] Branch is up to date with main
+- [ ] Feature works as expected in browser
+- [ ] Code is readable and well-documented
 
 #### Code Quality Standards
 - [ ] Functions are small and focused (single responsibility)
@@ -23,64 +26,78 @@ Code reviews are a cornerstone of professional software development. They help e
 - [ ] Error handling is implemented where appropriate
 - [ ] TypeScript types are properly defined (no `any`)
 
-### 2. Creating a Pull Request
+### 2. Optional Peer Review Process
 
-#### PR Title Format
+#### When to Request Peer Review
+- **Stuck on a problem**: Get help from other interns
+- **Learning opportunity**: Share interesting solutions
+- **Before major features**: Get feedback on architecture decisions
+- **Complex implementations**: Validate approach with peers
+
+#### How to Share Your Code for Review
+
+**Option 1: Share Your Fork**
+```bash
+# Share your repository URL with other interns
+https://github.com/YOUR-USERNAME/nextjs-internship-capstone
 ```
-<type>(<scope>): <description>
 
-Examples:
-feat(auth): add Clerk authentication integration
-fix(kanban): resolve drag-and-drop state sync issue
-docs(setup): update development environment guide
-```
-
-#### PR Description Template
+**Option 2: Create a Discussion Issue**
+Create an issue in your fork with this template:
 ```markdown
-## 🎯 What does this PR do?
-Brief description of the changes and why they were made.
+## 🤔 Looking for Feedback: [Feature Name]
 
-## 🧪 How to test
-Step-by-step instructions for testing the changes:
-1. Check out this branch
-2. Run `npm install` if dependencies changed
-3. Test specific functionality...
+### What I'm working on
+Brief description of the feature or problem.
 
-## ✅ Checklist
-- [ ] Code follows project conventions
-- [ ] Tests added/updated and passing
-- [ ] Documentation updated if needed
-- [ ] No breaking changes (or documented if necessary)
-- [ ] Reviewed my own code changes
+### My approach
+Explain your implementation approach.
 
-## 📷 Screenshots (if applicable)
-Include before/after screenshots for UI changes.
+### Specific questions
+- How can I improve this code?
+- Is there a better way to handle X?
+- Any potential issues you see?
 
-## 🔗 Related Issues
-Closes #123
-Related to #456
+### Code to review
+Link to specific files or commits:
+- `app/dashboard/page.tsx` - Main dashboard component
+- `lib/auth.ts` - Authentication logic
+
+### How to test
+1. Clone my fork: `git clone https://github.com/YOUR-USERNAME/nextjs-internship-capstone`
+2. Install dependencies: `pnpm install`
+3. Test the feature: [specific steps]
 ```
 
-#### Linking to Issues
-- Use `Closes #issue-number` to automatically close issues
-- Use `Related to #issue-number` for related work
-- Reference specific tasks from the main task list
+#### Peer Review Guidelines
+- **Voluntary**: All peer reviews are optional and voluntary
+- **Learning focused**: Focus on learning and knowledge sharing
+- **Respectful**: Be constructive and supportive
+- **No blocking**: Reviews don't block your progress
 
-### 3. Code Review Guidelines
+### 3. Knowledge Sharing & Learning
 
-#### For Authors
+#### Sharing Your Solutions
 
-##### Writing Reviewable Code
-- **Keep PRs small**: Aim for 200-400 lines of changes max
-- **Single purpose**: Each PR should address one feature/fix
-- **Clear context**: Provide good descriptions and comments
-- **Test coverage**: Include relevant tests for new functionality
+##### When to Share
+- **Breakthrough moments**: Solved a difficult problem
+- **Interesting patterns**: Found a clever solution
+- **Learning discoveries**: Learned something valuable
+- **Common challenges**: Help others avoid similar issues
 
-##### Responding to Feedback
-- **Be receptive**: View feedback as learning opportunities
-- **Ask questions**: If feedback is unclear, ask for clarification
-- **Explain decisions**: If you disagree, explain your reasoning respectfully
-- **Make requested changes**: Address all feedback before requesting re-review
+##### How to Share
+- **Daily standups**: Share quick wins and solutions
+- **Team chat**: Post code snippets and explanations
+- **Documentation**: Update guides with new learnings
+- **Demo sessions**: Show working features to the team
+
+#### Learning from Others
+
+##### Asking for Help
+- **Be specific**: Describe exactly what you're trying to achieve
+- **Share context**: Provide relevant code and error messages
+- **Show attempts**: Explain what you've already tried
+- **Ask questions**: Don't just ask for solutions, ask for understanding
 
 #### For Reviewers
 
@@ -118,7 +135,7 @@ Related to #456
 ❌ "This is wrong"
 ✅ "Consider using useState here instead of useRef for this use case"
 
-❌ "Bad variable name"  
+❌ "Bad variable name"
 ✅ "Could we use a more descriptive name like 'activeProjectId' instead of 'id'?"
 
 ❌ "This won't work"
@@ -133,16 +150,16 @@ Related to #456
 
 **Example Comments**
 ```
-[MUST FIX] This will cause a runtime error if projects is undefined. 
+[MUST FIX] This will cause a runtime error if projects is undefined.
 Add optional chaining: projects?.map()
 
-[SHOULD FIX] Consider extracting this logic into a custom hook 
+[SHOULD FIX] Consider extracting this logic into a custom hook
 for reusability across components.
 
-[CONSIDER] We could use a more semantic HTML element here, 
+[CONSIDER] We could use a more semantic HTML element here,
 like <section> instead of <div>, for better accessibility.
 
-[QUESTION] Why did you choose Zustand over React Context for this state? 
+[QUESTION] Why did you choose Zustand over React Context for this state?
 I'm curious about the reasoning.
 ```
 
@@ -188,15 +205,15 @@ export async function createProject(name: string) {
 // ✅ Proper validation and error handling
 export async function createProject(formData: FormData) {
   const name = formData.get('name') as string
-  
+
   if (!name || name.trim().length < 3) {
     throw new Error('Project name must be at least 3 characters')
   }
-  
+
   try {
-    await db.insert(projects).values({ 
+    await db.insert(projects).values({
       name: name.trim(),
-      userId: auth().userId 
+      userId: auth().userId
     })
     revalidatePath('/dashboard')
   } catch (error) {
@@ -213,14 +230,14 @@ export async function createProject(formData: FormData) {
 // ❌ Hooks in conditional
 function TaskCard({ task }) {
   if (!task) return null
-  
+
   const [isEditing, setIsEditing] = useState(false) // ❌ Hook after conditional
 }
 
 // ✅ Hooks at top level
 function TaskCard({ task }) {
   const [isEditing, setIsEditing] = useState(false) // ✅ Hook at top
-  
+
   if (!task) return null
 }
 ```
@@ -232,8 +249,8 @@ function Dashboard({ user, projects, onCreateProject, onEditProject }) {
   return (
     <div>
       <Header user={user} />
-      <ProjectList 
-        projects={projects} 
+      <ProjectList
+        projects={projects}
         onCreateProject={onCreateProject}
         onEditProject={onEditProject}
         user={user}

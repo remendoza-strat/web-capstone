@@ -1,8 +1,8 @@
-# Individual Project Development - 7 Parallel Implementations
+# Individual Project Development - Parallel Implementations
 
 ## Overview
 
-Each of the 7 interns will build their own complete version of the project management tool. This ensures everyone gets the full learning experience across all aspects of full-stack development, from setup to deployment.
+Each intern will build their own complete version of the project management tool. This ensures everyone gets the full learning experience across all aspects of full-stack development, from setup to deployment.
 
 ## Individual Development Approach
 
@@ -13,45 +13,91 @@ Each of the 7 interns will build their own complete version of the project manag
 - **Comprehensive Skills**: No one misses out on any part of the stack
 - **Individual Pacing**: Interns can work at their own pace while following milestones
 
-### Repository Structure
-Each intern will have their own branch and implementation:
+### Project Setup - Individual Forks
+Each intern should fork the project repository individually:
 
+#### How to Fork and Set Up Your Project
+
+1. **Fork the Repository**
+   ```bash
+   # Go to the main repository on GitHub
+   # Click "Fork" to create your own copy
+   # Clone your fork locally
+   git clone https://github.com/YOUR-USERNAME/nextjs-internship-capstone.git
+   cd nextjs-internship-capstone/project
+   ```
+
+2. **Set Up Your Development Environment**
+   ```bash
+   # Install dependencies
+   pnpm install
+
+   # Start development server
+   pnpm dev
+   ```
+
+3. **Create Your Own Implementation**
+   - Work on your fork independently
+   - Build the complete project from start to finish
+   - Own your entire codebase and learning journey
+
+## Task Tracking & Progress Management
+
+### Recommended Task Tracking Methods
+
+#### Option 1: GitHub Issues in Your Fork (Recommended)
+Create issues in your forked repository to track your progress:
+
+**Issue Template:**
+```markdown
+## Task: [Phase] - [Feature Name]
+**Priority**: High/Medium/Low
+**Estimated Time**: X hours
+**Week**: Week X
+
+### Description
+Clear description of what needs to be implemented.
+
+### Acceptance Criteria
+- [ ] Specific, measurable criteria
+- [ ] That define when the task is complete
+- [ ] Include testing requirements
+
+### Notes
+- Dependencies on other tasks
+- Useful resources or documentation links
+- Implementation notes or constraints
 ```
-main/
-├── intern-1-[name]/     # Individual implementation branches
-├── intern-2-[name]/
-├── intern-3-[name]/
-├── intern-4-[name]/
-├── intern-5-[name]/
-├── intern-6-[name]/
-└── intern-7-[name]/
-```
 
-## Project Board Organization
-
-### GitHub Projects Setup
-We'll use GitHub Projects with intern names as assignees/labels:
-
-#### Column Structure
-- **📋 Backlog** - All available tasks
-- **🎯 Sprint (Current Week)** - Tasks for current week
-- **👨‍💻 In Progress** - Tasks being worked on
-- **👀 Review** - Tasks in code review
+#### Option 2: Personal GitHub Projects Board
+Set up a project board in your fork with these columns:
+- **📋 Backlog** - All planned tasks
+- **🎯 Current Sprint** - Tasks for this week
+- **👨‍💻 In Progress** - Currently working on
+- **👀 Review** - Self-review and testing
 - **✅ Done** - Completed tasks
 
-#### Task Assignment Format
-Each task will include the intern's name:
+#### Option 3: External Task Management Tools
+- **Notion**: Create a personal project dashboard with databases
+- **Trello**: Simple Kanban board for visual task management
+- **Linear**: Advanced project management with time tracking
+- **Todoist**: Simple task list with due dates and priorities
 
-**Example Issue Titles:**
-- `[Sarah] 1.1 Initialize Next.js project with TypeScript`
-- `[John] 2.3 Create sign-in and sign-up pages`
-- `[Maria] 3.2 Configure PostgreSQL database`
+### Task Categories & Labels
+Organize your tasks using these categories:
+- `setup` - Project initialization and configuration
+- `auth` - Authentication and user management
+- `database` - Database schema and operations
+- `frontend` - UI components and pages
+- `backend` - API routes and server logic
+- `testing` - Unit, integration, and E2E tests
+- `deployment` - Production deployment and CI/CD
+- `documentation` - README, comments, and guides
 
-#### Labels for Organization
-- `week-1`, `week-2`, etc. - Timeline tracking
-- `priority-high`, `priority-medium`, `priority-low`
-- `frontend`, `backend`, `database`, `auth`, `testing`
-- `intern-sarah`, `intern-john`, `intern-maria`, etc.
+### Priority Levels
+- **High**: Blocking other tasks or critical functionality
+- **Medium**: Important features for MVP
+- **Low**: Nice-to-have features or optimizations
 
 ## Shared Learning & Collaboration
 
@@ -117,23 +163,53 @@ Each task will include the intern's name:
 - [ ] Performance optimized
 - [ ] Documentation complete
 
-## Branch Strategy
+## Git Workflow for Individual Forks
 
-### Individual Branch Naming
+### Branch Strategy in Your Fork
+Work directly on your fork with feature branches:
+
 ```
-main
-├── feature/sarah-jones/auth-setup
-├── feature/john-doe/database-schema
-├── feature/maria-garcia/kanban-board
-├── fix/alex-smith/drag-drop-bug
-└── docs/taylor-brown/setup-guide
+your-fork/main
+├── feature/auth-setup
+├── feature/database-schema
+├── feature/kanban-board
+├── fix/drag-drop-bug
+└── docs/setup-improvements
 ```
 
-### Merge Strategy
-- **Individual branches**: Never merge to main (keep separate)
-- **Shared documentation**: Can merge documentation updates
-- **Bug fixes in docs**: Can merge shared resource fixes
-- **Feature sharing**: Can create shared branches for optional collaboration
+### Recommended Git Workflow
+1. **Create feature branches** for each major task
+   ```bash
+   git checkout -b feature/user-authentication
+   # Work on the feature
+   git add .
+   git commit -m "feat: implement user authentication with Clerk"
+   git push origin feature/user-authentication
+   ```
+
+2. **Merge to your main branch** when feature is complete
+   ```bash
+   git checkout main
+   git merge feature/user-authentication
+   git push origin main
+   ```
+
+3. **Keep your fork updated** (optional - if you want updates from the original repo)
+   ```bash
+   git remote add upstream https://github.com/ORIGINAL-REPO/nextjs-internship-capstone.git
+   git fetch upstream
+   git merge upstream/main
+   ```
+
+### Commit Message Conventions
+Use conventional commits for better tracking:
+- `feat:` - New features
+- `fix:` - Bug fixes
+- `docs:` - Documentation updates
+- `style:` - Code formatting
+- `refactor:` - Code refactoring
+- `test:` - Adding tests
+- `chore:` - Maintenance tasks
 
 ## Showcase & Comparison
 
@@ -168,15 +244,15 @@ Each intern will demo their individual implementation:
 - ✅ **Code Review Experience**: Review different coding styles and approaches
 - ✅ **Communication**: Daily standups and technical discussions
 
-## Project Board Task Template
+## Personal Task Management Template
 
-### Individual Task Format
+### Individual Task Format for GitHub Issues
 ```markdown
-## [Intern Name] Task Title
+## Task: [Phase] - [Feature Name]
 
-**Assigned to**: @intern-github-username
-**Sprint**: Week X
 **Priority**: High/Medium/Low
+**Estimated Time**: X hours
+**Week**: Week X
 **Category**: Frontend/Backend/Database/Testing
 
 ### Description
@@ -187,17 +263,43 @@ Clear description of what needs to be implemented.
 - [ ] That define when the task is complete
 - [ ] Include testing requirements
 
-### Notes
-- Any specific requirements or constraints
-- Links to documentation or examples
+### Implementation Notes
+- Technical approach or architecture decisions
 - Dependencies on other tasks
+- Useful resources or documentation links
 
 ### Definition of Done
 - [ ] Code written and working locally
-- [ ] Self-reviewed for quality
+- [ ] Self-reviewed for quality and best practices
 - [ ] Tests written (if applicable)
 - [ ] Documentation updated
+- [ ] Feature deployed and tested
 - [ ] Ready for optional peer review
 ```
 
-This approach ensures fairness while maintaining the collaborative learning environment!
+### Weekly Planning Template
+Create a weekly planning issue to track your sprint:
+
+```markdown
+## Week X Planning - [Date Range]
+
+### Goals for This Week
+- [ ] Main objective 1
+- [ ] Main objective 2
+- [ ] Main objective 3
+
+### Tasks Planned
+- [ ] Task 1 (Priority: High, Est: 4h)
+- [ ] Task 2 (Priority: Medium, Est: 6h)
+- [ ] Task 3 (Priority: Low, Est: 2h)
+
+### Blockers/Questions
+- Any technical questions or blockers
+- Areas where you might need help
+
+### Learning Goals
+- New technologies or concepts to learn this week
+- Skills to practice or improve
+```
+
+

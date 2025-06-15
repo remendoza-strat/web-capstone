@@ -1,8 +1,8 @@
-# 12-Week Internship Timeline & Milestones
+# 12-Week Individual Development Timeline & Milestones
 
 ## Overview
 
-This document outlines the detailed timeline, milestones, and deliverables for the 12-week Next.js internship capstone project. The project is designed to be flexible, accommodating interns who may have 10-12 weeks available.
+This document outlines the detailed timeline, milestones, and deliverables for the 12-week Next.js internship capstone project. Each intern works on their own fork independently, building a complete project management tool from start to finish. The timeline is designed to be flexible, accommodating interns who may have 10-12 weeks available.
 
 ## Timeline Phases
 
@@ -10,13 +10,14 @@ This document outlines the detailed timeline, milestones, and deliverables for t
 **Focus**: Individual skill building and project foundation
 
 #### Week 1: Environment & Setup
-- **Goals**: Get everyone set up and familiar with tools
+- **Goals**: Fork the repository and set up individual development environment
 - **Deliverables**:
-  - Development environment configured
-  - First successful commit to personal branch
-  - Basic understanding of project structure
+  - Personal fork created and cloned locally
+  - Development environment configured with pnpm
+  - First successful commit to your fork
+  - Basic understanding of project structure and placeholder components
 
-#### Week 2: Next.js & React Fundamentals  
+#### Week 2: Next.js & React Fundamentals
 - **Goals**: Master core Next.js App Router concepts
 - **Deliverables**:
   - Personal portfolio mini-project deployed
@@ -30,17 +31,17 @@ This document outlines the detailed timeline, milestones, and deliverables for t
   - Understanding of Server Actions and data fetching
   - Experience with Drizzle ORM
 
-### Phase 2: Collaborative Development (Weeks 4-8)
-**Focus**: Building the capstone project together
+### Phase 2: Individual Implementation (Weeks 4-8)
+**Focus**: Building your complete project management tool
 
 #### Week 4: Project Architecture & Authentication
 - **Milestone 1**: Authenticated Dashboard
-- **Goals**: Set up project foundation and user auth
+- **Goals**: Set up your project foundation and user auth
 - **Deliverables**:
-  - Project repository structure finalized
-  - Authentication system implemented with Clerk
-  - Protected dashboard accessible
-  - Database schema designed and implemented
+  - Your fork's project structure organized
+  - Authentication system implemented with Clerk in your project
+  - Protected dashboard accessible in your implementation
+  - Database schema designed and implemented in your codebase
 
 #### Week 5: Core CRUD Operations
 - **Goals**: Build fundamental project management features
@@ -161,30 +162,37 @@ Follow the timeline as outlined above with additional time for:
 - [ ] Documentation complete and accessible
 - [ ] Team can demo all major features
 
-## Individual Contribution Tracking
+## Individual Progress Tracking
 
-Each intern will be evaluated on:
+Each intern will be evaluated on their complete project implementation:
 
 ### Technical Skills
-- [ ] Code quality and TypeScript usage
-- [ ] React and Next.js best practices
-- [ ] Database design and implementation
+- [ ] Code quality and TypeScript usage across entire project
+- [ ] React and Next.js best practices implementation
+- [ ] Database design and implementation in your fork
 - [ ] Testing and debugging abilities
-- [ ] Git workflow and collaboration
+- [ ] Git workflow and personal project management
 
-### Collaboration Skills
-- [ ] Code review participation and quality
-- [ ] Communication in standups and meetings
-- [ ] Help and mentorship provided to teammates
-- [ ] Issue reporting and documentation
-- [ ] Conflict resolution and problem-solving
+### Learning & Growth
+- [ ] Participation in daily standups and knowledge sharing
+- [ ] Communication about progress, blockers, and solutions
+- [ ] Help and mentorship provided to other interns
+- [ ] Documentation of your implementation and learnings
+- [ ] Problem-solving and independent research skills
 
 ### Professional Development
-- [ ] Meeting deadlines and commitments
-- [ ] Taking ownership of assigned features
-- [ ] Learning from feedback and iteration
-- [ ] Documentation and knowledge sharing
-- [ ] Initiative and proactive problem-solving
+- [ ] Meeting personal deadlines and milestone commitments
+- [ ] Taking ownership of your complete project
+- [ ] Learning from feedback and self-iteration
+- [ ] Documentation and knowledge sharing with the team
+- [ ] Initiative and proactive problem-solving in your implementation
+
+### Project Completeness
+- [ ] All MVP features implemented in your fork
+- [ ] Working authentication and user management
+- [ ] Complete CRUD operations for projects and tasks
+- [ ] Functional Kanban board with drag-and-drop
+- [ ] Deployed and accessible application
 
 ## Risk Mitigation
 
@@ -208,7 +216,7 @@ Each intern will be evaluated on:
 #### Individual Skill Gaps
 - **Prevention**: Initial skill assessment and personalized learning paths
 - **Solution**: Targeted mentorship and additional resources
-- **Support**: Peer learning and pair programming
+- **Support**: Peer learning and knowledge sharing between interns working on similar features
 
 ## Success Metrics
 
@@ -218,14 +226,14 @@ Each intern will be evaluated on:
 - **Performance**: Fast, responsive user experience
 - **Deployment**: Successfully deployed and accessible
 
-### Learning Success
-- **Technical Growth**: Demonstrable improvement in coding skills
-- **Collaboration**: Effective teamwork and communication
-- **Professional Skills**: Meeting deadlines and taking ownership
-- **Portfolio**: Quality project for job applications
+### Individual Learning Success
+- **Technical Growth**: Demonstrable improvement in coding skills through complete project
+- **Independence**: Ability to build full-stack applications independently
+- **Professional Skills**: Meeting personal deadlines and taking ownership
+- **Portfolio**: Quality complete project for job applications
 
-### Team Success
-- **Delivery**: Project completed on time and to specification
-- **Process**: Effective use of agile development practices
+### Cohort Success
+- **Individual Delivery**: Each intern completes their project on time and to specification
+- **Knowledge Sharing**: Effective peer learning and collaboration despite individual work
 - **Culture**: Positive, supportive, learning-focused environment
-- **Knowledge Transfer**: Good documentation and knowledge sharing
+- **Diverse Solutions**: Multiple approaches and implementations to learn from
