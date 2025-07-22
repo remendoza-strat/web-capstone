@@ -1,0 +1,84 @@
+name: "Task Template"
+description: Template for weekly development tasks with clear criteria and definitions.
+title: "Task: [Phase] - [Feature Name]"
+labels: []
+projects: ["remendoza-strat/1"]
+assignees:
+  - remendoza-strat
+
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: input
+    id: estimated-time
+    attributes:
+      label: Estimated Time
+    validations:
+      required: true
+
+  - type: input
+    id: week
+    attributes:
+      label: Week
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Setup
+        - Auth
+        - Database
+        - Frontend
+        - Backend
+        - Testing
+        - Deployment
+        - Documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation-notes
+    attributes:
+      label: Implementation Notes
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Code written and working locally
+        - label: Self-reviewed for quality and best practices
+        - label: Tests written
+        - label: Documentation updated
+        - label: Feature deployed and tested
+        - label: Ready for optional peer review
+    validations:
+      required: true
