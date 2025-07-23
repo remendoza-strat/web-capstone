@@ -1,8 +1,13 @@
+"use client";
+import { useTheme } from "@/components/theme-provider"
 import { SignUp } from "@clerk/nextjs"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
 export default function SignUpPage() {
+  const { theme } = useTheme();
+  const colorBackground = theme === "dark" ? "bg-black_shades-200" : "bg-platinum-100";
+
   return (
     <>
       <Header/>
@@ -12,7 +17,8 @@ export default function SignUpPage() {
             appearance={{
               variables: {
                 colorPrimary: "#146a7f",
-                colorInputText: "#000000"
+                colorInputText: "#000000",
+                colorBackground: "colorBackground"
               },
               elements: {
                 dividerText: "text-gray-300",
