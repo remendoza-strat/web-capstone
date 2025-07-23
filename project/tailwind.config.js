@@ -109,6 +109,11 @@ module.exports = {
           800: "#051a20",
           900: "#c7edf6",
         },
+        black_shades: {
+          DEFAULT: "#121212",
+          100: "#191919",
+          200: "#252525"
+        }
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

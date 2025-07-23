@@ -1,5 +1,8 @@
 import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
+// TEMPORARY FOR TESTING
+import { UserButton } from "@clerk/nextjs";
+// TEMPORARY FOR TESTING
 
 export default function DashboardPage() {
   return (
@@ -13,20 +16,23 @@ export default function DashboardPage() {
         </div>
 
         {/* Implementation Status Banner */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="p-4 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
           <div className="flex items-start">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue_munsell-500 rounded-full flex items-center justify-center">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue_munsell-500">
                 <TrendingUp className="text-white" size={16} />
               </div>
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">Dashboard Implementation Tasks</h3>
               <div className="mt-2 text-sm text-blue-800 dark:text-blue-200">
-                <ul className="list-disc list-inside space-y-1">
+                <ul className="space-y-1 list-disc list-inside">
                   <li>Task 4.2: Create project listing and dashboard interface</li>
                   <li>Task 5.3: Set up client-side state management with Zustand</li>
                   <li>Task 6.6: Optimize performance and implement loading states</li>
+                   {/* TEMPORARY FOR TESTING */}
+                  <UserButton/>
+                  {/* TEMPORARY FOR TESTING */}
                 </ul>
               </div>
             </div>
@@ -43,15 +49,15 @@ export default function DashboardPage() {
           ].map((stat) => (
             <div
               key={stat.name}
-              className="bg-white dark:bg-outer_space-500 overflow-hidden rounded-lg border border-french_gray-300 dark:border-payne's_gray-400 p-6"
+              className="overflow-hidden bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6"
             >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue_munsell-100 dark:bg-blue_munsell-900 rounded-lg flex items-center justify-center">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue_munsell-100 dark:bg-blue_munsell-900">
                     <stat.icon className="text-blue_munsell-500" size={20} />
                   </div>
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="flex-1 w-0 ml-5">
                   <dl>
                     <dt className="text-sm font-medium text-payne's_gray-500 dark:text-french_gray-400 truncate">
                       {stat.name}
@@ -60,7 +66,7 @@ export default function DashboardPage() {
                       <div className="text-2xl font-semibold text-outer_space-500 dark:text-platinum-500">
                         {stat.value}
                       </div>
-                      <div className="ml-2 flex items-baseline text-sm font-semibold text-green-600 dark:text-green-400">
+                      <div className="flex items-baseline ml-2 text-sm font-semibold text-green-600 dark:text-green-400">
                         {stat.change}
                       </div>
                     </dd>
@@ -72,15 +78,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Activity & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Recent Projects */}
-          <div className="bg-white dark:bg-outer_space-500 rounded-lg border border-french_gray-300 dark:border-payne's_gray-400 p-6">
-            <h3 className="text-lg font-semibold text-outer_space-500 dark:text-platinum-500 mb-4">Recent Projects</h3>
+          <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
+            <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Recent Projects</h3>
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-3 bg-platinum-800 dark:bg-outer_space-400 rounded-lg"
+                  className="flex items-center justify-between p-3 rounded-lg bg-platinum-800 dark:bg-outer_space-400"
                 >
                   <div>
                     <div className="font-medium text-outer_space-500 dark:text-platinum-500">Project {i}</div>
@@ -89,12 +95,12 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="w-12 h-2 bg-french_gray-300 dark:bg-payne's_gray-400 rounded-full">
-                    <div className="w-8 h-2 bg-blue_munsell-500 rounded-full"></div>
+                    <div className="w-8 h-2 rounded-full bg-blue_munsell-500"></div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
+            <div className="p-4 mt-4 border border-yellow-200 rounded bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
                 📋 <strong>Task 4.1:</strong> Implement project CRUD operations
               </p>
@@ -102,23 +108,23 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white dark:bg-outer_space-500 rounded-lg border border-french_gray-300 dark:border-payne's_gray-400 p-6">
-            <h3 className="text-lg font-semibold text-outer_space-500 dark:text-platinum-500 mb-4">Quick Actions</h3>
+          <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
+            <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-center px-4 py-3 bg-blue_munsell-500 text-white rounded-lg hover:bg-blue_munsell-600 transition-colors">
+              <button className="flex items-center justify-center w-full px-4 py-3 text-white transition-colors rounded-lg bg-blue_munsell-500 hover:bg-blue_munsell-600">
                 <Plus size={20} className="mr-2" />
                 Create New Project
               </button>
-              <button className="w-full flex items-center justify-center px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
+              <button className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
                 <Plus size={20} className="mr-2" />
                 Add Team Member
               </button>
-              <button className="w-full flex items-center justify-center px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
+              <button className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
                 <Plus size={20} className="mr-2" />
                 Create Task
               </button>
             </div>
-            <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
+            <div className="p-4 mt-4 border border-yellow-200 rounded bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
                 📋 <strong>Task 4.4:</strong> Build task creation and editing functionality
               </p>
