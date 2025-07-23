@@ -73,7 +73,7 @@ export function Footer() {
           </div>
         </div>
         <div className="pt-8 mt-8 text-center border-t border-gray-300">
-          <p className="text-platinum-300 dark:text-black_shades-100">© 2024 TaskFlow. All rights reserved.</p>
+          <p className="text-platinum-300 dark:text-black_shades-100">© 2025 ProjectFlow. All rights reserved.</p>
         </div>
       </div>
     </footer>
