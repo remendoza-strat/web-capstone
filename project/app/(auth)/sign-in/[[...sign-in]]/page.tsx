@@ -12,7 +12,7 @@ export default function SignInPage() {
     <>
       <Header/>
       <div className="flex items-center justify-center min-h-screen bg-platinum-300 dark:bg-black_shades-100">
-        <div className="w-full max-w-md">
+        <div className="flex justify-center w-full max-w-md mx-auto">
           <SignIn
             appearance={{
               variables: {

@@ -1,38 +1,40 @@
-"use client"
-
-import { useTheme } from "./theme-provider"
+"use client";
+import { useTheme } from "@/components/theme-provider"
 import { Moon, Sun } from "lucide-react"
 import Link from "next/link"
 
 export function Header() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
 
   return (
-    <header className="border-b border-french_gray-300 dark:border-payne's_gray-400 bg-white/80 dark:bg-outer_space-500/80 backdrop-blur-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header className="border-b border-gray-300 bg-platinum-100 dark:bg-black_shades-200">
+      <div className="container px-4 mx-auto sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-blue_munsell-500">
-              TaskFlow
+            <Link 
+              href="/" 
+              className="text-2xl font-bold text-blue_munsell-400 hover:text-blue_munsell-600"
+            >
+              ProjectFlow
             </Link>
           </div>
 
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden space-x-8 md:flex">
             <Link
               href="#features"
-              className="text-outer_space-500 dark:text-platinum-500 hover:text-blue_munsell-500 transition-colors"
+              className="text-md text-black_shades-100 dark:text-platinum-300 hover:text-blue_munsell-400 dark:hover:text-blue_munsell-400"
             >
               Features
             </Link>
             <Link
               href="#pricing"
-              className="text-outer_space-500 dark:text-platinum-500 hover:text-blue_munsell-500 transition-colors"
+              className="text-md text-black_shades-100 dark:text-platinum-300 hover:text-blue_munsell-400 dark:hover:text-blue_munsell-400"
             >
               Pricing
             </Link>
             <Link
               href="#about"
-              className="text-outer_space-500 dark:text-platinum-500 hover:text-blue_munsell-500 transition-colors"
+              className="text-md text-black_shades-100 dark:text-platinum-300 hover:text-blue_munsell-400 dark:hover:text-blue_munsell-400"
             >
               About
             </Link>
@@ -41,14 +43,14 @@ export function Header() {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-              className="p-2 rounded-lg bg-platinum-500 dark:bg-payne's_gray-500 text-outer_space-500 dark:text-platinum-500 hover:bg-french_gray-500 dark:hover:bg-payne's_gray-400 transition-colors"
+              className="p-2 text-gray-500 bg-platinum-500"
             >
-              {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+              {theme === "light" ? <Moon size={20} /> : <Sun size={20}/>}
             </button>
 
             <Link
-              href="/dashboard"
-              className="px-4 py-2 bg-blue_munsell-500 text-white rounded-lg hover:bg-blue_munsell-600 transition-colors"
+              href="/sign-in"
+              className="px-4 py-2 text-white bg-blue_munsell-400 hover:bg-blue_munsell-600"
             >
               Get Started
             </Link>
@@ -56,5 +58,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }
