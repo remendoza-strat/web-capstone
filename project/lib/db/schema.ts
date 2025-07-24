@@ -11,11 +11,6 @@ TODO: Implementation Notes for Interns:
    - OR pg + @types/pg (if using regular PostgreSQL)
 
 2. Define schemas for:
-   - users (id, clerkId, email, name, createdAt, updatedAt)
-   - projects (id, name, description, ownerId, createdAt, updatedAt, dueDate)
-   - lists (id, name, projectId, position, createdAt, updatedAt)
-   - tasks (id, title, description, listId, assigneeId, priority, dueDate, position, createdAt, updatedAt)
-   - comments (id, content, taskId, authorId, createdAt, updatedAt)
 
 3. Set up proper relationships between tables
 4. Add indexes for performance
