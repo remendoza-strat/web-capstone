@@ -1,22 +1,54 @@
-"use client";
-
-import {useState} from "react"
+"use client"
+import { useState } from "react"
 import { X } from "lucide-react"
-import type {NewProject} from "@/lib/db/schema"
-import {useUser} from "@clerk/nextjs"
-import {createProjectAction, getUserIdAction} from "@/lib/db/actions"
+import { toast } from "sonner"
+import { useUser } from "@clerk/nextjs"
+import { createProjectAction, getUserIdAction } from "@/lib/db/actions"
+import type { NewProject } from "@/lib/db/schema"
+import { ProjectSchema } from "@/lib/validations"
 
-export function CreateProjectButton({ close }: { close: () => void }){
+
+
+export function CreateProjectButton({ close } : { close: () => void }){
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
 
+  const { user } = useUser();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { user } = useUser();
     const clerkId = user!.id;
     const ownerId = (await getUserIdAction(clerkId))!;
+
+    const result = ProjectSchema.safeParse({
+      name,
+      description,
+      dueDate
+    });
+
+    if(!result.success){
+      const errors = result.error.flatten().fieldErrors;
+
+      if(errors.name?.[0]){
+        toast.error(errors.name[0]);
+        return;
+      }
+
+      if(errors.description?.[0]){
+        toast.error(errors.description[0]);
+        return;
+      }
+
+      if(errors.dueDate?.[0]){
+        toast.error(errors.dueDate[0]);
+        return;
+      }
+
+      toast.error("Invalid input. Please check your form.");
+      return;
+  }
 
     const newProject: NewProject = {
       ownerId,
@@ -25,10 +57,10 @@ export function CreateProjectButton({ close }: { close: () => void }){
       dueDate: new Date(dueDate)
     };
 
+    toast.success("Project created.");
     await createProjectAction(newProject);
     close();
-  }
-
+  };
 
   return (
     <>

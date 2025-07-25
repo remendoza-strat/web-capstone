@@ -6,6 +6,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useTheme } from "./theme-provider"
 import { Home, FolderOpen, Users, Settings, Moon, Sun, Menu, X, BarChart3, Calendar } from "lucide-react"
+import { UserButton } from "@clerk/nextjs";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
@@ -37,13 +38,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400"
+            className="p-2 rounded-lg lg:hidden hover:bg-platinum-500 dark:hover:bg-payne's_gray-400"
           >
             <X size={20} />
           </button>
         </div>
 
-        <nav className="mt-6 px-3">
+        <nav className="px-3 mt-6">
           <ul className="space-y-1">
             {navigation.map((item) => (
               <li key={item.name}>
@@ -63,15 +64,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <div className="sticky top-0 z-30 flex h-16 items-center gap-x-4 border-b border-french_gray-300 dark:border-payne's_gray-400 bg-white dark:bg-outer_space-500 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="sticky top-0 z-30 flex items-center h-16 border-b gap-x-4 border-french_gray-300 dark:border-payne's_gray-400 bg-white dark:bg-outer_space-500 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400"
+            className="p-2 rounded-lg lg:hidden hover:bg-platinum-500 dark:hover:bg-payne's_gray-400"
           >
             <Menu size={20} />
           </button>
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+          <div className="flex self-stretch flex-1 gap-x-4 lg:gap-x-6">
             <div className="flex flex-1"></div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               <button
@@ -81,15 +82,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
               </button>
 
-              <div className="w-8 h-8 bg-blue_munsell-500 rounded-full flex items-center justify-center text-white font-semibold">
-                U
+              <div className="flex items-center justify-center w-8 h-8">
+                <UserButton/>
               </div>
             </div>
           </div>
         </div>
 
         {/* Page content */}
-        <main className="py-8 px-4 sm:px-6 lg:px-8">{children}</main>
+        <main className="px-4 py-8 sm:px-6 lg:px-8">{children}</main>
       </div>
     </div>
   )

@@ -1,41 +1,50 @@
-// TODO: Task 3.6 - Set up data validation with Zod schemas
+import { z } from "zod"
 
-/*
-TODO: Implementation Notes for Interns:
+// Project data input validation
+export const ProjectSchema = z.object({
 
-1. Install Zod: pnpm add zod
-2. Create validation schemas for all forms and API endpoints
-3. Add proper error messages
-4. Set up client and server-side validation
+  // Name validation
+  name: z
+    .string()
+    .min(3, "Name: Project name must be at least 3 characters.")
+    .max(60, "Name: Project name must not exceed 60 characters."),
 
-Example schemas needed:
-- Project creation/update
-- Task creation/update
-- User profile update
-- List/column management
-- Comment creation
+  // Description validation
+  description: z
+    .string()
+    .min(10, "Description: Description must be at least 10 characters.")
+    .max(300, "Description:  Description must not exceed 300 characters."),
 
-Example structure:
-import { z } from 'zod'
+  // Due date validation
+  dueDate: z.preprocess(
+    (val) => {
+      if(typeof val === "string" || val instanceof Date){
+        const parsed = new Date(val);
+        return isNaN(parsed.getTime()) ? null : parsed;
+      }
+      return null;
+    },
+    z
+      .date()
+      .nullable()
+      .superRefine((date, ctx) => {
+        if(date === null){
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Due Date: Invalid date input."
+          });
+          return;
+        }
+        if(date <= new Date()){
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Due Date: Due date must be in the future."
+          });
+        }
+      }
+    )
+  )
+});
 
-export const projectSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
-  description: z.string().max(500, 'Description too long').optional(),
-  dueDate: z.date().min(new Date(), 'Due date must be in future').optional(),
-})
-
-export const taskSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
-  description: z.string().max(1000, 'Description too long').optional(),
-  priority: z.enum(['low', 'medium', 'high']),
-  dueDate: z.date().optional(),
-  assigneeId: z.string().uuid().optional(),
-})
-*/
-
-// Placeholder exports to prevent import errors
-export const projectSchema = "TODO: Implement project validation schema"
-export const taskSchema = "TODO: Implement task validation schema"
-export const userSchema = "TODO: Implement user validation schema"
-export const listSchema = "TODO: Implement list validation schema"
-export const commentSchema = "TODO: Implement comment validation schema"
+// Type for project zod schema 
+export type ProjectInput = z.infer<typeof ProjectSchema>;
