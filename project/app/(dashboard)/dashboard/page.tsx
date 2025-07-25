@@ -1,12 +1,23 @@
+"use client"
+
 import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
+import { useState } from "react"
+import { CreateProjectButton } from "@/components/create-project-button"
 // TEMPORARY FOR TESTING
 import { UserButton } from "@clerk/nextjs";
 // TEMPORARY FOR TESTING
 
 export default function DashboardPage() {
+  const [isOpen, isOpenState] = useState(false);
+  
   return (
     <DashboardLayout>
+
+      {isOpen && (
+        <CreateProjectButton close={() => isOpenState(false)} />
+      )}
+
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Dashboard</h1>
@@ -111,7 +122,7 @@ export default function DashboardPage() {
           <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
             <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="flex items-center justify-center w-full px-4 py-3 text-white transition-colors rounded-lg bg-blue_munsell-500 hover:bg-blue_munsell-600">
+              <button onClick={() => isOpenState(true)} className="flex items-center justify-center w-full px-4 py-3 text-white transition-colors rounded-lg bg-blue_munsell-500 hover:bg-blue_munsell-600">
                 <Plus size={20} className="mr-2" />
                 Create New Project
               </button>
