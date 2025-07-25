@@ -3,9 +3,9 @@ import { db } from "@/lib/db/connection"
 import { users, projects } from "@/lib/db/schema"
 import type { NewUser, NewProject } from "@/lib/db/schema"
 
+// Store all queries
 export const queries = {
   users: {
-
     createUser: async (newUser: NewUser) => {
       // Check if clerkId is already used
       const existing = await db.query.users.findFirst({
@@ -31,16 +31,12 @@ export const queries = {
       // Return user id
       return user?.id ?? null;
     }
-
   },
 
   projects: {
-
     // Create project in the database
     createProject: async (newProject: NewProject) => {
       await db.insert(projects).values(newProject).execute();
     }
-
   }
-
 };

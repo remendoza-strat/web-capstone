@@ -35,8 +35,9 @@ export async function POST(req: Request){
     return new NextResponse("Webhook verification failed", { status: 400 });
   }
 
-  // Process event if it is user created
+  // Process event if it is user.created
   if(evt.type === "user.created"){
+    // Get data
     const { id, email_addresses, first_name, last_name } = evt.data;
 
     // Try to create user in database
