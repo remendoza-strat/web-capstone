@@ -113,7 +113,27 @@ module.exports = {
           DEFAULT: "#121212",
           100: "#191919",
           200: "#252525"
+        },
+
+
+
+        // MODAL COLORS
+        modal_light: {
+          DEFAULT: "#e8e7e8",
+          100: "#f8f8f8"
+        },
+        modal_dark: {
+          DEFAULT: "#46494c",
+          100: "#393b3e",
+        },
+        modal_blue: {
+          DEFAULT: "#146a7f",
+          100: "#0f4f5f"
         }
+        // MODAL COLORS
+
+
+
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

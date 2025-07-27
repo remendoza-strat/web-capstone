@@ -6,14 +6,14 @@ export const ProjectSchema = z.object({
   // Name validation
   name: z
     .string()
-    .min(3, "Name: Project name must be at least 3 characters.")
-    .max(60, "Name: Project name must not exceed 60 characters."),
+    .min(3, "Name: Must be at least 3 characters.")
+    .max(50, "Name: Must not exceed 50 characters."),
 
   // Description validation
   description: z
     .string()
-    .min(10, "Description: Description must be at least 10 characters.")
-    .max(300, "Description:  Description must not exceed 300 characters."),
+    .min(10, "Description: Must be at least 10 characters.")
+    .max(300, "Description:  Must not exceed 300 characters."),
 
   // Due date validation
   dueDate: z.preprocess(
@@ -31,14 +31,14 @@ export const ProjectSchema = z.object({
         if(date === null){
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Due Date: Invalid date input."
+            message: "Due Date: Must be a valid date."
           });
           return;
         }
         if(date <= new Date()){
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Due Date: Due date must be in the future."
+            message: "Due Date: Must be in the future."
           });
         }
       }

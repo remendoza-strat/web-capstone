@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components{
+  .modal-open-bg{
+		@apply bg-black bg-opacity-50;
+	}
+	.modal-form-color{
+    @apply bg-modal_light dark:bg-modal_dark;
+  }
+  .modal-form-title{
+    @apply text-lg font-bold text-modal_dark dark:text-modal_light;
+  }
+	.modal-sub-btn{
+		@apply px-4 py-2 text-base font-light text-modal_dark-100 dark:text-modal_light-100 hover:bg-modal_light-100 dark:hover:bg-modal_dark-100;
+	}
+	.modal-form-label{
+		@apply text-sm font-light text-modal_dark dark:text-modal_light;
+	}
+	.modal-form-input{
+		@apply px-3 py-2 bg-modal_light-100 dark:bg-modal_dark-100 text-modal_dark dark:text-modal_light focus:outline-none focus:ring-2 focus:ring-modal_blue;
+	}
+	.modal-main-btn{
+		@apply px-4 py-2 text-base font-normal text-white rounded-lg bg-modal_blue hover:bg-modal_blue-100;
+	}
+}

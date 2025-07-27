@@ -1,42 +1,43 @@
 import { eq } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
-import { users, projects } from "@/lib/db/schema"
-import type { NewUser, NewProject } from "@/lib/db/schema"
+import { users, projects, projectMembers } from "@/lib/db/schema"
+import type { NewUser, NewProject, NewProjectMember } from "@/lib/db/schema"
 
-// Store all queries
 export const queries = {
+
+  // Users queries
   users: {
     createUser: async (newUser: NewUser) => {
-      // Check if clerkId is already used
       const existing = await db.query.users.findFirst({
         where: eq(users.clerkId, newUser.clerkId)
       });
-
-      // Create user if no duplication
       if(!existing){
         await db.insert(users).values(newUser).execute();
       }
-
-      // Return account with existing clerkId
       return existing;
     },
-
     getUserId: async (clerkId: string) => {
-      // Get user id with clerk id
       const user = await db.query.users.findFirst({
         where: eq(users.clerkId, clerkId),
         columns: { id: true }
       });
-
-      // Return user id
       return user?.id ?? null;
     }
   },
 
+  // Project queries
   projects: {
-    // Create project in the database
     createProject: async (newProject: NewProject) => {
-      await db.insert(projects).values(newProject).execute();
+      const [project] = await db.insert(projects).values(newProject).returning({ id: projects.id });
+      return project.id;
+    }
+  },
+
+  // Project members queries
+  projectMembers: {
+    addProjectMember: async (newProjectMember: NewProjectMember) => {
+      await db.insert(projectMembers).values(newProjectMember).execute();
     }
   }
+  
 };

@@ -4,9 +4,6 @@ import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { useState } from "react"
 import { CreateProjectButton } from "@/components/create-project-button"
-// TEMPORARY FOR TESTING
-import { UserButton } from "@clerk/nextjs";
-// TEMPORARY FOR TESTING
 
 export default function DashboardPage() {
   const [isOpen, setIsOpen] = useState(false);
