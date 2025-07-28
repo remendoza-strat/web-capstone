@@ -16,12 +16,24 @@
 		@apply px-4 py-2 text-base font-light text-modal_dark-100 dark:text-modal_light-100 hover:bg-modal_light-100 dark:hover:bg-modal_dark-100;
 	}
 	.modal-form-label{
-		@apply text-sm font-light text-modal_dark dark:text-modal_light;
+		@apply text-sm font-normal text-modal_dark dark:text-modal_light;
 	}
 	.modal-form-input{
 		@apply px-3 py-2 bg-modal_light-100 dark:bg-modal_dark-100 text-modal_dark dark:text-modal_light focus:outline-none focus:ring-2 focus:ring-modal_blue;
 	}
 	.modal-main-btn{
 		@apply px-4 py-2 text-base font-normal text-white rounded-lg bg-modal_blue hover:bg-modal_blue-100;
+	}
+	.modal-form-suggestion-main{
+		@apply px-1 py-1 text-base font-bold text-modal_dark dark:text-modal_light;
+	}
+	.modal-form-suggestion-sec{
+		@apply px-1 py-1 text-sm font-normal text-modal_dark dark:text-modal_light;
+	}
+	.modal-form-suggestion-ul{
+		@apply bg-modal_light-100 dark:bg-modal_dark-100
+	}
+	.modal-form-suggestion-li{
+		@apply cursor-pointer hover:bg-gray-300 dark:hover:bg-black_shades-200
 	}
 }

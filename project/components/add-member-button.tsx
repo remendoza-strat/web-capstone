@@ -101,7 +101,8 @@ export function AddMemberButton({ close }: { close: () => void }) {
             >
               {projects.length === 0 ? (
                 <option disabled>No projects available</option>
-              ) : (
+              ) : 
+              (
                 projects.map((project) => (
                   <option key={project.projectId} value={project.projectId}>
                     {project.projectName}
@@ -129,11 +130,11 @@ export function AddMemberButton({ close }: { close: () => void }) {
                 }}
               />
               {!selectedUser && (
-                <ul className="absolute w-full overflow-y-auto bg-white border border-gray-300 rounded shadow z-60 dark:bg-modal_dark max-h-48">
+                <ul className="absolute w-full overflow-y-auto z-60 max-h-48 modal-form-suggestion-ul">
                   {suggestions.length > 0 ? (
                     suggestions.map((sug) => (
                       <li
-                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="modal-form-suggestion-li"
                         key={sug.userId}
                         onClick={() => {
                           setSelectedUser({
@@ -146,25 +147,24 @@ export function AddMemberButton({ close }: { close: () => void }) {
                           setSuggestions([]);
                         }}
                       >
-                        <div className="font-medium">
+                        <div className="modal-form-suggestion-main">
                           {sug.userFname} {sug.userLname}
                         </div>
-                        <div className="text-sm text-gray-500">{sug.userEmail}</div>
+                        <div className="modal-form-suggestion-sec">{sug.userEmail}</div>
                       </li>
                     ))
                   ) : 
                   (
                     query && (
-                      <li className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                      <li className="modal-form-suggestion-sec">
                         No users found
                       </li>
                     )
                   )
-                  }
+                }
                 </ul>
               )}
             </div>
-
           </div>
           <div>
             <label className="block m-2 modal-form-label">
@@ -180,10 +180,6 @@ export function AddMemberButton({ close }: { close: () => void }) {
               <option value="Designer">Designer</option>
               <option value="QA Engineer">QA Engineer</option>
             </select>
-
-
-
-
           </div>
           <div className="flex justify-end pt-4 space-x-3">
             <button onClick={close} type="button" className="modal-sub-btn">
