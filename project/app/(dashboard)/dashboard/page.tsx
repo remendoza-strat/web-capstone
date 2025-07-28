@@ -7,14 +7,15 @@ import { CreateProjectButton } from "@/components/create-project-button"
 
 export default function DashboardPage() {
   const [isOpen, setIsOpen] = useState(false);
+  const [modalType, setModalType] = useState("");
   
   return (
     <DashboardLayout>
 
-      {isOpen && (
-        <CreateProjectButton close={() => setIsOpen(false)} />
+      {isOpen && modalType === "project" && (
+        <CreateProjectButton close={() => setIsOpen(false)}/>
       )}
-
+      
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Dashboard</h1>
@@ -95,7 +96,7 @@ export default function DashboardPage() {
           <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
             <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Quick Actions</h3>
             <div className="space-y-3">
-              <button onClick={() => setIsOpen(true)} className="flex items-center justify-center w-full px-4 py-3 text-white transition-colors rounded-lg bg-blue_munsell-500 hover:bg-blue_munsell-600">
+              <button onClick={() => {setIsOpen(true); setModalType("project");}}  className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
                 <Plus size={20} className="mr-2" />
                 Create New Project
               </button>
