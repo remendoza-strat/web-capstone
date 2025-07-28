@@ -23,7 +23,7 @@ export default function DashboardPage() {
       setProjects(projectList);
     };
     if (user) fetchProjects();
-  }, [user]);
+  }, [isOpen]);
   
   return(
     <DashboardLayout>

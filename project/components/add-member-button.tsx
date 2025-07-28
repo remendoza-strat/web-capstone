@@ -1,50 +1,57 @@
 import { X } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
-import { useUser } from "@clerk/nextjs"
-import { getNonMembersOfProjectAction, addProjectMemberAction } from "@/lib/db/actions"
 import type { NewProjectMember } from "@/lib/db/schema"
+import { getNonMembersOfProjectAction, addProjectMemberAction } from "@/lib/db/actions"
 import { ProjectMemberSchema } from "@/lib/validations"
 import { QueryUser, QueryProject, Role } from "@/lib/customtype"
 
-export function AddMemberButton({ close, projects }: { close: () => void; projects: QueryProject[] }) {
+export function AddMemberButton({ close, projects }: { close: () => void; projects: QueryProject[] }){
+  // Selecting project id hook
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+
+  // Selecting user hooks
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<QueryUser[]>([]);
-const [selectedUser, setSelectedUser] = useState<QueryUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<QueryUser | null>(null);
+
+  // Selecting role hook
   const [role, setRole] = useState<Role>("Viewer");
 
+  // Set first project as selected if not empty
   useEffect(() => {
-    if (projects.length > 0) {
+    if(projects.length > 0){
       setSelectedProjectId(projects[0].projectId);
     }
   }, [projects]);
 
+  // Getting users based on project id and query
   useEffect(() => {
     const timeout = setTimeout(async () => {
       if(!query || !selectedProjectId){
         setSuggestions([]);
         return;
       }
-
       const users = await getNonMembersOfProjectAction(selectedProjectId, query);
       setSuggestions(users);
     }, 300);  
     return () => clearTimeout(timeout);
   }, [query, selectedProjectId]);
 
+  // Form handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate the fields
     const result = ProjectMemberSchema.safeParse({
       projectId: selectedProjectId,
       userId: selectedUser?.userId!,
       role: role 
     });
 
+    // Display validation errors
     if(!result.success){
       const errors = result.error.flatten().fieldErrors;
-
       if(errors.projectId?.[0]){
         toast.error(errors.projectId[0]);
         return;
@@ -55,14 +62,17 @@ const [selectedUser, setSelectedUser] = useState<QueryUser | null>(null);
       }
     }
 
+    // Create object of type project member
     const newProjectMember: NewProjectMember = {
       projectId: selectedProjectId,
       userId: selectedUser?.userId!,
       role: role 
     }
 
+    // Add member to the project
     addProjectMemberAction(newProjectMember);
 
+    // Display success
     toast.success("Member added.");
     close();
   }
@@ -84,7 +94,7 @@ const [selectedUser, setSelectedUser] = useState<QueryUser | null>(null);
               Project
             </label>
             <select
-              className="w-full modal-form-input"
+              className="w-full cursor-pointer modal-form-input"
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
             >
@@ -160,7 +170,7 @@ const [selectedUser, setSelectedUser] = useState<QueryUser | null>(null);
               Role
             </label>
             <select 
-              className="w-full modal-form-input"
+              className="w-full cursor-pointer modal-form-input"
               value={role} onChange={(e) => setRole(e.target.value as Role)}
             >
               <option value="Viewer">Viewer</option>
