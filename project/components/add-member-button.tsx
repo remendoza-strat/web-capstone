@@ -1,35 +1,24 @@
-import { X } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
-import { useState, useEffect } from "react";
-import { getProjectsUserCanAddAction, getUserIdAction, getNonMembersOfProjectAction, addProjectMemberAction } from '@/lib/db/actions';
-import type { NewProjectMember, User } from "@/lib/db/schema";
-import { ProjectMemberSchema } from "@/lib/validations";
-import { toast } from "sonner";
+import { X } from "lucide-react"
+import { toast } from "sonner"
+import { useState, useEffect } from "react"
+import { useUser } from "@clerk/nextjs"
+import { getNonMembersOfProjectAction, addProjectMemberAction } from "@/lib/db/actions"
+import type { NewProjectMember } from "@/lib/db/schema"
+import { ProjectMemberSchema } from "@/lib/validations"
+import { QueryUser, QueryProject, Role } from "@/lib/customtype"
 
-export function AddMemberButton({ close }: { close: () => void }) {
-  const { user } = useUser();
-  const [projects, setProjects] = useState<{ projectId: string; projectName: string }[]>([]);
+export function AddMemberButton({ close, projects }: { close: () => void; projects: QueryProject[] }) {
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<{userId: string; userEmail: string; userFname: string; userLname: string}[]>([]);
-  const [selectedUser, setSelectedUser] = useState<{userId: string; userEmail: string; userFname: string; userLname: string} | null>(null);
-  type Role = "Viewer" | "Project Manager" | "Developer" | "Designer" | "QA Engineer";
+  const [suggestions, setSuggestions] = useState<QueryUser[]>([]);
+const [selectedUser, setSelectedUser] = useState<QueryUser | null>(null);
   const [role, setRole] = useState<Role>("Viewer");
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      const clerkId = user!.id;
-      const userId = (await getUserIdAction(clerkId))!;
-
-      const projectList = await getProjectsUserCanAddAction(userId);
-      setProjects(projectList);
-
-      if(projectList.length > 0){
-        setSelectedProjectId(projectList[0].projectId);
-      }
-    };
-    fetchProjects();
-  }, [user]);
+    if (projects.length > 0) {
+      setSelectedProjectId(projects[0].projectId);
+    }
+  }, [projects]);
 
   useEffect(() => {
     const timeout = setTimeout(async () => {

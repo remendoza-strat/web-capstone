@@ -2,24 +2,37 @@
 
 import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CreateProjectButton } from "@/components/create-project-button"
 import { AddMemberButton } from "@/components/add-member-button"
+import { getProjectsUserCanAddAction, getUserIdAction } from '@/lib/db/actions';
+import { useUser } from "@clerk/nextjs";
+import { QueryProject } from "@/lib/customtype"
 
 export default function DashboardPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [modalType, setModalType] = useState("");
+  const [projects, setProjects] = useState<QueryProject[]>([]);
+  const { user } = useUser();
   
-  return (
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const clerkId = user!.id;
+      const userId = (await getUserIdAction(clerkId))!;
+      const projectList = await getProjectsUserCanAddAction(userId);
+      setProjects(projectList);
+    };
+    if (user) fetchProjects();
+  }, [user]);
+  
+  return(
     <DashboardLayout>
-
       {isOpen && modalType === "project" && (
         <CreateProjectButton close={() => setIsOpen(false)}/>
       )}
       {isOpen && modalType === "member" && (
-        <AddMemberButton close={() => setIsOpen(false)}/>
+        <AddMemberButton close={() => setIsOpen(false)} projects={projects}/>
       )}
-      
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Dashboard</h1>
@@ -133,5 +146,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </DashboardLayout>
-  )
+  );
 }
