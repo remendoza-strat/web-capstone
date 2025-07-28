@@ -44,17 +44,20 @@ export const ProjectSchema = z.object({
       }
     )
   )
+
 });
 
-
-
+// Project member data input validation
 export const ProjectMemberSchema = z.object({
+
+  // Project id validation
   projectId: z
     .union([z.string(), z.undefined()])
     .refine((val) => val && val.length > 0, {
       message: "Project: Must select a project to add member to."
     }),
 
+  // User id validation
   userId: z
     .union([z.string(), z.undefined()])
     .refine((val) => val && val.length > 0, {
