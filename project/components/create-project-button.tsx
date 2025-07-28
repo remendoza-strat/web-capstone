@@ -4,7 +4,7 @@ import { useState } from "react"
 import { X } from "lucide-react"
 import { toast } from "sonner"
 import { useUser } from "@clerk/nextjs"
-import { getUserIdAction, createProjectAction, addProjectMemberAction } from "@/lib/db/actions"
+import { getUserIdAction, createProjectAction, addCreatorAsProjectMemberAction } from "@/lib/db/actions"
 import type { NewProject, NewProjectMember } from "@/lib/db/schema"
 import { ProjectSchema } from "@/lib/validations"
 
@@ -72,7 +72,7 @@ export function CreateProjectButton({ close }: { close: () => void }){
     }
 
     // Add member to the project
-    addProjectMemberAction(newProjectMember);
+    addCreatorAsProjectMemberAction(newProjectMember);
     
     // Display success and close the modal
     toast.success("Project created.");
