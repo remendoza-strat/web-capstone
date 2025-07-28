@@ -46,5 +46,19 @@ export const ProjectSchema = z.object({
   )
 });
 
-// Type for project zod schema 
-export type ProjectInput = z.infer<typeof ProjectSchema>;
+
+
+export const ProjectMemberSchema = z.object({
+  projectId: z
+    .union([z.string(), z.undefined()])
+    .refine((val) => val && val.length > 0, {
+      message: "Project: Must select a project to add member to."
+    }),
+
+  userId: z
+    .union([z.string(), z.undefined()])
+    .refine((val) => val && val.length > 0, {
+      message: "User: Must select a user to add in the project."
+    })
+
+});

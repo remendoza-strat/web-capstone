@@ -45,7 +45,7 @@ export const queries = {
 
   // Project members queries
   projectMembers: {
-    addCreatorAsProjectMember: async (newProjectMember: NewProjectMember) => {
+    addProjectMember: async (newProjectMember: NewProjectMember) => {
       await db
         .insert(projectMembers)
         .values(newProjectMember)
@@ -73,14 +73,19 @@ export const queries = {
         .from(projectMembers)
         .where(eq(projectMembers.projectId, projectId));
 
-      const existingUserIds = existingMembers.map((m) => m.userId);
+      const existingMembersIds = existingMembers.map((m) => m.userId);
 
-      const matchedUsers = await db
-        .select()
+      const result = await db
+        .select({
+          userId: users.id,
+          userEmail: users.email,
+          userFname: users.fname,
+          userLname: users.lname
+        })
         .from(users)
         .where(
           and(
-            notInArray(users.id, existingUserIds),
+            notInArray(users.id, existingMembersIds),
             or(
               ilike(users.fname, `%${query}%`),
               ilike(users.lname, `%${query}%`),
@@ -89,7 +94,7 @@ export const queries = {
           )
         );
 
-      return matchedUsers;
+      return result;
     },
   },
 

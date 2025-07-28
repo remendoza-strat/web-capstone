@@ -12,9 +12,9 @@ export async function createProjectAction(newProject: NewProject){
   return await queries.projects.createProject(newProject);
 }
 
-// Action to add project creator as member of the project
-export async function addCreatorAsProjectMemberAction(newProjectMember: NewProjectMember){
-  await queries.projectMembers.addCreatorAsProjectMember(newProjectMember);
+// Action to add member to a project
+export async function addProjectMemberAction(newProjectMember: NewProjectMember){
+  await queries.projectMembers.addProjectMember(newProjectMember);
 }
 
 // Action to get projects a user can add member to

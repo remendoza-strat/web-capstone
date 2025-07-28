@@ -4,6 +4,7 @@ import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { useState } from "react"
 import { CreateProjectButton } from "@/components/create-project-button"
+import { AddMemberButton } from "@/components/add-member-button"
 
 export default function DashboardPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,9 @@ export default function DashboardPage() {
 
       {isOpen && modalType === "project" && (
         <CreateProjectButton close={() => setIsOpen(false)}/>
+      )}
+      {isOpen && modalType === "member" && (
+        <AddMemberButton close={() => setIsOpen(false)}/>
       )}
       
       <div className="space-y-6">
@@ -96,14 +100,25 @@ export default function DashboardPage() {
           <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
             <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Quick Actions</h3>
             <div className="space-y-3">
-              <button onClick={() => {setIsOpen(true); setModalType("project");}}  className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
-                <Plus size={20} className="mr-2" />
-                Create New Project
+              
+              
+              
+              <button 
+                className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors"
+                onClick={() => {setIsOpen(true); setModalType("project");}}>
+                  <Plus size={20} className="mr-2" />
+                  Create New Project
               </button>
-              <button className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
-                <Plus size={20} className="mr-2" />
-                Add Team Member
+              <button 
+                className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors"
+                onClick={() => {setIsOpen(true); setModalType("member")}}>
+                  <Plus size={20} className="mr-2" />
+                  Add Team Member
               </button>
+
+
+
+
               <button className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
                 <Plus size={20} className="mr-2" />
                 Create Task
