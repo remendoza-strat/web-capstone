@@ -1,6 +1,6 @@
 "use server"
 import { queries } from "@/lib/db/queries"
-import type { NewProject, NewProjectMember } from "@/lib/db/schema"
+import type { NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 
 // Action to get user id with clerk id
 export async function getUserIdAction(clerkId: string){
@@ -25,4 +25,19 @@ export async function getProjectsUserCanAddAction(userId: string){
 // Action to get list of users that is not yet a member of a project
 export async function getNonMembersOfProjectAction(projectId: string, query: string){
   return await queries.projectMembers.getNonMembersOfProject(projectId, query);
+}
+
+// Action to get list of project members
+export async function getMembersOfProjectAction(projectId: string){
+  return await queries.projectMembers.getMembersOfProject(projectId);
+}
+
+// Action to create task
+export async function createTaskAction(newTask: NewTask){
+  return await queries.tasks.createTask(newTask);
+}
+
+// Action to assign user to a task
+export async function assignTaskAction(taskAssignee: NewTaskAssignee){
+  await queries.taskAssignees.assignTask(taskAssignee);
 }
