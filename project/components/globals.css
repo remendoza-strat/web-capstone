@@ -36,4 +36,7 @@
 	.modal-form-suggestion-li{
 		@apply cursor-pointer hover:bg-gray-300 dark:hover:bg-black_shades-200
 	}
+	.modal-form-trash{
+		@apply text-red-500 hover:text-red-700;
+	}
 }

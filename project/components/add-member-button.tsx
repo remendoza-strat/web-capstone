@@ -1,84 +1,101 @@
 "use client"
 import "./globals.css"
-import { X } from "lucide-react"
+import { X, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import type { NewProjectMember } from "@/lib/db/schema"
-import { getNonMembersOfProjectAction, addProjectMemberAction } from "@/lib/db/actions"
+import { getNonProjectMembersAction, addProjectMemberAction } from "@/lib/db/actions"
 import { ProjectMemberSchema } from "@/lib/validations"
-import { QueryUser, QueryProject, Role } from "@/lib/customtype"
-import { RoleArr } from "@/lib/customtype"
+import { QueryUser, QueryProject, Role, RoleArr } from "@/lib/customtype"
 
-export function AddMemberButton({ close, projects }: { close: () => void; projects: QueryProject[] }){
-  // Selecting project id hook
+export function AddMemberButton({ close, projects } : { close: () => void; projects: QueryProject[] }) {
+  // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
-  // Selecting user hooks
+  // Hook for user
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<QueryUser[]>([]);
-  const [selectedUser, setSelectedUser] = useState<QueryUser | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<{ user: QueryUser; role: Role }[]>([]);
 
-  // Selecting role hook
-  const [role, setRole] = useState<Role>("Project Manager");
-
-  // Set first project as selected if not empty
+  // Set initial selected project if not empty
   useEffect(() => {
     if(projects.length > 0){
       setSelectedProjectId(projects[0].projectId);
     }
   }, [projects]);
 
-  // Getting users based on project id and query
+  // Getting suggested user and removing already selected user
   useEffect(() => {
     const timeout = setTimeout(async () => {
       if(!query || !selectedProjectId){
         setSuggestions([]);
         return;
       }
-      const users = await getNonMembersOfProjectAction(selectedProjectId, query);
-      setSuggestions(users);
-    }, 300);  
+      const users = await getNonProjectMembersAction(selectedProjectId, query);
+      const selectedIds = selectedUsers.map((u) => u.user.userId);
+      setSuggestions(users.filter((u) => !selectedIds.includes(u.userId)));
+    }, 300);
     return () => clearTimeout(timeout);
-  }, [query, selectedProjectId]);
+  }, [selectedProjectId, query, selectedUsers]);
 
-  // Form handler
+  // Add selected user to array
+  const handleAddUser = (user: QueryUser) => {
+    setSelectedUsers((prev) => [...prev, { user, role: "Project Manager" }]);
+    setQuery("");
+    setSuggestions([]);
+  };
+
+  // Handle change in selected role
+  const handleRoleChange = (index: number, newRole: Role) => {
+    const updated = [...selectedUsers];
+    updated[index].role = newRole;
+    setSelectedUsers(updated);
+  };
+
+  // Remove user from array
+  const handleRemoveUser = (index: number) => {
+    const updated = [...selectedUsers];
+    updated.splice(index, 1);
+    setSelectedUsers(updated);
+  };
+
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate the fields
+    // Validate project and members
     const result = ProjectMemberSchema.safeParse({
       projectId: selectedProjectId,
-      userId: selectedUser?.userId!,
-      role: role 
+      members: selectedUsers
     });
 
-    // Display validation errors
+    // Display errors
     if(!result.success){
       const errors = result.error.flatten().fieldErrors;
       if(errors.projectId?.[0]){
         toast.error(errors.projectId[0]);
         return;
-      }
-      if(errors.userId?.[0]){
-        toast.error(errors.userId[0]);
+      } 
+      if(errors.members?.[0]){
+        toast.error(errors.members[0]);
         return;
-      }
+      } 
     }
 
-    // Create object of type project member
-    const newProjectMember: NewProjectMember = {
-      projectId: selectedProjectId,
-      userId: selectedUser?.userId!,
-      role: role 
+    // Iterate the array and add user content to database
+    for(const { user, role } of selectedUsers){
+      const newMember: NewProjectMember = {
+        projectId: selectedProjectId,
+        userId: user.userId,
+        role
+      }; 
+      await addProjectMemberAction(newMember);
     }
 
-    // Add member to the project
-    addProjectMemberAction(newProjectMember);
-
-    // Display success
-    toast.success("Member added.");
+    // Display success and close modal
+    toast.success("All members added.");
     close();
-  }
+  };
 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center modal-open-bg">
@@ -98,19 +115,17 @@ export function AddMemberButton({ close, projects }: { close: () => void; projec
             </label>
             <select
               className="w-full cursor-pointer modal-form-input"
-              value={selectedProjectId}
-              onChange={(e) => setSelectedProjectId(e.target.value)}
-            >
-              {projects.length === 0 ? (
-                <option disabled>No projects available</option>
-              ) : 
-              (
-                projects.map((project) => (
-                  <option key={project.projectId} value={project.projectId}>
-                    {project.projectName}
-                  </option>
-                ))
-              )}
+              value={selectedProjectId} onChange={(e) => setSelectedProjectId(e.target.value)}>
+                {projects.length === 0 ? (
+                  <option disabled>No projects available</option>
+                ) : 
+                (
+                  projects.map((project) => (
+                    <option key={project.projectId} value={project.projectId}>
+                      {project.projectName}
+                    </option>
+                  ))
+                )}
             </select>
           </div>
           <div>
@@ -121,69 +136,55 @@ export function AddMemberButton({ close, projects }: { close: () => void; projec
               <input
                 className="w-full modal-form-input"
                 type="text" placeholder="Search by name or email"
-                value={
-                  selectedUser
-                    ? `${selectedUser.userFname} ${selectedUser.userLname} (${selectedUser.userEmail})`
-                    : query
-                }
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setSelectedUser(null);
-                }}
-              />
-              {!selectedUser && (
-                <ul className="absolute w-full overflow-y-auto z-60 max-h-48 modal-form-suggestion-ul">
-                  {suggestions.length > 0 ? (
-                    suggestions.map((sug) => (
-                      <li
-                        className="modal-form-suggestion-li"
-                        key={sug.userId}
-                        onClick={() => {
-                          setSelectedUser({
-                            userId: sug.userId,
-                            userEmail: sug.userEmail,
-                            userFname: sug.userFname,
-                            userLname: sug.userLname,
-                          });
-                          setQuery("");
-                          setSuggestions([]);
-                        }}
-                      >
-                        <div className="modal-form-suggestion-main">
-                          {sug.userFname} {sug.userLname}
-                        </div>
-                        <div className="modal-form-suggestion-sec">{sug.userEmail}</div>
-                      </li>
-                    ))
-                  ) : 
-                  (
-                    query && (
-                      <li className="modal-form-suggestion-sec">
-                        No users found
-                      </li>
-                    )
-                  )
-                }
-                </ul>
-              )}
+                value={query} onChange={(e) => setQuery(e.target.value)}/>
+                  {query && suggestions.length > 0 && (
+                    <ul className="absolute w-full overflow-y-auto z-60 max-h-48 modal-form-suggestion-ul">
+                      {suggestions.map((sug) => (
+                        <li
+                          key={sug.userId}
+                          className="modal-form-suggestion-li"
+                          onClick={() => handleAddUser(sug)}>
+                            <div className="modal-form-suggestion-main">
+                              {sug.userFname} {sug.userLname}
+                            </div>
+                            <div className="modal-form-suggestion-sec">{sug.userEmail}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
             </div>
           </div>
-          <div>
-            <label className="block m-2 modal-form-label">
-              Role
-            </label>
-            <select
-              className="w-full cursor-pointer modal-form-input"
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-            >
-              {RoleArr.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          </div>
+          {selectedUsers.length > 0 && (
+            <div>
+              <label className="block m-2 modal-form-label">
+              Selected Users
+              </label>
+              <ul className="space-y-2">
+                {selectedUsers.map((item, index) => (
+                  <li key={item.user.userId} className="flex items-center justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="modal-form-suggestion-main">
+                        {item.user.userFname} {item.user.userLname}
+                      </div>
+                      <div className="modal-form-suggestion-sec">{item.user.userEmail}</div>
+                    </div>
+                    <select
+                      className="modal-form-input w-fit"
+                      value={item.role} onChange={(e) => handleRoleChange(index, e.target.value as Role)}>
+                        {RoleArr.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                    </select>
+                    <button type="button" onClick={() => handleRemoveUser(index)}>
+                      <Trash className="modal-form-trash" size={18} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="flex justify-end pt-4 space-x-3">
             <button onClick={close} type="button" className="modal-sub-btn">
               Cancel

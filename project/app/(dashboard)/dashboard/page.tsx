@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { useState, useEffect } from "react"
 import { CreateProjectButton } from "@/components/create-project-button"
 import { AddMemberButton } from "@/components/add-member-button"
-import { getProjectsUserCanAddAction, getUserIdAction } from '@/lib/db/actions';
+import { getUserMembershipAction, getUserIdAction } from '@/lib/db/actions';
 import { useUser } from "@clerk/nextjs";
 import { QueryProject } from "@/lib/customtype"
 
@@ -19,7 +19,7 @@ export default function DashboardPage() {
     const fetchProjects = async () => {
       const clerkId = user!.id;
       const userId = (await getUserIdAction(clerkId))!;
-      const projectList = await getProjectsUserCanAddAction(userId);
+      const projectList = await getUserMembershipAction(userId);
       setProjects(projectList);
     };
     if (user) fetchProjects();

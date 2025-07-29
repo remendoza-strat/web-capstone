@@ -57,11 +57,9 @@ export const ProjectMemberSchema = z.object({
       message: "Project: Must select a project to add member to."
     }),
 
-  // User id validation
-  userId: z
-    .union([z.string(), z.undefined()])
-    .refine((val) => val && val.length > 0, {
-      message: "User: Must select a user to add in the project."
-    })
+  // User with role validation
+  members: z.array(z
+    .object({}))
+    .min(1, "User: Must select at least one user to be added.")
 
 });

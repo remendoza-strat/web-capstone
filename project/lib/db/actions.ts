@@ -17,14 +17,14 @@ export async function addProjectMemberAction(newProjectMember: NewProjectMember)
   await queries.projectMembers.addProjectMember(newProjectMember);
 }
 
-// Action to get projects a user can add member to
-export async function getProjectsUserCanAddAction(userId: string){
-  return await queries.projectMembers.getProjectsUserCanAdd(userId);
+// Action to get projects a user is member in
+export async function getUserMembershipAction(userId: string){
+  return await queries.projectMembers.getUserMembership(userId);
 }
 
 // Action to get list of users that is not yet a member of a project
-export async function getNonMembersOfProjectAction(projectId: string, query: string){
-  return await queries.projectMembers.getNonMembersOfProject(projectId, query);
+export async function getNonProjectMembersAction(projectId: string, query: string){
+  return await queries.projectMembers.getNonProjectMembers(projectId, query);
 }
 
 // Action to get list of project members

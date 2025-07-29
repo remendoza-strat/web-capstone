@@ -51,7 +51,7 @@ export const queries = {
         .values(newProjectMember)
         .execute();
     },
-    getProjectsUserCanAdd: async (userId: string) => {
+    getUserMembership: async (userId: string) => {
       const result = await db
         .select({
           projectId: projects.id,
@@ -63,7 +63,7 @@ export const queries = {
         
       return result;
     },
-    getNonMembersOfProject: async (projectId: string, query: string) => {
+    getNonProjectMembers: async (projectId: string, query: string) => {
       if (!query) return [];
 
       const existingMembers = await db
