@@ -1,3 +1,5 @@
+"use client"
+import "./globals.css"
 import { X } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
