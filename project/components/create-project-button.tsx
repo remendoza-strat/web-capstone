@@ -7,12 +7,14 @@ import { useUser } from "@clerk/nextjs"
 import { getUserIdAction, createProjectAction, addProjectMemberAction } from "@/lib/db/actions"
 import type { NewProject, NewProjectMember } from "@/lib/db/schema"
 import { ProjectSchema } from "@/lib/validations"
+import { Role } from "@/lib/customtype"
 
 export function CreateProjectButton({ close }: { close: () => void }){
   // Hooks for input
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [role, setRole] = useState<Role>("Project Manager");
 
   // Get current user  
   const { user } = useUser();
@@ -68,7 +70,7 @@ export function CreateProjectButton({ close }: { close: () => void }){
     const newProjectMember: NewProjectMember = {
       projectId: projectId,
       userId: ownerId,
-      role: "Project Manager"
+      role: role
     }
 
     // Add member to the project
@@ -120,6 +122,20 @@ export function CreateProjectButton({ close }: { close: () => void }){
               type="datetime-local"
               className="w-full modal-form-input"
             />
+          </div>
+          <div>
+            <label className="block m-2 modal-form-label">
+              Your Role
+            </label>
+            <select 
+              className="w-full cursor-pointer modal-form-input"
+              value={role} onChange={(e) => setRole(e.target.value as Role)}
+            >
+              <option value="Project Manager">Project Manager</option>
+              <option value="Developer">Developer</option>
+              <option value="Designer">Designer</option>
+              <option value="QA Engineer">QA Engineer</option>
+            </select>
           </div>
           <div className="flex justify-end pt-4 space-x-3">
             <button onClick={close} type="button" className="modal-sub-btn">
