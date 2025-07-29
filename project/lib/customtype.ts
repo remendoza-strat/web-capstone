@@ -1,5 +1,10 @@
 // Roles
-export type Role = "Project Manager" | "Developer" | "Designer" | "QA Engineer";
+export type Role =   "Project Manager" | "Frontend Developer" | "Backend Developer" | "Fullstack Developer" | "UI/UX Designer"
+  | "QA Engineer" | "DevOps Engineer" | "Product Manager"| "Team Lead";
+
+// Array for select field
+export const RoleArr: Role[] = ["Project Manager", "Frontend Developer", "Backend Developer", "Fullstack Developer", "UI/UX Designer", 
+  "QA Engineer", "DevOps Engineer", "Product Manager", "Team Lead"];
 
 // Getting brief project info
 export interface QueryProject{

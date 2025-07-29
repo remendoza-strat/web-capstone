@@ -8,6 +8,7 @@ import { getUserIdAction, createProjectAction, addProjectMemberAction } from "@/
 import type { NewProject, NewProjectMember } from "@/lib/db/schema"
 import { ProjectSchema } from "@/lib/validations"
 import { Role } from "@/lib/customtype"
+import { RoleArr } from "@/lib/customtype"
 
 export function CreateProjectButton({ close }: { close: () => void }){
   // Hooks for input
@@ -127,14 +128,16 @@ export function CreateProjectButton({ close }: { close: () => void }){
             <label className="block m-2 modal-form-label">
               Your Role
             </label>
-            <select 
+            <select
               className="w-full cursor-pointer modal-form-input"
-              value={role} onChange={(e) => setRole(e.target.value as Role)}
+              value={role}
+              onChange={(e) => setRole(e.target.value as Role)}
             >
-              <option value="Project Manager">Project Manager</option>
-              <option value="Developer">Developer</option>
-              <option value="Designer">Designer</option>
-              <option value="QA Engineer">QA Engineer</option>
+              {RoleArr.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
             </select>
           </div>
           <div className="flex justify-end pt-4 space-x-3">

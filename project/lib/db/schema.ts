@@ -1,8 +1,20 @@
 import { pgEnum, pgTable, uuid, text, timestamp, integer } from "drizzle-orm/pg-core"
 
-// Set allowed values in priority and role columns
-export const priorityEnum = pgEnum("priority", ["Low", "Medium", "High"]);
-export const roleEnum = pgEnum("role", ["Project Manager", "Developer", "Designer", "QA Engineer"]);
+// Set allowed values in priority and role
+export const priorityEnum = pgEnum("priority", [
+  "Low", "Medium", "High"
+]);
+export const roleEnum = pgEnum("role", [
+  "Project Manager",
+  "Frontend Developer",
+  "Backend Developer",
+  "Fullstack Developer",
+  "UI/UX Designer",
+  "QA Engineer",
+  "DevOps Engineer",
+  "Product Manager",
+  "Team Lead"
+]);
 
 // Table "users" schema and export types
 export const users = pgTable("users", {

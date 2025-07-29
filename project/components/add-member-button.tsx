@@ -7,6 +7,7 @@ import type { NewProjectMember } from "@/lib/db/schema"
 import { getNonMembersOfProjectAction, addProjectMemberAction } from "@/lib/db/actions"
 import { ProjectMemberSchema } from "@/lib/validations"
 import { QueryUser, QueryProject, Role } from "@/lib/customtype"
+import { RoleArr } from "@/lib/customtype"
 
 export function AddMemberButton({ close, projects }: { close: () => void; projects: QueryProject[] }){
   // Selecting project id hook
@@ -171,14 +172,16 @@ export function AddMemberButton({ close, projects }: { close: () => void; projec
             <label className="block m-2 modal-form-label">
               Role
             </label>
-            <select 
+            <select
               className="w-full cursor-pointer modal-form-input"
-              value={role} onChange={(e) => setRole(e.target.value as Role)}
+              value={role}
+              onChange={(e) => setRole(e.target.value as Role)}
             >
-              <option value="Project Manager">Project Manager</option>
-              <option value="Developer">Developer</option>
-              <option value="Designer">Designer</option>
-              <option value="QA Engineer">QA Engineer</option>
+              {RoleArr.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
             </select>
           </div>
           <div className="flex justify-end pt-4 space-x-3">
