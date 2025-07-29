@@ -28,8 +28,8 @@ export async function getNonMembersOfProjectAction(projectId: string, query: str
 }
 
 // Action to get list of project members
-export async function getMembersOfProjectAction(projectId: string){
-  return await queries.projectMembers.getMembersOfProject(projectId);
+export async function getMembersOfProjectAction(projectId: string, query: string){
+  return await queries.projectMembers.getMembersOfProject(projectId, query);
 }
 
 // Action to create task

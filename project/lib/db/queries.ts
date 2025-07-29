@@ -96,7 +96,7 @@ export const queries = {
 
       return result;
     },
-    getMembersOfProject: async (projectId: string) => {
+    getMembersOfProject: async (projectId: string, query: string) => {
       const existingMembers = await db
         .select({ userId: projectMembers.userId })
         .from(projectMembers)
@@ -112,7 +112,16 @@ export const queries = {
           userLname: users.lname
         })
         .from(users)
-        .where(inArray(users.id, existingMembersIds));
+        .where(
+          and(
+            inArray(users.id, existingMembersIds),
+            or(
+              ilike(users.fname, `%${query}%`),
+              ilike(users.lname, `%${query}%`),
+              ilike(users.email, `%${query}%`)
+            )
+          )
+        );
 
       return result;
     },
