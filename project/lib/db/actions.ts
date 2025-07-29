@@ -22,14 +22,14 @@ export async function getUserMembershipAction(userId: string){
   return await queries.projectMembers.getUserMembership(userId);
 }
 
-// Action to get list of users that is not yet a member of a project
+// Action to get users that is not yet a member of a project
 export async function getNonProjectMembersAction(projectId: string, query: string){
   return await queries.projectMembers.getNonProjectMembers(projectId, query);
 }
 
-// Action to get list of project members
-export async function getMembersOfProjectAction(projectId: string, query: string){
-  return await queries.projectMembers.getMembersOfProject(projectId, query);
+// Action to get project members
+export async function getProjectMembersAction(projectId: string, query: string){
+  return await queries.projectMembers.getProjectMembers(projectId, query);
 }
 
 // Action to create task

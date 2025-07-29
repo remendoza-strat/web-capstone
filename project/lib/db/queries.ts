@@ -94,7 +94,9 @@ export const queries = {
 
       return result;
     },
-    getMembersOfProject: async (projectId: string, query: string) => {
+    getProjectMembers: async (projectId: string, query: string) => {
+      if (!query) return []; 
+      
       const existingMembers = await db
         .select({ userId: projectMembers.userId })
         .from(projectMembers)

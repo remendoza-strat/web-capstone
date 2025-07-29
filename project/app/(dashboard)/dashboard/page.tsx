@@ -8,6 +8,7 @@ import { AddMemberButton } from "@/components/add-member-button"
 import { getUserMembershipAction, getUserIdAction } from '@/lib/db/actions';
 import { useUser } from "@clerk/nextjs";
 import { QueryProject } from "@/lib/customtype"
+import { CreateTaskButton } from "@/components/create-task-button"
 
 export default function DashboardPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +33,9 @@ export default function DashboardPage() {
       )}
       {isOpen && modalType === "member" && (
         <AddMemberButton close={() => setIsOpen(false)} projects={projects}/>
+      )}
+      {isOpen && modalType === "task" && (
+        <CreateTaskButton close={() => setIsOpen(false)} projects={projects}/>
       )}
       <div className="space-y-6">
         <div>
@@ -128,14 +132,17 @@ export default function DashboardPage() {
                   <Plus size={20} className="mr-2" />
                   Add Team Member
               </button>
-
-
-
-
-              <button className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
-                <Plus size={20} className="mr-2" />
-                Create Task
+              <button 
+                className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors"
+                onClick={() => {setIsOpen(true); setModalType("task")}}>
+                  <Plus size={20} className="mr-2" />
+                  Create New Task
               </button>
+
+
+
+
+              
             </div>
             <div className="p-4 mt-4 border border-yellow-200 rounded bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
