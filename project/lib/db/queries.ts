@@ -1,7 +1,7 @@
 import { and, or, eq, ne, notInArray, ilike, inArray } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
-import { users, projects, projectMembers } from "@/lib/db/schema"
-import type { NewUser, NewProject, NewProjectMember } from "@/lib/db/schema"
+import { users, projects, projectMembers, tasks, taskAssignees } from "@/lib/db/schema"
+import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 
 export const queries = {
 
@@ -115,6 +115,28 @@ export const queries = {
         .where(inArray(users.id, existingMembersIds));
 
       return result;
+    },
+  },
+
+  // Tasks queries
+  tasks: {
+    createTask: async (newTask: NewTask) => {
+      const [task] = await db
+        .insert(tasks)
+        .values(newTask)
+        .returning({ id: tasks.id });
+
+      return task.id;
+    },
+  },
+
+  // Task assignees queries
+  taskAssignees: {
+    assignTask: async (taskAssignee: NewTaskAssignee) => {
+      await db
+        .insert(taskAssignees)
+        .values(taskAssignee)
+        .execute();
     },
   },
 
