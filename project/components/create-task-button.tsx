@@ -3,19 +3,25 @@ import "./globals.css"
 import { X, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
-import type { NewProjectMember } from "@/lib/db/schema"
-import { getProjectMembersAction, addProjectMemberAction } from "@/lib/db/actions"
-import { ProjectMemberSchema } from "@/lib/validations"
-import { QueryUser, QueryProject, Role, RoleArr } from "@/lib/customtype"
+import type { NewTask, NewTaskAssignee } from "@/lib/db/schema"
+import { getProjectMembersAction, createTaskAction, assignTaskAction } from "@/lib/db/actions"
+import { QueryUser, QueryProject, Priority, PriorityArr } from "@/lib/customtype"
 
 export function CreateTaskButton({ close, projects } : { close: () => void; projects: QueryProject[] }) {
   // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
+  // Hook for input
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [priority, setPriority] = useState<Priority>("Low");
+  const [label, setLabel] = useState("");
+
   // Hook for user
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<QueryUser[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<{ user: QueryUser; role: Role }[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<{ user: QueryUser }[]>([]);
 
   // Set initial selected project if not empty
   useEffect(() => {
@@ -40,16 +46,9 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
 
   // Add selected user to array
   const handleAddUser = (user: QueryUser) => {
-    setSelectedUsers((prev) => [...prev, { user, role: "Project Manager" }]);
+    setSelectedUsers((prev) => [...prev, { user }]);
     setQuery("");
     setSuggestions([]);
-  };
-
-  // Handle change in selected role
-  const handleRoleChange = (index: number, newRole: Role) => {
-    const updated = [...selectedUsers];
-    updated[index].role = newRole;
-    setSelectedUsers(updated);
   };
 
   // Remove user from array
@@ -63,37 +62,35 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate project and members
-    const result = ProjectMemberSchema.safeParse({
-      projectId: selectedProjectId,
-      members: selectedUsers
-    });
+    // TODO: ZOD VALIDATIONS HERE
+    // TODO: ZOD ERROR DISPLAY HERE
 
-    // Display errors
-    if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.projectId?.[0]){
-        toast.error(errors.projectId[0]);
-        return;
-      } 
-      if(errors.members?.[0]){
-        toast.error(errors.members[0]);
-        return;
-      } 
-    }
+    // Create object of new task
+    const newTask: NewTask = {
+      projectId: selectedProjectId,
+      title: title,
+      description: description,
+      dueDate: new Date(dueDate),
+      priority: priority,
+      position: 0,
+      label: label
+    };
+    
+    // Add and get the task id of the created task
+    const taskId = (await createTaskAction(newTask))!;
 
     // Iterate the array and add user content to database
-    for(const { user, role } of selectedUsers){
-      const newMember: NewProjectMember = {
-        projectId: selectedProjectId,
-        userId: user.userId,
-        role
-      }; 
-      await addProjectMemberAction(newMember);
+    for(const {user} of selectedUsers){
+      const newTaskAssignee: NewTaskAssignee = {
+        taskId: taskId,
+        userId: user.userId
+      };
+
+      await assignTaskAction(newTaskAssignee);
     }
 
     // Display success and close modal
-    toast.success("All members added.");
+    toast.success("All members assigned to task.");
     close();
   };
 
@@ -102,7 +99,7 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
       <div className="w-full max-w-md p-6 mx-4 rounded-lg modal-form-color">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
-            Add Team Member
+            Create New Task
           </h3>
           <button onClick={close} className="modal-sub-btn">
             <X size={20}/>
@@ -127,6 +124,61 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
                   ))
                 )}
             </select>
+          </div>
+          <div>
+            <label className="block m-2 modal-form-label">
+              Title
+            </label>
+            <input
+              value={title} onChange={(e) => setTitle(e.target.value)}
+              type="text" placeholder="Enter task title"
+              className="w-full modal-form-input"
+            />
+          </div>
+          <div>
+            <label className="block m-2 modal-form-label">
+              Description
+            </label>
+            <textarea
+              value={description} onChange={(e) => setDescription(e.target.value)}
+              rows={3} placeholder="Enter task description"
+              className="w-full modal-form-input"
+            />
+          </div>
+          <div>
+            <label className="block m-2 modal-form-label">
+              Due Date
+            </label>
+            <input
+              value={dueDate} onChange={(e) => setDueDate(e.target.value)}
+              type="datetime-local"
+              className="w-full cursor-pointer modal-form-input"
+            />
+          </div>
+          <div>
+            <label className="block m-2 modal-form-label">
+              Priority
+            </label>
+            <select
+              className="w-full cursor-pointer modal-form-input"
+              value={priority} onChange={(e) => setPriority(e.target.value as Priority)}
+            >
+              {PriorityArr.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block m-2 modal-form-label">
+              Label
+            </label>
+            <input
+              value={label} onChange={(e) => setLabel(e.target.value)}
+              type="text" placeholder="Enter task label"
+              className="w-full modal-form-input"
+            />
           </div>
           <div>
             <label className="block m-2 modal-form-label">
@@ -157,7 +209,7 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
           {selectedUsers.length > 0 && (
             <div>
               <label className="block m-2 modal-form-label">
-              Selected Users
+                Selected Users
               </label>
               <ul className="space-y-2">
                 {selectedUsers.map((item, index) => (
@@ -168,17 +220,8 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
                       </div>
                       <div className="modal-form-suggestion-sec">{item.user.userEmail}</div>
                     </div>
-                    <select
-                      className="modal-form-input w-fit"
-                      value={item.role} onChange={(e) => handleRoleChange(index, e.target.value as Role)}>
-                        {RoleArr.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
-                        ))}
-                    </select>
                     <button type="button" onClick={() => handleRemoveUser(index)}>
-                      <Trash className="modal-form-trash" size={18} />
+                      <Trash className="modal-form-trash" size={18}/>
                     </button>
                   </li>
                 ))}
@@ -190,7 +233,7 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
               Cancel
             </button>
             <button type="submit" className="modal-main-btn">
-              Add Member
+              Create Task
             </button>
           </div>
         </form>

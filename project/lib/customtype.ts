@@ -1,5 +1,11 @@
+// Priorities
+export type Priority = "Low" | "Medium" | "High";
+
+// Array for priorities select field
+export const PriorityArr: Priority[] = ["Low", "Medium", "High"];
+
 // Roles
-export type Role =   "Project Manager" | "Frontend Developer" | "Backend Developer" | "Fullstack Developer" | "UI/UX Designer"
+export type Role = "Project Manager" | "Frontend Developer" | "Backend Developer" | "Fullstack Developer" | "UI/UX Designer"
   | "QA Engineer" | "DevOps Engineer" | "Product Manager"| "Team Lead";
 
 // Array for roles select field

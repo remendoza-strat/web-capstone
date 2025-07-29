@@ -157,7 +157,7 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
           {selectedUsers.length > 0 && (
             <div>
               <label className="block m-2 modal-form-label">
-              Selected Users
+                Selected Users
               </label>
               <ul className="space-y-2">
                 {selectedUsers.map((item, index) => (
@@ -178,7 +178,7 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
                         ))}
                     </select>
                     <button type="button" onClick={() => handleRemoveUser(index)}>
-                      <Trash className="modal-form-trash" size={18} />
+                      <Trash className="modal-form-trash" size={18}/>
                     </button>
                   </li>
                 ))}
