@@ -1,4 +1,4 @@
-import { and, or, eq, ne, notInArray, ilike, inArray } from "drizzle-orm"
+import { and, or, eq, notInArray, ilike, inArray } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
 import { users, projects, projectMembers, tasks, taskAssignees } from "@/lib/db/schema"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"

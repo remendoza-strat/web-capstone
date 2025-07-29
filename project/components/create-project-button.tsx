@@ -7,10 +7,9 @@ import { useUser } from "@clerk/nextjs"
 import { getUserIdAction, createProjectAction, addProjectMemberAction } from "@/lib/db/actions"
 import type { NewProject, NewProjectMember } from "@/lib/db/schema"
 import { ProjectSchema } from "@/lib/validations"
-import { Role } from "@/lib/customtype"
-import { RoleArr } from "@/lib/customtype"
+import { Role, RoleArr } from "@/lib/customtype"
 
-export function CreateProjectButton({ close }: { close: () => void }){
+export function CreateProjectButton({ close } : { close : () => void }){
   // Hooks for input
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -40,8 +39,6 @@ export function CreateProjectButton({ close }: { close: () => void }){
     // Display error from validation
     if(!result.success){
       const errors = result.error.flatten().fieldErrors;
-
-      // Display error
       if(errors.name?.[0]){
         toast.error(errors.name[0]);
         return;
@@ -121,7 +118,7 @@ export function CreateProjectButton({ close }: { close: () => void }){
             <input
               value={dueDate} onChange={(e) => setDueDate(e.target.value)}
               type="datetime-local"
-              className="w-full modal-form-input"
+              className="w-full cursor-pointer modal-form-input"
             />
           </div>
           <div>
@@ -130,8 +127,7 @@ export function CreateProjectButton({ close }: { close: () => void }){
             </label>
             <select
               className="w-full cursor-pointer modal-form-input"
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
+              value={role} onChange={(e) => setRole(e.target.value as Role)}
             >
               {RoleArr.map((r) => (
                 <option key={r} value={r}>

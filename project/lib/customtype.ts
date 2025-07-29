@@ -2,7 +2,7 @@
 export type Role =   "Project Manager" | "Frontend Developer" | "Backend Developer" | "Fullstack Developer" | "UI/UX Designer"
   | "QA Engineer" | "DevOps Engineer" | "Product Manager"| "Team Lead";
 
-// Array for select field
+// Array for roles select field
 export const RoleArr: Role[] = ["Project Manager", "Frontend Developer", "Backend Developer", "Fullstack Developer", "UI/UX Designer", 
   "QA Engineer", "DevOps Engineer", "Product Manager", "Team Lead"];
 
@@ -17,5 +17,5 @@ export interface QueryUser{
   userId: string;
   userEmail: string; 
   userFname: string; 
-  userLname: string
+  userLname: string;
 }
