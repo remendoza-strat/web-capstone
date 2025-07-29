@@ -1,4 +1,4 @@
-import { and, or, eq, ne, notInArray, ilike } from "drizzle-orm"
+import { and, or, eq, ne, notInArray, ilike, inArray } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
 import { users, projects, projectMembers } from "@/lib/db/schema"
 import type { NewUser, NewProject, NewProjectMember } from "@/lib/db/schema"
@@ -93,6 +93,26 @@ export const queries = {
             )
           )
         );
+
+      return result;
+    },
+    getMembersOfProject: async (projectId: string) => {
+      const existingMembers = await db
+        .select({ userId: projectMembers.userId })
+        .from(projectMembers)
+        .where(eq(projectMembers.projectId, projectId));
+
+      const existingMembersIds = existingMembers.map((m) => m.userId);
+
+      const result = await db
+        .select({
+          userId: users.id,
+          userEmail: users.email,
+          userFname: users.fname,
+          userLname: users.lname
+        })
+        .from(users)
+        .where(inArray(users.id, existingMembersIds));
 
       return result;
     },
