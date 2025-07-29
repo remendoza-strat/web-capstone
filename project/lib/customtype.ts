@@ -1,5 +1,5 @@
 // Roles
-export type Role = "Viewer" | "Project Manager" | "Developer" | "Designer" | "QA Engineer";
+export type Role = "Project Manager" | "Developer" | "Designer" | "QA Engineer";
 
 // Getting brief project info
 export interface QueryProject{

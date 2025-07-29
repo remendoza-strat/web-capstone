@@ -18,7 +18,7 @@ export function AddMemberButton({ close, projects }: { close: () => void; projec
   const [selectedUser, setSelectedUser] = useState<QueryUser | null>(null);
 
   // Selecting role hook
-  const [role, setRole] = useState<Role>("Viewer");
+  const [role, setRole] = useState<Role>("Project Manager");
 
   // Set first project as selected if not empty
   useEffect(() => {
@@ -175,7 +175,6 @@ export function AddMemberButton({ close, projects }: { close: () => void; projec
               className="w-full cursor-pointer modal-form-input"
               value={role} onChange={(e) => setRole(e.target.value as Role)}
             >
-              <option value="Viewer">Viewer</option>
               <option value="Project Manager">Project Manager</option>
               <option value="Developer">Developer</option>
               <option value="Designer">Designer</option>

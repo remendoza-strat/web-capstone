@@ -59,9 +59,7 @@ export const queries = {
         })
         .from(projectMembers)
         .innerJoin(projects, eq(projects.id, projectMembers.projectId))
-        .where(
-          and(eq(projectMembers.userId, userId), ne(projectMembers.role, "Viewer"))
-        )
+        .where(eq(projectMembers.userId, userId))
         
       return result;
     },
