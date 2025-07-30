@@ -18,13 +18,14 @@ export default function DashboardPage() {
   
   useEffect(() => {
     const fetchProjects = async () => {
+      if (!user) return;
       const clerkId = user!.id;
       const userId = (await getUserIdAction(clerkId))!;
       const projectList = await getUserMembershipAction(userId);
       setProjects(projectList);
     };
-    if (user) fetchProjects();
-  }, [isOpen]);
+    fetchProjects();
+  }, [user, isOpen]);
   
   return(
     <DashboardLayout>
