@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { useState, useEffect } from "react"
 import { CreateProjectButton } from "@/components/create-project-button"
 import { AddMemberButton } from "@/components/add-member-button"
-import { getUserMembershipAction, getUserIdAction } from '@/lib/db/actions';
+import { getUserMembershipAction, getUserIdAction, getUserActiveProjectCountAction, getUserOverdueProjectCountAction, getUserActiveTaskCountAction, getUserOverdueTaskCountAction } from '@/lib/db/actions';
 import { useUser } from "@clerk/nextjs";
 import { QueryProject } from "@/lib/customtype"
 import { CreateTaskButton } from "@/components/create-task-button"
@@ -16,6 +16,10 @@ export default function DashboardPage() {
   const [modalType, setModalType] = useState("");
   const [projects, setProjects] = useState<QueryProject[]>([]);
   const { user } = useUser();
+  const [activeProj, setActiveProj] = useState(0);
+  const [overdueProj, setOverdueProj] = useState(0);
+  const [activeTask, setActiveTask] = useState(0);
+  const [overdueTask, setOverdueTask] = useState(0);
   
   useEffect(() => {
     const fetchProjects = async () => {
@@ -24,6 +28,17 @@ export default function DashboardPage() {
       const userId = (await getUserIdAction(clerkId))!;
       const projectList = await getUserMembershipAction(userId);
       setProjects(projectList);
+
+      const activeProj = await getUserActiveProjectCountAction(userId);
+      setActiveProj(activeProj);
+      const overdueProj = await getUserOverdueProjectCountAction(userId);
+      setOverdueProj(overdueProj);
+      const activeTask = await getUserActiveTaskCountAction(userId);
+      setActiveTask(activeTask);
+      const overdueTask = await getUserOverdueTaskCountAction(userId);
+      setOverdueTask(overdueTask);
+
+      
     };
     fetchProjects();
   }, [user, isOpen]);
@@ -47,7 +62,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <DashboardStats/>
+        <DashboardStats activeProj={activeProj} overdueProj={overdueProj} activeTask={activeTask} overdueTask={overdueTask}/>
 
         {/* Recent Activity & Quick Actions */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -72,11 +87,7 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <div className="p-4 mt-4 border border-yellow-200 rounded bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                📋 <strong>Task 4.1:</strong> Implement project CRUD operations
-              </p>
-            </div>
+            
           </div>
 
           {/* Quick Actions */}
@@ -110,11 +121,7 @@ export default function DashboardPage() {
 
               
             </div>
-            <div className="p-4 mt-4 border border-yellow-200 rounded bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                📋 <strong>Task 4.4:</strong> Build task creation and editing functionality
-              </p>
-            </div>
+            
           </div>
         </div>
       </div>

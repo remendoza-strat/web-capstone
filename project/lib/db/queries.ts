@@ -1,4 +1,4 @@
-import { and, or, eq, notInArray, ilike, inArray } from "drizzle-orm"
+import { and, or, eq, notInArray, ilike, inArray, count, gt, lt } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
 import { users, projects, projectMembers, tasks, taskAssignees } from "@/lib/db/schema"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
@@ -47,6 +47,50 @@ export const queries = {
         .from(projects)
         .where(eq(projects.id, projectId));
       return result;
+    },
+    getUserActiveProjectCount: async (userId: string) => {
+      const memberships = await queries.projectMembers.getUserMembership(userId);
+      const projectIds = memberships.map((m) => m.projectId);
+
+      if (projectIds.length === 0) return 0;
+
+      const now = new Date();
+
+      const result = await db
+        .select({ count: count() })
+        .from(projects)
+        .innerJoin(tasks, eq(tasks.projectId, projects.id))
+        .where(
+          and(
+            inArray(projects.id, projectIds),
+            gt(projects.dueDate, now),
+            lt(tasks.position, 100)
+          )
+        );
+
+      return Number(result[0].count);
+    },
+    getUserOverdueProjectCount: async (userId: string) => {
+      const memberships = await queries.projectMembers.getUserMembership(userId);
+      const projectIds = memberships.map((m) => m.projectId);
+
+      if (projectIds.length === 0) return 0;
+
+      const now = new Date();
+
+      const result = await db
+        .select({ count: count() })
+        .from(projects)
+        .innerJoin(tasks, eq(tasks.projectId, projects.id))
+        .where(
+          and(
+            inArray(projects.id, projectIds),
+            lt(projects.dueDate, now),
+            lt(tasks.position, 100)
+          )
+        );
+
+      return Number(result[0].count);
     },
   },
 
@@ -143,6 +187,40 @@ export const queries = {
         .returning({ id: tasks.id });
 
       return task.id;
+    },
+    getUserActiveTaskCount: async (userId: string) => {
+      const now = new Date();
+
+      const result = await db
+        .select({ count: count() })
+        .from(taskAssignees)
+        .innerJoin(tasks, eq(taskAssignees.taskId, tasks.id))
+        .where(
+          and(
+            eq(taskAssignees.userId, userId),
+            gt(tasks.dueDate, now),
+            lt(tasks.position, 100)
+          )
+        );
+
+      return Number(result[0].count);
+    },
+    getUserOverdueTaskCount: async (userId: string) => {
+      const now = new Date();
+
+      const result = await db
+        .select({ count: count() })
+        .from(taskAssignees)
+        .innerJoin(tasks, eq(taskAssignees.taskId, tasks.id))
+        .where(
+          and(
+            eq(taskAssignees.userId, userId),
+            lt(tasks.dueDate, now),
+            lt(tasks.position, 100)
+          )
+        );
+        
+      return Number(result[0].count);
     },
   },
 

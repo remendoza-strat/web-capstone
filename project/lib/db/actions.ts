@@ -46,3 +46,23 @@ export async function assignTaskAction(taskAssignee: NewTaskAssignee){
 export async function getProjectDeadlineAction(projectId: string){
   return await queries.projects.getProjectDeadline(projectId);
 }
+
+// Action to get all active projects of user
+export async function getUserActiveProjectCountAction(userId: string){
+  return await queries.projects.getUserActiveProjectCount(userId);
+}
+
+// Action to get all overdue projects of user
+export async function getUserOverdueProjectCountAction(userId: string){
+  return await queries.projects.getUserOverdueProjectCount(userId);
+}
+
+// Action to get all active tasks of user
+export async function getUserActiveTaskCountAction(userId: string){
+  return await queries.tasks.getUserActiveTaskCount(userId);
+}
+
+// Action to get all overdue tasks of user
+export async function getUserOverdueTaskCountAction(userId: string){
+  return await queries.tasks.getUserOverdueTaskCount(userId);
+}
