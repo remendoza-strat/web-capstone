@@ -117,21 +117,29 @@ module.exports = {
 
 
 
-        // MODAL COLORS
+        // MODAL COLORS USED
         modal_light: {
           DEFAULT: "#e8e7e8",
           100: "#f8f8f8"
         },
         modal_dark: {
-          DEFAULT: "#46494c",
-          100: "#393b3e",
+          DEFAULT: "#121212",
+          100: "#1e1e1e",
         },
         modal_blue: {
           DEFAULT: "#146a7f",
           100: "#0f4f5f"
         }
-        // MODAL COLORS
+        // MODAL COLORS USED
 
+        /*
+        MODAL TAILWIND COLORS USED
+        black
+        white
+        gray-300
+        red-500
+        red-700 
+        */
 
 
       },
