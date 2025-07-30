@@ -1,6 +1,4 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+// Remove tags from input
+export function StripHTML(html: string): string{
+  return html.replace(/<[^>]+>/g, "").trim();
 }

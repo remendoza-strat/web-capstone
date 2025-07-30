@@ -1,13 +1,20 @@
 "use client"
 import "./globals.css"
+import "react-quill-new/dist/quill.snow.css"
+import dynamic from "next/dynamic"
 import { X, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
-import type { NewTask, NewTaskAssignee } from "@/lib/db/schema"
-import { getProjectMembersAction, createTaskAction, assignTaskAction } from "@/lib/db/actions"
+import { TaskSchema } from "@/lib/validations"
+import { StripHTML } from "@/lib/utils"
 import { QueryUser, QueryProject, Priority, PriorityArr } from "@/lib/customtype"
+import { getProjectMembersAction, createTaskAction, assignTaskAction, getProjectDeadlineAction } from "@/lib/db/actions"
+import type { NewTask, NewTaskAssignee } from "@/lib/db/schema"
 
-export function CreateTaskButton({ close, projects } : { close: () => void; projects: QueryProject[] }) {
+// Dynamic import of react quill
+const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
+
+export function CreateTaskButton({ close, projects } : { close: () => void; projects: QueryProject[] }){
   // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
@@ -62,8 +69,61 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // TODO: ZOD VALIDATIONS HERE
-    // TODO: ZOD ERROR DISPLAY HERE
+    // Validate project id
+    const projectValidation = TaskSchema.safeParse({
+      projectId: selectedProjectId
+    });
+
+    // Display project id error
+    if(!projectValidation.success){
+      const errors = projectValidation.error.flatten().fieldErrors;
+      if(errors.projectId?.[0]){
+        toast.error(errors.projectId[0]);
+        return;
+      }
+    }
+
+    // Get selected project deadline
+    const projDeadline = await getProjectDeadlineAction(selectedProjectId);
+    const deadline = projDeadline?.[0]?.dueDate;
+
+    // Get raw text of description
+    const descriptionRaw = StripHTML(String(description).trim());
+
+    // Validate input
+    const result = TaskSchema.safeParse({
+      title: title,
+      description: descriptionRaw,
+      label: label,
+      members: selectedUsers,
+      dueDate: new Date(dueDate),
+      deadline: new Date(deadline)
+    })
+
+    // Display errors
+    if(!result.success){
+      const errors = result.error.flatten().fieldErrors;
+      if(errors.title?.[0]){
+        toast.error(errors.title[0]);
+        return;
+      }
+      if(errors.description?.[0]){
+        toast.error(errors.description[0]);
+        return;
+      }
+      if(errors.label?.[0]){
+        toast.error(errors.label[0]);
+        return;
+      }
+      if(errors.members?.[0]){
+        toast.error(errors.members[0]);
+        return;
+      } 
+      if(errors.dueDate?.[0]){
+        toast.error(errors.dueDate[0]);
+        return;
+      } 
+    }
 
     // Create object of new task
     const newTask: NewTask = {
@@ -85,7 +145,6 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
         taskId: taskId,
         userId: user.userId
       };
-
       await assignTaskAction(newTaskAssignee);
     }
 
@@ -96,7 +155,7 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center modal-open-bg">
-      <div className="w-full max-w-md p-6 mx-4 rounded-lg modal-form-color">
+      <div className="w-full max-w-md h-[90vh] p-6 mx-4 rounded-lg modal-form-color overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
             Create New Task
@@ -139,10 +198,10 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
             <label className="block m-2 modal-form-label">
               Description
             </label>
-            <textarea
-              value={description} onChange={(e) => setDescription(e.target.value)}
-              rows={3} placeholder="Enter task description"
+						<ReactQuill 
+              theme="snow" placeholder="Enter task description"
               className="w-full modal-form-input"
+              value={description} onChange={setDescription}
             />
           </div>
           <div>

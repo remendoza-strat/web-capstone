@@ -8,18 +8,18 @@ export const queries = {
   // Users queries
   users: {
     createUser: async (newUser: NewUser) => {
-      const user = await db.query.users.findFirst({
+      const result = await db.query.users.findFirst({
         where: eq(users.clerkId, newUser.clerkId)
       });
 
-      if(!user){
+      if(!result){
         await db
           .insert(users)
           .values(newUser)
           .execute();
       }
 
-      return user;
+      return result;
     },
     getUserId: async (clerkId: string) => {
       const user = await db.query.users.findFirst({
@@ -40,6 +40,13 @@ export const queries = {
         .returning({ id: projects.id });
 
       return project.id;
+    },
+    getProjectDeadline: async (projectId: string) => {
+      const result = await db
+        .select({ dueDate: projects.dueDate })
+        .from(projects)
+        .where(eq(projects.id, projectId));
+      return result;
     },
   },
 

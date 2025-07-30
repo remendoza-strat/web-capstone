@@ -8,7 +8,7 @@ import { getNonProjectMembersAction, addProjectMemberAction } from "@/lib/db/act
 import { ProjectMemberSchema } from "@/lib/validations"
 import { QueryUser, QueryProject, Role, RoleArr } from "@/lib/customtype"
 
-export function AddMemberButton({ close, projects } : { close: () => void; projects: QueryProject[] }) {
+export function AddMemberButton({ close, projects } : { close: () => void; projects: QueryProject[] }){
   // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 

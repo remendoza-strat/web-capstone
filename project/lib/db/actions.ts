@@ -41,3 +41,8 @@ export async function createTaskAction(newTask: NewTask){
 export async function assignTaskAction(taskAssignee: NewTaskAssignee){
   await queries.taskAssignees.assignTask(taskAssignee);
 }
+
+// Action to get project deadline
+export async function getProjectDeadlineAction(projectId: string){
+  return await queries.projects.getProjectDeadline(projectId);
+}
