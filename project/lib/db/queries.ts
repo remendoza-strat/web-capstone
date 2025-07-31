@@ -1,4 +1,4 @@
-import { and, or, eq, notInArray, ilike, inArray, count, gt, lt } from "drizzle-orm"
+import { and, or, eq, notInArray, ilike, inArray, count, gt, lt, desc } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
 import { users, projects, projectMembers, tasks, taskAssignees } from "@/lib/db/schema"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
@@ -91,6 +91,59 @@ export const queries = {
         );
 
       return Number(result[0].count);
+    },
+    getUserProjectsInfo: async (userId: string) => {
+      const memberships = await queries.projectMembers.getUserMembership(userId);
+      const projectIds = memberships.map((m) => m.projectId);
+
+      if (projectIds.length === 0) return [];
+
+      const projectsRaw = await db
+        .select({
+          project: projects,
+          memberCount: count(projectMembers.id).as("memberCount")
+        })
+        .from(projects)
+        .leftJoin(projectMembers, eq(projects.id, projectMembers.projectId))
+        .where(inArray(projects.id, projectIds))
+        .groupBy(projects.id)
+        .orderBy(desc(projects.updatedAt));
+
+      const allTasks = await db
+        .select({
+          id: tasks.id,
+          position: tasks.position,
+          columnCount: tasks.columnCount,
+          projectId: tasks.projectId
+        })
+        .from(tasks)
+        .where(inArray(tasks.projectId, projectIds));
+
+      const computeTaskProgress = (position: number, columnCount: number) => {
+        if (position === 100) return 100;
+        if (columnCount <= 0) return 0;
+        return Math.round((position / columnCount) * 100);
+      };
+
+      const result = projectsRaw.map((proj) => {
+        const projectTasks = allTasks.filter((task) => task.projectId === proj.project.id);
+        const taskCount = projectTasks.length;
+
+        const totalProgress = projectTasks.reduce((acc, task) => {
+          return acc + computeTaskProgress(task.position, task.columnCount);
+        }, 0);
+
+        const progress = taskCount > 0 ? Math.round(totalProgress / taskCount) : 0;
+
+        return{
+          project: proj.project,
+          memberCount: Number(proj.memberCount),
+          taskCount,
+          progress
+        };
+      });
+
+      return result;
     },
   },
 

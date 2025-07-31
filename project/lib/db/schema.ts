@@ -70,6 +70,7 @@ export const tasks = pgTable("tasks", {
   dueDate: timestamp("due_date").notNull(),
   priority: priorityEnum("priority").notNull(),
   position: integer("position").notNull(),
+  columnCount: integer("column_count").notNull(),
   label: text("label").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()

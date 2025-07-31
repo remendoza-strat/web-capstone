@@ -133,6 +133,7 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
       dueDate: new Date(dueDate),
       priority: priority,
       position: 0,
+      columnCount: 5,
       label: label
     };
     
@@ -199,7 +200,7 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
               Description
             </label>
 						<ReactQuill 
-              theme="snow" placeholder="Enter task description"
+              theme="snow"
               className="w-full modal-form-input"
               value={description} onChange={setDescription}
             />
@@ -272,7 +273,7 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
               </label>
               <ul className="space-y-2">
                 {selectedUsers.map((item, index) => (
-                  <li key={item.user.userId} className="flex items-center justify-between gap-2">
+                  <li key={item.user.userId} className="flex items-center justify-between gap-2 modal-form-input">
                     <div className="flex-1">
                       <div className="modal-form-suggestion-main">
                         {item.user.userFname} {item.user.userLname}

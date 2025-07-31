@@ -1,15 +1,23 @@
 "use client"
 
+
+
+
 import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { useState, useEffect } from "react"
 import { CreateProjectButton } from "@/components/create-project-button"
 import { AddMemberButton } from "@/components/add-member-button"
-import { getUserMembershipAction, getUserIdAction, getUserActiveProjectCountAction, getUserOverdueProjectCountAction, getUserActiveTaskCountAction, getUserOverdueTaskCountAction } from '@/lib/db/actions';
+import { getUserMembershipAction, getUserIdAction, 
+  getUserActiveProjectCountAction, getUserOverdueProjectCountAction, 
+  getUserActiveTaskCountAction, getUserOverdueTaskCountAction,
+  getUserProjectsInfoAction } from '@/lib/db/actions';
 import { useUser } from "@clerk/nextjs";
 import { QueryProject } from "@/lib/customtype"
 import { CreateTaskButton } from "@/components/create-task-button"
 import { DashboardStats } from "@/components/dashboard-stats"
+import { RecentProjects } from "@/components/recent-projects"
+import { UserRecentProject } from "@/lib/customtype"
 
 export default function DashboardPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +28,7 @@ export default function DashboardPage() {
   const [overdueProj, setOverdueProj] = useState(0);
   const [activeTask, setActiveTask] = useState(0);
   const [overdueTask, setOverdueTask] = useState(0);
+  const [recentProj, setRecentProj] = useState<UserRecentProject[]>([]);
   
   useEffect(() => {
     const fetchProjects = async () => {
@@ -37,6 +46,9 @@ export default function DashboardPage() {
       setActiveTask(activeTask);
       const overdueTask = await getUserOverdueTaskCountAction(userId);
       setOverdueTask(overdueTask);
+
+      const recentProj = await getUserProjectsInfoAction(userId);
+      setRecentProj(recentProj);
 
       
     };
@@ -66,29 +78,10 @@ export default function DashboardPage() {
 
         {/* Recent Activity & Quick Actions */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Recent Projects */}
-          <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
-            <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Recent Projects</h3>
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-3 rounded-lg bg-platinum-800 dark:bg-outer_space-400"
-                >
-                  <div>
-                    <div className="font-medium text-outer_space-500 dark:text-platinum-500">Project {i}</div>
-                    <div className="text-sm text-payne's_gray-500 dark:text-french_gray-400">
-                      Last updated 2 hours ago
-                    </div>
-                  </div>
-                  <div className="w-12 h-2 bg-french_gray-300 dark:bg-payne's_gray-400 rounded-full">
-                    <div className="w-8 h-2 rounded-full bg-blue_munsell-500"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
+          <div>
+            <RecentProjects recentProj={recentProj}/>
           </div>
+          
 
           {/* Quick Actions */}
           <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">

@@ -1,3 +1,5 @@
+import type { Project } from "@/lib/db/schema"
+
 // Priorities
 export type Priority = "Low" | "Medium" | "High";
 
@@ -24,4 +26,12 @@ export interface QueryUser{
   userEmail: string; 
   userFname: string; 
   userLname: string;
+}
+
+// Getting project card info
+export interface UserRecentProject{
+  project: Project;
+  memberCount: number;
+  taskCount: number;
+  progress: number;
 }

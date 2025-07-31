@@ -99,7 +99,7 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center modal-open-bg">
-      <div className="w-full max-w-md p-6 mx-4 rounded-lg modal-form-color">
+      <div className="w-full max-w-lg p-6 mx-4 rounded-lg modal-form-color">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
             Add Team Member
@@ -161,7 +161,7 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
               </label>
               <ul className="space-y-2">
                 {selectedUsers.map((item, index) => (
-                  <li key={item.user.userId} className="flex items-center justify-between gap-2">
+                  <li key={item.user.userId} className="flex items-center justify-between gap-2 modal-form-input">
                     <div className="flex-1">
                       <div className="modal-form-suggestion-main">
                         {item.user.userFname} {item.user.userLname}

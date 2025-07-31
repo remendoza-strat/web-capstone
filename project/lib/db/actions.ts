@@ -66,3 +66,8 @@ export async function getUserActiveTaskCountAction(userId: string){
 export async function getUserOverdueTaskCountAction(userId: string){
   return await queries.tasks.getUserOverdueTaskCount(userId);
 }
+
+// Action to get brief information of user projects
+export async function getUserProjectsInfoAction(userId: string){
+  return await queries.projects.getUserProjectsInfo(userId);
+}
