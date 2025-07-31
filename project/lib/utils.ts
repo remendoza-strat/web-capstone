@@ -32,3 +32,11 @@ export function DateTimeFormatter(date: Date | string | null): string{
 
   return `${month} ${day}, ${year} at ${hours}:${paddedMinutes}${ampm}`;
 }
+
+// Limit character to display
+export function LimitChar(paragraph: string, limit: number): string{
+  if(paragraph.length <= limit){
+    return paragraph;
+  }
+  return paragraph.slice(0, limit) + "...";
+}

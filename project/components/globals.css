@@ -45,13 +45,13 @@
 	.page-icon-color{
 		@apply text-page_blue-100;
 	}
-	.page-stats-card{
-		@apply p-5 m-3 border border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
-	}
 	.page-stats-text{
 		@apply text-sm font-medium text-page_gray;
 	}
 	.page-stats-value{
 		@apply text-3xl font-semibold text-page_dark dark:text-page_light;
+	}
+	.page-card{
+		@apply border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
 	}
 }

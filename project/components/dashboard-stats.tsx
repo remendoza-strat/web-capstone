@@ -13,7 +13,7 @@ export function DashboardStats({ activeProj, overdueProj, activeTask, overdueTas
   return(
     <div className="flex flex-col md:flex-row">
       {values.map((val) => (
-        <div key={val.name} className="flex-1 page-stats-card">
+        <div key={val.name} className="flex-1 p-5 m-3 border page-card">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="flex items-center justify-center w-12 h-12 page-icon-bg">
