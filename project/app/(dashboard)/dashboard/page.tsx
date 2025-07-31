@@ -66,18 +66,15 @@ export default function DashboardPage() {
       {isOpen && modalType === "task" && (
         <CreateTaskButton close={() => setIsOpen(false)} projects={projects}/>
       )}
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Dashboard</h1>
-          <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-2">
-            Welcome back! Here's an overview of your projects and tasks.
-          </p>
-        </div>
+      <div className="space-y-6 ">
+
+  {/*PARENT DIV */}
 
         <DashboardStats activeProj={activeProj} overdueProj={overdueProj} activeTask={activeTask} overdueTask={overdueTask}/>
 
         {/* Recent Activity & Quick Actions */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+
           <div>
             <RecentProjects recentProj={recentProj}/>
           </div>
@@ -87,8 +84,6 @@ export default function DashboardPage() {
           <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
             <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Quick Actions</h3>
             <div className="space-y-3">
-              
-              
               
               <button 
                 className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors"

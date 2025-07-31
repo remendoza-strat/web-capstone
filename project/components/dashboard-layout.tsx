@@ -22,7 +22,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme()
 
   return (
-    <div className="min-h-screen bg-platinum-900 dark:bg-outer_space-600">
+    <div className="min-h-screen bg-page_light dark:bg-page_dark">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden" onClick={() => setSidebarOpen(false)} />

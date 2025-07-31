@@ -54,4 +54,28 @@
 	.page-card{
 		@apply border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
 	}
+	.page-main-title{
+		@apply text-lg font-semibold text-page_dark dark:text-page_light;
+	}
+	.page-sub-text{
+		@apply text-base font-normal text-page_dark dark:text-page_light;
+	}
+	.page-gray-text{
+		@apply text-sm font-medium text-page_gray;
+	}
+	.page-progress-text{
+		@apply text-sm font-bold text-page_blue-100;
+	}
+	.page-progress-div{
+		@apply w-full h-3 rounded-full bg-page_gray;
+	}
+	.page-progress-bar{
+		@apply h-3 transition-all duration-300 rounded-full bg-page_blue-100;
+	}
+	.page-section-main{
+		@apply text-2xl font-semibold text-page_blue-100;
+	}
+	.page-section-sub{
+		@apply text-sm font-semibold text-page_blue-100 hover:text-page_blue;
+	}
 }

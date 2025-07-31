@@ -104,7 +104,12 @@ export const queries = {
           memberCount: count(projectMembers.id).as("memberCount")
         })
         .from(projects)
-        .leftJoin(projectMembers, eq(projects.id, projectMembers.projectId))
+        .leftJoin(projectMembers, 
+          and(
+            eq(projects.id, projectMembers.projectId),
+            eq(projectMembers.approved, true)
+          )
+        )
         .where(inArray(projects.id, projectIds))
         .groupBy(projects.id)
         .orderBy(desc(projects.updatedAt));

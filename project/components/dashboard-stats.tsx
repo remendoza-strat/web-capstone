@@ -22,7 +22,7 @@ export function DashboardStats({ activeProj, overdueProj, activeTask, overdueTas
             </div>
             <div className="flex-1 w-0 ml-5">
               <dl>
-                <dt className="page-stats-text">
+                <dt className="page-gray-text">
                   {val.name}
                 </dt>
                 <dd className="flex items-baseline">
