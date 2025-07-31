@@ -31,12 +31,27 @@
 		@apply px-1 py-1 text-sm font-normal text-modal_dark dark:text-modal_light;
 	}
 	.modal-form-suggestion-ul{
-		@apply bg-modal_light-100 dark:bg-modal_dark-100
+		@apply bg-modal_light-100 dark:bg-modal_dark-100;
 	}
 	.modal-form-suggestion-li{
-		@apply cursor-pointer hover:bg-gray-300 dark:hover:bg-modal_dark
+		@apply cursor-pointer hover:bg-gray-300 dark:hover:bg-modal_dark;
 	}
 	.modal-form-trash{
 		@apply text-red-500 hover:text-red-700;
+	}
+	.page-icon-bg{
+		@apply bg-page_blue;
+	}
+	.page-icon-color{
+		@apply text-page_blue-100;
+	}
+	.page-stats-card{
+		@apply p-5 m-3 border border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
+	}
+	.page-stats-text{
+		@apply text-sm font-medium text-page_gray;
+	}
+	.page-stats-value{
+		@apply text-3xl font-semibold text-page_dark dark:text-page_light;
 	}
 }
