@@ -8,7 +8,7 @@ import { useState, useEffect } from "react"
 import { TaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
 import { QueryUser, QueryProject, Priority, PriorityArr } from "@/lib/customtype"
-import { getProjectMembersAction, createTaskAction, assignTaskAction, getProjectDeadlineAction } from "@/lib/db/actions"
+import { getProjectMembersAction, createTaskAction, assignTaskAction, getProjectDeadlineAction, updateProjectTimeAction } from "@/lib/db/actions"
 import type { NewTask, NewTaskAssignee } from "@/lib/db/schema"
 
 // Dynamic import of react quill
@@ -148,6 +148,9 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
       };
       await assignTaskAction(newTaskAssignee);
     }
+
+    // Update project for activity
+    await updateProjectTimeAction(selectedProjectId);
 
     // Display success and close modal
     toast.success("All members assigned to task.");

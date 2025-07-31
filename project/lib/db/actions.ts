@@ -71,3 +71,8 @@ export async function getUserOverdueTaskCountAction(userId: string){
 export async function getUserProjectsInfoAction(userId: string){
   return await queries.projects.getUserProjectsInfo(userId);
 }
+
+// Action to update project updated at time when an activity occur
+export async function updateProjectTimeAction(projectId: string){
+  await queries.projects.updateProjectTime(projectId);
+}

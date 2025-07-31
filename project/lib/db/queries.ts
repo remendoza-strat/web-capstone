@@ -145,6 +145,12 @@ export const queries = {
 
       return result;
     },
+    updateProjectTime: async (projectId: string) => {
+      await db
+        .update(projects)
+        .set({updatedAt: new Date()})
+        .where(eq(projects.id, projectId));
+    },
   },
 
   // Project members queries

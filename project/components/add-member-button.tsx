@@ -4,7 +4,7 @@ import { X, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import type { NewProjectMember } from "@/lib/db/schema"
-import { getNonProjectMembersAction, addProjectMemberAction } from "@/lib/db/actions"
+import { getNonProjectMembersAction, addProjectMemberAction, updateProjectTimeAction } from "@/lib/db/actions"
 import { ProjectMemberSchema } from "@/lib/validations"
 import { QueryUser, QueryProject, Role, RoleArr } from "@/lib/customtype"
 
@@ -91,6 +91,9 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
       }; 
       await addProjectMemberAction(newMember);
     }
+
+    // Update project for activity
+    await updateProjectTimeAction(selectedProjectId);
 
     // Display success and close modal
     toast.success("All members added.");
