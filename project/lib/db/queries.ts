@@ -169,8 +169,12 @@ export const queries = {
         })
         .from(projectMembers)
         .innerJoin(projects, eq(projects.id, projectMembers.projectId))
-        .where(eq(projectMembers.userId, userId))
-        
+        .where(
+          and(
+            eq(projectMembers.userId, userId),
+            eq(projectMembers.approved, true)
+          )
+        )
       return result;
     },
     getNonProjectMembers: async (projectId: string, query: string) => {
@@ -210,7 +214,12 @@ export const queries = {
       const existingMembers = await db
         .select({ userId: projectMembers.userId })
         .from(projectMembers)
-        .where(eq(projectMembers.projectId, projectId));
+        .where(
+          and(
+            eq(projectMembers.projectId, projectId),
+            eq(projectMembers.approved, true)
+          )
+        );
 
       const existingMembersIds = existingMembers.map((m) => m.userId);
 

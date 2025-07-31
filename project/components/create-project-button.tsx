@@ -68,7 +68,8 @@ export function CreateProjectButton({ close } : { close : () => void }){
     const newProjectMember: NewProjectMember = {
       projectId: projectId,
       userId: ownerId,
-      role: role
+      role: role,
+      approved: true
     }
 
     // Add member to the project

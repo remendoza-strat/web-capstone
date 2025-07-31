@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, uuid, text, timestamp, integer } from "drizzle-orm/pg-core"
+import { pgEnum, pgTable, uuid, text, timestamp, integer, boolean } from "drizzle-orm/pg-core"
 
 // Set allowed values in priority and role
 export const priorityEnum = pgEnum("priority", [
@@ -53,6 +53,7 @@ export const projectMembers = pgTable("project_members", {
   userId: uuid("user_id").notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   role: roleEnum("role").notNull(),
+  approved: boolean("approved").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });

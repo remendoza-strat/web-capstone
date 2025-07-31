@@ -87,7 +87,8 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
       const newMember: NewProjectMember = {
         projectId: selectedProjectId,
         userId: user.userId,
-        role
+        role: role,
+        approved: false
       }; 
       await addProjectMemberAction(newMember);
     }
@@ -96,7 +97,7 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
     await updateProjectTimeAction(selectedProjectId);
 
     // Display success and close modal
-    toast.success("All members added.");
+    toast.success("Project membership invitation sent.");
     close();
   };
 
