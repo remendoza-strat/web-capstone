@@ -51,3 +51,9 @@
   background-color: var(--french-gray);
   border-radius: 3px;
 }
+
+@layer components{
+  .page-card{
+		@apply border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
+	}
+}

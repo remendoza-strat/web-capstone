@@ -1,8 +1,4 @@
 "use client"
-
-
-
-
 import { FolderOpenDot , UserRoundPlus, StickyNote   } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { useState, useEffect } from "react"
@@ -83,7 +79,7 @@ export default function DashboardPage() {
           
 
           {/* Quick Actions */}
-          <div className="bg-white border rounded-lg lg:col-span-4 dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-5">
+          <div className="p-5 border page-card lg:col-span-4">
             <h3 className="mb-5 page-section-main">Quick Actions</h3>
             <div className="space-y-3">
               
