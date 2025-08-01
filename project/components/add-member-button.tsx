@@ -63,42 +63,45 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate project and members
-    const result = ProjectMemberSchema.safeParse({
-      projectId: selectedProjectId,
-      members: selectedUsers
-    });
-
-    // Display errors
-    if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.projectId?.[0]){
-        toast.error(errors.projectId[0]);
-        return;
-      } 
-      if(errors.members?.[0]){
-        toast.error(errors.members[0]);
-        return;
-      } 
-    }
-
-    // Iterate the array and add user content to database
-    for(const { user, role } of selectedUsers){
-      const newMember: NewProjectMember = {
+    try{
+      // Validate project and members
+      const result = ProjectMemberSchema.safeParse({
         projectId: selectedProjectId,
-        userId: user.userId,
-        role: role,
-        approved: false
-      }; 
-      await addProjectMemberAction(newMember);
+        members: selectedUsers
+      });
+
+      // Display errors
+      if(!result.success){
+        const errors = result.error.flatten().fieldErrors;
+        if(errors.projectId?.[0]){
+          toast.error(errors.projectId[0]);
+          return;
+        } 
+        if(errors.members?.[0]){
+          toast.error(errors.members[0]);
+          return;
+        } 
+      }
+
+      // Iterate the array and add user content to database
+      for(const { user, role } of selectedUsers){
+        const newMember: NewProjectMember = {
+          projectId: selectedProjectId,
+          userId: user.userId,
+          role: role,
+          approved: false
+        }; 
+        await addProjectMemberAction(newMember);
+      }
+
+      // Update project for activity
+      await updateProjectTimeAction(selectedProjectId);
+
+      // Display success and close modal
+      toast.success("Project membership invitation sent.");
+      close();
     }
-
-    // Update project for activity
-    await updateProjectTimeAction(selectedProjectId);
-
-    // Display success and close modal
-    toast.success("Project membership invitation sent.");
-    close();
+    catch{return}
   };
 
   return(

@@ -39,16 +39,19 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
 
   // Getting suggested user and removing already selected user
   useEffect(() => {
-    const timeout = setTimeout(async () => {
-      if(!query || !selectedProjectId){
-        setSuggestions([]);
-        return;
-      }
-      const users = await getProjectMembersAction(selectedProjectId, query);
-      const selectedIds = selectedUsers.map((u) => u.user.userId);
-      setSuggestions(users.filter((u) => !selectedIds.includes(u.userId)));
-    }, 300);
-    return () => clearTimeout(timeout);
+    try{
+      const timeout = setTimeout(async () => {
+        if(!query || !selectedProjectId){
+          setSuggestions([]);
+          return;
+        }
+        const users = await getProjectMembersAction(selectedProjectId, query);
+        const selectedIds = selectedUsers.map((u) => u.user.userId);
+        setSuggestions(users.filter((u) => !selectedIds.includes(u.userId)));
+      }, 300);
+      return () => clearTimeout(timeout);
+    }
+    catch{return}
   }, [selectedProjectId, query, selectedUsers]);
 
   // Add selected user to array
@@ -69,92 +72,95 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate project id
-    const projectValidation = TaskSchema.safeParse({
-      projectId: selectedProjectId
-    });
+    try{
+      // Validate project id
+      const projectValidation = TaskSchema.safeParse({
+        projectId: selectedProjectId
+      });
 
-    // Display project id error
-    if(!projectValidation.success){
-      const errors = projectValidation.error.flatten().fieldErrors;
-      if(errors.projectId?.[0]){
-        toast.error(errors.projectId[0]);
-        return;
+      // Display project id error
+      if(!projectValidation.success){
+        const errors = projectValidation.error.flatten().fieldErrors;
+        if(errors.projectId?.[0]){
+          toast.error(errors.projectId[0]);
+          return;
+        }
       }
-    }
 
-    // Get selected project deadline
-    const projDeadline = await getProjectDeadlineAction(selectedProjectId);
-    const deadline = projDeadline?.[0]?.dueDate;
+      // Get selected project deadline
+      const projDeadline = await getProjectDeadlineAction(selectedProjectId);
+      const deadline = projDeadline?.[0]?.dueDate;
 
-    // Get raw text of description
-    const descriptionRaw = StripHTML(String(description).trim());
+      // Get raw text of description
+      const descriptionRaw = StripHTML(String(description).trim());
 
-    // Validate input
-    const result = TaskSchema.safeParse({
-      title: title,
-      description: descriptionRaw,
-      label: label,
-      members: selectedUsers,
-      dueDate: new Date(dueDate),
-      deadline: new Date(deadline)
-    })
+      // Validate input
+      const result = TaskSchema.safeParse({
+        title: title,
+        description: descriptionRaw,
+        label: label,
+        members: selectedUsers,
+        dueDate: new Date(dueDate),
+        deadline: new Date(deadline)
+      })
 
-    // Display errors
-    if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.title?.[0]){
-        toast.error(errors.title[0]);
-        return;
+      // Display errors
+      if(!result.success){
+        const errors = result.error.flatten().fieldErrors;
+        if(errors.title?.[0]){
+          toast.error(errors.title[0]);
+          return;
+        }
+        if(errors.description?.[0]){
+          toast.error(errors.description[0]);
+          return;
+        }
+        if(errors.label?.[0]){
+          toast.error(errors.label[0]);
+          return;
+        }
+        if(errors.members?.[0]){
+          toast.error(errors.members[0]);
+          return;
+        } 
+        if(errors.dueDate?.[0]){
+          toast.error(errors.dueDate[0]);
+          return;
+        } 
       }
-      if(errors.description?.[0]){
-        toast.error(errors.description[0]);
-        return;
-      }
-      if(errors.label?.[0]){
-        toast.error(errors.label[0]);
-        return;
-      }
-      if(errors.members?.[0]){
-        toast.error(errors.members[0]);
-        return;
-      } 
-      if(errors.dueDate?.[0]){
-        toast.error(errors.dueDate[0]);
-        return;
-      } 
-    }
 
-    // Create object of new task
-    const newTask: NewTask = {
-      projectId: selectedProjectId,
-      title: title,
-      description: description,
-      dueDate: new Date(dueDate),
-      priority: priority,
-      position: 0,
-      columnCount: 5,
-      label: label
-    };
-    
-    // Add and get the task id of the created task
-    const taskId = (await createTaskAction(newTask))!;
-
-    // Iterate the array and add user content to database
-    for(const {user} of selectedUsers){
-      const newTaskAssignee: NewTaskAssignee = {
-        taskId: taskId,
-        userId: user.userId
+      // Create object of new task
+      const newTask: NewTask = {
+        projectId: selectedProjectId,
+        title: title,
+        description: description,
+        dueDate: new Date(dueDate),
+        priority: priority,
+        position: 0,
+        columnCount: 5,
+        label: label
       };
-      await assignTaskAction(newTaskAssignee);
+      
+      // Add and get the task id of the created task
+      const taskId = await createTaskAction(newTask);
+
+      // Iterate the array and add user content to database
+      for(const {user} of selectedUsers){
+        const newTaskAssignee: NewTaskAssignee = {
+          taskId: taskId,
+          userId: user.userId
+        };
+        await assignTaskAction(newTaskAssignee);
+      }
+
+      // Update project for activity
+      await updateProjectTimeAction(selectedProjectId);
+
+      // Display success and close modal
+      toast.success("All members assigned to task.");
+      close();
     }
-
-    // Update project for activity
-    await updateProjectTimeAction(selectedProjectId);
-
-    // Display success and close modal
-    toast.success("All members assigned to task.");
-    close();
+    catch{return}
   };
 
   return(

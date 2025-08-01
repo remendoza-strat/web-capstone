@@ -1,3 +1,4 @@
+import "./globals.css"
 import Link from "next/link"
 import { Users, Calendar } from "lucide-react"
 import { DateTimeFormatter, LimitChar } from "@/lib/utils"

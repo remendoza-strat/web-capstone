@@ -23,61 +23,68 @@ export function CreateProjectButton({ close } : { close : () => void }){
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Get clerk id of user
-    const clerkId = user!.id;
+    try{
+      // Check for user
+      if (!user) return;
 
-    // Get user id with clerk id
-    const ownerId = (await getUserIdAction(clerkId))!;
+      // Get clerk id of user
+      const clerkId = user.id;
 
-    // Validate input
-    const result = ProjectSchema.safeParse({
-      name,
-      description,
-      dueDate
-    });
+      // Get user id with clerk id
+      const ownerId = await getUserIdAction(clerkId);
+      if (!ownerId) return;
 
-    // Display error from validation
-    if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.name?.[0]){
-        toast.error(errors.name[0]);
-        return;
+      // Validate input
+      const result = ProjectSchema.safeParse({
+        name,
+        description,
+        dueDate
+      });
+
+      // Display error from validation
+      if(!result.success){
+        const errors = result.error.flatten().fieldErrors;
+        if(errors.name?.[0]){
+          toast.error(errors.name[0]);
+          return;
+        }
+        if(errors.description?.[0]){
+          toast.error(errors.description[0]);
+          return;
+        }
+        if(errors.dueDate?.[0]){
+          toast.error(errors.dueDate[0]);
+          return;
+        }
       }
-      if(errors.description?.[0]){
-        toast.error(errors.description[0]);
-        return;
+
+      // Create object of new project
+      const newProject: NewProject = {
+        ownerId,
+        name,
+        description,
+        dueDate: new Date(dueDate)
+      };
+      
+      // Add and get the project id of the created project
+      const projectId = await createProjectAction(newProject);
+
+      // Create object of new project member
+      const newProjectMember: NewProjectMember = {
+        projectId: projectId,
+        userId: ownerId,
+        role: role,
+        approved: true
       }
-      if(errors.dueDate?.[0]){
-        toast.error(errors.dueDate[0]);
-        return;
-      }
+
+      // Add member to the project
+      addProjectMemberAction(newProjectMember);
+      
+      // Display success and close the modal
+      toast.success("Project created.");
+      close();
     }
-
-    // Create object of new project
-    const newProject: NewProject = {
-      ownerId,
-      name,
-      description,
-      dueDate: new Date(dueDate)
-    };
-    
-    // Add and get the project id of the created project
-    const projectId = (await createProjectAction(newProject))!;
-
-    // Create object of new project member
-    const newProjectMember: NewProjectMember = {
-      projectId: projectId,
-      userId: ownerId,
-      role: role,
-      approved: true
-    }
-
-    // Add member to the project
-    addProjectMemberAction(newProjectMember);
-    
-    // Display success and close the modal
-    toast.success("Project created.");
-    close();
+    catch{return}
   };
 
   return(
