@@ -1,4 +1,4 @@
-import { and, or, eq, notInArray, ilike, inArray, count, gt, lt, desc } from "drizzle-orm"
+import { and, or, eq, notInArray, ilike, inArray, count, gt, lt, desc, countDistinct } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
 import { users, projects, projectMembers, tasks, taskAssignees } from "@/lib/db/schema"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
@@ -57,7 +57,7 @@ export const queries = {
       const now = new Date();
 
       const result = await db
-        .select({ count: count() })
+        .select({ count: countDistinct(projects.id) })
         .from(projects)
         .innerJoin(tasks, eq(tasks.projectId, projects.id))
         .where(
@@ -79,7 +79,7 @@ export const queries = {
       const now = new Date();
 
       const result = await db
-        .select({ count: count() })
+        .select({ count: countDistinct(projects.id) })
         .from(projects)
         .innerJoin(tasks, eq(tasks.projectId, projects.id))
         .where(
