@@ -3,7 +3,7 @@
 
 
 
-import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react"
+import { FolderOpenDot , UserRoundPlus, StickyNote   } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { useState, useEffect } from "react"
 import { CreateProjectButton } from "@/components/create-project-button"
@@ -83,15 +83,15 @@ export default function DashboardPage() {
           
 
           {/* Quick Actions */}
-          <div className="bg-white border rounded-lg lg:col-span-4 dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
-            <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Quick Actions</h3>
+          <div className="bg-white border rounded-lg lg:col-span-4 dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-5">
+            <h3 className="mb-5 page-section-main">Quick Actions</h3>
             <div className="space-y-3">
               
               <button 
-                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg text-page_dark bg-page_blue-100 border-french_gray-300"
+                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg text-page_dark bg-page_blue-100 border-french_gray-300 hover:bg-opacity-80"
                 onClick={() => {setIsOpen(true); setModalType("project");}}>
                   <div className="p-3 m-3 rounded-xl bg-page_blue">
-                    <Plus size={20} className="text-black "/>  
+                    <FolderOpenDot  size={20} className="text-black "/>  
                   </div>   
                    <div className="flex flex-col items-start m-3">
                     <p className="font-extrabold">Create New Project</p>
@@ -99,10 +99,10 @@ export default function DashboardPage() {
                   </div>
               </button>
               <button 
-                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg bg-page_blue border-french_gray-300 text-page_dark"
+                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg bg-page_blue border-french_gray-300 text-page_dark hover:bg-opacity-75"
                 onClick={() => {setIsOpen(true); setModalType("member")}}>
                   <div className="p-3 m-3 rounded-xl bg-page_blue-100">
-                    <Plus size={20} className="text-black "/>  
+                    <UserRoundPlus  size={20} className="text-black "/>  
                   </div>
                   <div className="flex flex-col items-start m-3">
                     <p className="font-bold">Add Team Member</p>
@@ -110,10 +110,10 @@ export default function DashboardPage() {
                   </div>
               </button>
               <button 
-                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg text-page_dark bg-page_blue border-french_gray-300"
+                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg text-page_dark bg-page_blue border-french_gray-300 hover:bg-opacity-75"
                 onClick={() => {setIsOpen(true); setModalType("task")}}>
                   <div className="p-3 m-3 rounded-xl bg-page_blue-100">
-                    <Plus size={20} className="text-black "/>  
+                    <StickyNote  size={20} className="text-black "/>  
                   </div>
                   <div className="flex flex-col items-start m-3">
                     <p className="font-bold">Create New Task</p>
