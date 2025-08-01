@@ -2,6 +2,23 @@
 import { queries } from "@/lib/db/queries"
 import type { NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 
+// Action to get all data necessary for dashboard page
+export async function getDashboardData(userId: string){
+  const [projects, activeProj, overdueProj, activeTask, overdueTask, recentProj] = await Promise.all([
+    getUserMembershipAction(userId),
+    getUserActiveProjectCountAction(userId),
+    getUserOverdueProjectCountAction(userId),
+    getUserActiveTaskCountAction(userId),
+    getUserOverdueTaskCountAction(userId),
+    getUserProjectsInfoAction(userId)
+  ]);
+
+  return{
+    projects, activeProj, overdueProj, 
+    activeTask, overdueTask, recentProj
+  };
+}
+
 // Action to get user id with clerk id
 export async function getUserIdAction(clerkId: string){
   return await queries.users.getUserId(clerkId);

@@ -67,7 +67,7 @@
 		@apply text-sm font-bold text-page_blue-100;
 	}
 	.page-progress-div{
-		@apply w-full h-3 rounded-full bg-page_gray;
+		@apply w-full h-3 rounded-full bg-page_gray-100 dark:bg-page_gray;
 	}
 	.page-progress-bar{
 		@apply h-3 transition-all duration-300 rounded-full bg-page_blue-100;
@@ -77,5 +77,20 @@
 	}
 	.page-section-sub{
 		@apply text-sm font-semibold text-page_blue-100 hover:text-page_blue;
+	}
+	.page-main-btn{
+		@apply border bg-page_blue-100 border-page_gray-100 hover:bg-opacity-80;
+	}
+	.page-sub-btn{
+		@apply border bg-page_blue border-page_gray-100 hover:bg-opacity-60;
+	}
+	.page-btn-icon{
+		@apply bg-page_light-100 text-page_blue-100;
+	}
+	.page-btn-main-text{
+		@apply text-lg font-extrabold text-page_dark;
+	}
+	.page-btn-sub-text{
+		@apply text-sm font-normal text-page_dark;
 	}
 }

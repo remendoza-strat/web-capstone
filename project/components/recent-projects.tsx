@@ -16,7 +16,7 @@ export function RecentProjects({recentProj} : { recentProj: UserRecentProject[] 
       </div>
       <div>
         {recentProj.slice(0, 3).map((project) => (
-          <div key={project.project.id} className="border-t page-card">
+          <div key={project.project.id} className="px-3 border-t page-card">
             <div className="flex items-start justify-between">
               <div className="flex-1 p-4">
                 <h4 className="py-1 page-main-title">
@@ -32,9 +32,7 @@ export function RecentProjects({recentProj} : { recentProj: UserRecentProject[] 
                   </div>
                   <div className="flex items-center">
                     <Users size={16} className="mr-1"/>
-                    {project.memberCount < 2 ? 
-                      (<p>{project.memberCount} Member</p>) : (<p>{project.memberCount} Members</p>)
-                    }
+                    {project.memberCount}
                   </div>
                  </div>
                 <div className="py-2">

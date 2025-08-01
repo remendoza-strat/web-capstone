@@ -1,3 +1,4 @@
+import "./globals.css"
 import { FolderCheck, FolderX, Clock, AlarmClockOff } from "lucide-react"
 
 export function DashboardStats({ activeProj, overdueProj, activeTask, overdueTask } : { activeProj: number; overdueProj: number; activeTask: number; overdueTask: number }){
@@ -11,9 +12,9 @@ export function DashboardStats({ activeProj, overdueProj, activeTask, overdueTas
   ];
 
   return(
-    <div className="flex flex-col md:flex-row">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
       {values.map((val) => (
-        <div key={val.name} className="flex-1 p-5 m-3 border page-card">
+        <div key={val.name} className="p-5 border page-card">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="flex items-center justify-center w-12 h-12 page-icon-bg">
