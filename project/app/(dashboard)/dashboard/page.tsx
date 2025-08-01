@@ -66,6 +66,8 @@ export default function DashboardPage() {
       {isOpen && modalType === "task" && (
         <CreateTaskButton close={() => setIsOpen(false)} projects={projects}/>
       )}
+
+      
       <div className="space-y-6 ">
 
   {/*PARENT DIV */}
@@ -73,35 +75,50 @@ export default function DashboardPage() {
         <DashboardStats activeProj={activeProj} overdueProj={overdueProj} activeTask={activeTask} overdueTask={overdueTask}/>
 
         {/* Recent Activity & Quick Actions */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
 
-          <div>
+          <div className="lg:col-span-8">
             <RecentProjects recentProj={recentProj}/>
           </div>
           
 
           {/* Quick Actions */}
-          <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
+          <div className="bg-white border rounded-lg lg:col-span-4 dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
             <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Quick Actions</h3>
             <div className="space-y-3">
               
               <button 
-                className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors"
+                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg text-page_dark bg-page_blue-100 border-french_gray-300"
                 onClick={() => {setIsOpen(true); setModalType("project");}}>
-                  <Plus size={20} className="mr-2" />
-                  Create New Project
+                  <div className="p-3 m-3 rounded-xl bg-page_blue">
+                    <Plus size={20} className="text-black "/>  
+                  </div>   
+                   <div className="flex flex-col items-start m-3">
+                    <p className="font-extrabold">Create New Project</p>
+                    <span className="text-sm text-page_light">Create a new project to plan</span>
+                  </div>
               </button>
               <button 
-                className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors"
+                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg bg-page_blue border-french_gray-300 text-page_dark"
                 onClick={() => {setIsOpen(true); setModalType("member")}}>
-                  <Plus size={20} className="mr-2" />
-                  Add Team Member
+                  <div className="p-3 m-3 rounded-xl bg-page_blue-100">
+                    <Plus size={20} className="text-black "/>  
+                  </div>
+                  <div className="flex flex-col items-start m-3">
+                    <p className="font-bold">Add Team Member</p>
+                    <span className="text-sm text-page_gray">Invite a user to collaborate</span>
+                  </div>
               </button>
               <button 
-                className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors"
+                className="flex items-center justify-start w-full px-4 py-3 border rounded-lg text-page_dark bg-page_blue border-french_gray-300"
                 onClick={() => {setIsOpen(true); setModalType("task")}}>
-                  <Plus size={20} className="mr-2" />
-                  Create New Task
+                  <div className="p-3 m-3 rounded-xl bg-page_blue-100">
+                    <Plus size={20} className="text-black "/>  
+                  </div>
+                  <div className="flex flex-col items-start m-3">
+                    <p className="font-bold">Create New Task</p>
+                    <span className="text-sm text-page_gray">Add a task to your project</span>
+                  </div>
               </button>
 
 
