@@ -1,43 +1,102 @@
 import { eq } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
-import { users, projects, projectMembers } from "@/lib/db/schema"
-import type { NewUser, NewProject, NewProjectMember } from "@/lib/db/schema"
+import { users, projects, projectMembers, tasks, taskAssignees } from "@/lib/db/schema"
+import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 
 export const queries = {
 
   // Users queries
   users: {
     createUser: async (newUser: NewUser) => {
-      const existing = await db.query.users.findFirst({
+      const result = await db.query.users.findFirst({
         where: eq(users.clerkId, newUser.clerkId)
       });
-      if(!existing){
+
+      if(!result){
         await db.insert(users).values(newUser).execute();
       }
-      return existing;
+
+      return result;
     },
     getUserId: async (clerkId: string) => {
-      const user = await db.query.users.findFirst({
-        where: eq(users.clerkId, clerkId),
-        columns: { id: true }
+      const result = await db.query.users.findFirst({
+        where: eq(users.clerkId, clerkId)
       });
-      return user?.id ?? null;
-    }
+
+      return result?.id;
+    },
   },
 
-  // Project queries
+  // Projects queries
   projects: {
     createProject: async (newProject: NewProject) => {
-      const [project] = await db.insert(projects).values(newProject).returning({ id: projects.id });
-      return project.id;
-    }
+      const [result] = await db.insert(projects).values(newProject)
+        .returning({ id: projects.id });
+
+      return result.id;
+    },
+    getUserProjects: async (userId: string) => {
+      const query = await db.query.projectMembers.findMany({
+        where: (pm, {and, eq}) => and(eq(pm.approved, true), eq(pm.userId, userId)),
+        with: {project: {with: {members: {with: {user: true}}, tasks: true}}}
+      })
+
+      const result = query.map((q) => ({...q.project, members: q.project.members.filter((member) => member.approved === true)}));
+      return result;
+    },
+    updateProjectTime: async (projectId: string) => {
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, projectId));
+    },
   },
 
   // Project members queries
   projectMembers: {
-    addProjectMember: async (newProjectMember: NewProjectMember) => {
+    createProjectMember: async (newProjectMember: NewProjectMember) => {
       await db.insert(projectMembers).values(newProjectMember).execute();
-    }
-  }
-  
+    },
+    getNonProjectMembers: async (projectId: string) => {
+      const query1 = await db.query.projectMembers.findMany({
+        where: (pm, {eq}) => eq(pm.projectId, projectId),
+        with: {user: true}
+      });
+
+      const addedIds = query1.map((q) => q.user.id);
+      
+      const query2 = await db
+        .select()
+        .from(users);
+
+      const result = query2.filter((q) => !addedIds.includes(q.id))
+      return result;
+    },
+  },
+
+  // Tasks queries
+  tasks: {
+    createTask: async (newTask: NewTask) => {
+      const [result] = await db.insert(tasks).values(newTask)
+        .returning({ id: tasks.id });
+
+      return result.id;
+    },
+    getUserTasks: async (userId: string) => {
+      const query = await db.query.taskAssignees.findMany({
+        where: (ta, {eq}) => eq(ta.userId, userId),
+        with: {task: true}
+      });
+      
+      const result = query.map((q) => q.task);
+      return result;
+    },
+  },
+
+  // Task assignees queries
+  taskAssignees: {
+    createTaskAssignee: async (newTaskAssignee: NewTaskAssignee) => {
+      await db.insert(taskAssignees).values(newTaskAssignee).execute();
+    },
+  },
+
 };

@@ -1,121 +1,129 @@
 "use client"
-
-import { TrendingUp, Users, CheckCircle, Clock, Plus } from "lucide-react"
+import { useState, useEffect } from "react"
+import { FolderOpenDot } from "lucide-react"
+import { useUser } from "@clerk/nextjs"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { useState } from "react"
 import { CreateProjectButton } from "@/components/create-project-button"
+import { AddMemberButton } from "@/components/add-member-button"
+import { CreateTaskButton } from "@/components/create-task-button"
+import { getUserIdAction, getUserTasksAction, getUserProjectsAction } from "@/lib/db/actions"
+import { DashboardStats } from "@/components/dashboard-stats"
+import { RecentProjects } from "@/components/recent-projects"
+import type { Task } from "@/lib/db/schema"
+import type { UserProjects } from "@/lib/customtype"
 
-export default function DashboardPage() {
+export default function DashboardPage(){
+  // Hooks for modal
   const [isOpen, setIsOpen] = useState(false);
+  const [modalType, setModalType] = useState("");
+
+  // Hook for getting current user
+  const { user } = useUser();
+
+  // Hook for data to send to components
+  const [userId, setUserId] = useState("");
+  const [userTasks, setUserTasks] = useState<Task[]>([]);
+  const [userProjs, setUserProjs] = useState<UserProjects[]>([]);
   
-  return (
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try{
+        // Return if user is null
+        if (!user) return;
+        
+        // Get clerk id
+        const clerkId = user.id;
+        if (!clerkId) return;
+        
+        // Get user id with clerk id
+        const userId = await getUserIdAction(clerkId);
+        if (!userId) return;
+        setUserId(userId);
+
+        // Get user tasks
+        const userTasks = await getUserTasksAction(userId);
+        setUserTasks(userTasks);
+
+        // Get user projects
+        const userProjs = await getUserProjectsAction(userId);
+        setUserProjs(userProjs);
+      }
+      catch{return}
+    };
+    fetchProjects();
+  }, [user, isOpen]);
+
+  return(
     <DashboardLayout>
-
-      {isOpen && (
-        <CreateProjectButton close={() => setIsOpen(false)} />
+      {isOpen && modalType === "project" && (
+        <CreateProjectButton close={() => setIsOpen(false)} userId={userId}/>
       )}
-
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Dashboard</h1>
-          <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-2">
-            Welcome back! Here's an overview of your projects and tasks.
-          </p>
-        </div>
-
-        {/* Stats Grid - Placeholder */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { name: "Active Projects", value: "12", icon: TrendingUp, change: "+2.5%" },
-            { name: "Team Members", value: "24", icon: Users, change: "+4.1%" },
-            { name: "Completed Tasks", value: "156", icon: CheckCircle, change: "+12.3%" },
-            { name: "Pending Tasks", value: "43", icon: Clock, change: "-2.1%" },
-          ].map((stat) => (
-            <div
-              key={stat.name}
-              className="overflow-hidden bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue_munsell-100 dark:bg-blue_munsell-900">
-                    <stat.icon className="text-blue_munsell-500" size={20} />
-                  </div>
-                </div>
-                <div className="flex-1 w-0 ml-5">
-                  <dl>
-                    <dt className="text-sm font-medium text-payne's_gray-500 dark:text-french_gray-400 truncate">
-                      {stat.name}
-                    </dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-outer_space-500 dark:text-platinum-500">
-                        {stat.value}
-                      </div>
-                      <div className="flex items-baseline ml-2 text-sm font-semibold text-green-600 dark:text-green-400">
-                        {stat.change}
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Recent Activity & Quick Actions */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Recent Projects */}
-          <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
-            <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Recent Projects</h3>
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-3 rounded-lg bg-platinum-800 dark:bg-outer_space-400"
-                >
-                  <div>
-                    <div className="font-medium text-outer_space-500 dark:text-platinum-500">Project {i}</div>
-                    <div className="text-sm text-payne's_gray-500 dark:text-french_gray-400">
-                      Last updated 2 hours ago
-                    </div>
-                  </div>
-                  <div className="w-12 h-2 bg-french_gray-300 dark:bg-payne's_gray-400 rounded-full">
-                    <div className="w-8 h-2 rounded-full bg-blue_munsell-500"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-4 mt-4 border border-yellow-200 rounded bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                📋 <strong>Task 4.1:</strong> Implement project CRUD operations
-              </p>
-            </div>
+      {isOpen && modalType === "member" && (
+        <AddMemberButton close={() => setIsOpen(false)} userProjs={userProjs}/>
+      )}
+      {isOpen && modalType === "task" && (
+        <CreateTaskButton close={() => setIsOpen(false)} userProjs={userProjs}/>
+      )}
+      <div className="space-y-6 ">
+        <DashboardStats userProjs={userProjs} userTasks={userTasks}/>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12 lg:items-start">
+          <div className="xl:col-span-7">
+            <RecentProjects userProjs={userProjs}/>
           </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
-            <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Quick Actions</h3>
+          <div className="p-5 border xl:col-span-5 page-card">
+            <h3 className="mb-5 page-section-main">
+              Quick Actions
+            </h3>
             <div className="space-y-3">
-              <button onClick={() => setIsOpen(true)} className="flex items-center justify-center w-full px-4 py-3 text-white transition-colors rounded-lg bg-blue_munsell-500 hover:bg-blue_munsell-600">
-                <Plus size={20} className="mr-2" />
-                Create New Project
+              <button 
+                className="flex items-center justify-start w-full px-4 py-3 page-main-btn"
+                onClick={() => {setIsOpen(true); setModalType("project");}}>
+                  <div className="p-3 m-3 page-btn-icon">
+                    <FolderOpenDot size={20}/>  
+                  </div>   
+                  <div className="flex flex-col items-start m-3">
+                    <p className="page-btn-main-text">
+                      Create New Project
+                    </p>
+                    <span className="page-btn-sub-text">
+                      Start a new project to plan
+                    </span>
+                  </div>
               </button>
-              <button className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
-                <Plus size={20} className="mr-2" />
-                Add Team Member
+              <button 
+                className="flex items-center justify-start w-full px-4 py-3 page-sub-btn"
+                onClick={() => {setIsOpen(true); setModalType("member");}}>
+                  <div className="p-3 m-3 page-btn-icon">
+                    <FolderOpenDot size={20}/>  
+                  </div>   
+                  <div className="flex flex-col items-start m-3">
+                    <p className="page-btn-main-text">
+                      Add Team Member
+                    </p>
+                    <span className="page-btn-sub-text">
+                      Invite a user to collaborate
+                    </span>
+                  </div>
               </button>
-              <button className="flex items-center justify-center w-full px-4 py-3 border border-french_gray-300 dark:border-payne's_gray-400 text-outer_space-500 dark:text-platinum-500 rounded-lg hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 transition-colors">
-                <Plus size={20} className="mr-2" />
-                Create Task
+              <button 
+                className="flex items-center justify-start w-full px-4 py-3 page-sub-btn"
+                onClick={() => {setIsOpen(true); setModalType("task");}}>
+                  <div className="p-3 m-3 page-btn-icon">
+                    <FolderOpenDot size={20}/>  
+                  </div>   
+                  <div className="flex flex-col items-start m-3">
+                    <p className="page-btn-main-text">
+                      Create New Task
+                    </p>
+                    <span className="page-btn-sub-text">
+                      Add a task to your project
+                    </span>
+                  </div>
               </button>
-            </div>
-            <div className="p-4 mt-4 border border-yellow-200 rounded bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                📋 <strong>Task 4.4:</strong> Build task creation and editing functionality
-              </p>
-            </div>
+            </div>    
           </div>
         </div>
       </div>
     </DashboardLayout>
-  )
+  );
 }

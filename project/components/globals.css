@@ -16,12 +16,81 @@
 		@apply px-4 py-2 text-base font-light text-modal_dark-100 dark:text-modal_light-100 hover:bg-modal_light-100 dark:hover:bg-modal_dark-100;
 	}
 	.modal-form-label{
-		@apply text-sm font-light text-modal_dark dark:text-modal_light;
+		@apply text-sm font-normal text-modal_dark dark:text-modal_light;
 	}
 	.modal-form-input{
 		@apply px-3 py-2 bg-modal_light-100 dark:bg-modal_dark-100 text-modal_dark dark:text-modal_light focus:outline-none focus:ring-2 focus:ring-modal_blue;
 	}
 	.modal-main-btn{
 		@apply px-4 py-2 text-base font-normal text-white rounded-lg bg-modal_blue hover:bg-modal_blue-100;
+	}
+	.modal-form-suggestion-main{
+		@apply px-1 py-1 text-base font-bold text-modal_dark dark:text-modal_light;
+	}
+	.modal-form-suggestion-sec{
+		@apply px-1 py-1 text-sm font-normal text-modal_dark dark:text-modal_light;
+	}
+	.modal-form-suggestion-ul{
+		@apply bg-modal_light-100 dark:bg-modal_dark-100;
+	}
+	.modal-form-suggestion-li{
+		@apply cursor-pointer hover:bg-gray-300 dark:hover:bg-modal_dark;
+	}
+	.modal-form-trash{
+		@apply text-red-500 hover:text-red-700;
+	}
+	.page-icon-bg{
+		@apply bg-page_blue;
+	}
+	.page-icon-color{
+		@apply text-page_blue-100;
+	}
+	.page-stats-text{
+		@apply text-sm font-medium text-page_gray;
+	}
+	.page-stats-value{
+		@apply text-3xl font-semibold text-page_dark dark:text-page_light;
+	}
+	.page-card{
+		@apply border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
+	}
+	.page-main-title{
+		@apply text-lg font-semibold text-page_dark dark:text-page_light;
+	}
+	.page-sub-text{
+		@apply text-base font-normal text-page_dark dark:text-page_light;
+	}
+	.page-gray-text{
+		@apply text-sm font-medium text-page_gray;
+	}
+	.page-progress-text{
+		@apply text-sm font-bold text-page_blue-100;
+	}
+	.page-progress-div{
+		@apply w-full h-3 rounded-full bg-page_gray-100 dark:bg-page_gray;
+	}
+	.page-progress-bar{
+		@apply h-3 transition-all duration-300 rounded-full bg-page_blue-100;
+	}
+	.page-section-main{
+		@apply text-2xl font-semibold text-page_blue-100;
+	}
+	.page-section-sub{
+		@apply text-sm font-semibold text-page_blue-100 hover:text-page_blue;
+	}
+	.page-main-btn{
+		@apply border bg-page_blue-100 border-page_gray-100 hover:bg-opacity-80;
+	}
+	.page-sub-btn{
+		@apply border bg-page_blue border-page_gray-100 hover:bg-opacity-60;
+	}
+	.page-btn-icon{
+		@apply bg-page_light-100 text-page_blue-100;
+	}
+	.page-btn-main-text{
+		@apply text-lg font-extrabold text-page_dark;
+	}
+	.page-btn-sub-text{
+		@apply text-sm font-normal text-page_dark;
 	}
 }

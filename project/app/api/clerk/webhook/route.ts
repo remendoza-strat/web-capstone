@@ -1,6 +1,7 @@
 import { Webhook } from "svix"
 import { NextResponse } from "next/server"
-import { queries } from "@/lib/db/queries"
+import { NewUser } from "@/lib/db/schema"
+import { createUserAction } from "@/lib/db/actions"
 
 // Payload from user.created webhook
 type ClerkUserCreatedEvent = {
@@ -40,13 +41,16 @@ export async function POST(req: Request){
     // Get data
     const { id, email_addresses, first_name, last_name } = evt.data;
 
-    // Try to create user in database
-    const result = await queries.users.createUser({
+    // Create object of new user
+    const newUser: NewUser = {
       clerkId: id,
       email: email_addresses?.[0]?.email_address,
       fname: first_name,
       lname: last_name
-    });
+    }
+
+    // Try to create user in database
+    const result = await createUserAction(newUser);
 
     // When user with same clerkId already exist
     if(result){

@@ -1,8 +1,20 @@
-import { pgEnum, pgTable, uuid, text, timestamp, integer } from "drizzle-orm/pg-core"
+import { pgEnum, pgTable, uuid, text, timestamp, integer, boolean } from "drizzle-orm/pg-core"
 
-// Set allowed values in priority and role columns
-export const priorityEnum = pgEnum("priority", ["Low", "Medium", "High"]);
-export const roleEnum = pgEnum("role", ["Viewer", "Project Manager", "Developer", "Designer", "QA Engineer"]);
+// Set allowed values in priority and role
+export const priorityEnum = pgEnum("priority", [
+  "Low", "Medium", "High"
+]);
+export const roleEnum = pgEnum("role", [
+  "Project Manager",
+  "Frontend Developer",
+  "Backend Developer",
+  "Fullstack Developer",
+  "UI/UX Designer",
+  "QA Engineer",
+  "DevOps Engineer",
+  "Product Manager",
+  "Team Lead"
+]);
 
 // Table "users" schema and export types
 export const users = pgTable("users", {
@@ -41,6 +53,7 @@ export const projectMembers = pgTable("project_members", {
   userId: uuid("user_id").notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   role: roleEnum("role").notNull(),
+  approved: boolean("approved").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
@@ -58,6 +71,8 @@ export const tasks = pgTable("tasks", {
   dueDate: timestamp("due_date").notNull(),
   priority: priorityEnum("priority").notNull(),
   position: integer("position").notNull(),
+  columnCount: integer("column_count").notNull(),
+  label: text("label").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
