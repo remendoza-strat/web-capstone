@@ -1,5 +1,4 @@
 "use client"
-import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import { FolderOpenDot } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
@@ -7,10 +6,11 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { CreateProjectButton } from "@/components/create-project-button"
 import { AddMemberButton } from "@/components/add-member-button"
 import { CreateTaskButton } from "@/components/create-task-button"
-import { getUserIdAction, getDashboardData } from "@/lib/db/actions"
-import { QueryProject, UserRecentProject } from "@/lib/customtype"
+import { getUserIdAction, getUserTasksAction, getUserProjectsAction } from "@/lib/db/actions"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { RecentProjects } from "@/components/recent-projects"
+import type { Task } from "@/lib/db/schema"
+import type { UserProjects } from "@/lib/customtype"
 
 export default function DashboardPage(){
   // Hooks for modal
@@ -20,13 +20,10 @@ export default function DashboardPage(){
   // Hook for getting current user
   const { user } = useUser();
 
-  // Hooks for data of dashboard page
-  const [projects, setProjects] = useState<QueryProject[]>([]);
-  const [activeProj, setActiveProj] = useState(0);
-  const [overdueProj, setOverdueProj] = useState(0);
-  const [activeTask, setActiveTask] = useState(0);
-  const [overdueTask, setOverdueTask] = useState(0);
-  const [recentProj, setRecentProj] = useState<UserRecentProject[]>([]);
+  // Hook for data to send to components
+  const [userId, setUserId] = useState("");
+  const [userTasks, setUserTasks] = useState<Task[]>([]);
+  const [userProjs, setUserProjs] = useState<UserProjects[]>([]);
   
   useEffect(() => {
     const fetchProjects = async () => {
@@ -41,15 +38,15 @@ export default function DashboardPage(){
         // Get user id with clerk id
         const userId = await getUserIdAction(clerkId);
         if (!userId) return;
+        setUserId(userId);
 
-        // Get necessary dashboard data
-        const{ projects, activeProj, overdueProj, activeTask, overdueTask, recentProj } = await getDashboardData(userId);
-        setProjects(projects);
-        setActiveProj(activeProj);
-        setOverdueProj(overdueProj);
-        setActiveTask(activeTask);
-        setOverdueTask(overdueTask);
-        setRecentProj(recentProj);
+        // Get user tasks
+        const userTasks = await getUserTasksAction(userId);
+        setUserTasks(userTasks);
+
+        // Get user projects
+        const userProjs = await getUserProjectsAction(userId);
+        setUserProjs(userProjs);
       }
       catch{return}
     };
@@ -59,19 +56,19 @@ export default function DashboardPage(){
   return(
     <DashboardLayout>
       {isOpen && modalType === "project" && (
-        <CreateProjectButton close={() => setIsOpen(false)}/>
+        <CreateProjectButton close={() => setIsOpen(false)} userId={userId}/>
       )}
       {isOpen && modalType === "member" && (
-        <AddMemberButton close={() => setIsOpen(false)} projects={projects}/>
+        <AddMemberButton close={() => setIsOpen(false)} userProjs={userProjs}/>
       )}
       {isOpen && modalType === "task" && (
-        <CreateTaskButton close={() => setIsOpen(false)} projects={projects}/>
+        <CreateTaskButton close={() => setIsOpen(false)} userProjs={userProjs}/>
       )}
       <div className="space-y-6 ">
-        <DashboardStats activeProj={activeProj} overdueProj={overdueProj} activeTask={activeTask} overdueTask={overdueTask}/>
+        <DashboardStats userProjs={userProjs} userTasks={userTasks}/>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-12 lg:items-start">
           <div className="xl:col-span-7">
-            <RecentProjects recentProj={recentProj}/>
+            <RecentProjects userProjs={userProjs}/>
           </div>
           <div className="p-5 border xl:col-span-5 page-card">
             <h3 className="mb-5 page-section-main">

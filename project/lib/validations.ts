@@ -64,7 +64,7 @@ export const ProjectMemberSchema = z.object({
 
 });
 
-// Task data validation
+// Task data input validation
 export const TaskSchema = z.object({
 
   // Project id validation
@@ -117,7 +117,7 @@ export const TaskSchema = z.object({
       ctx.addIssue({
         path: ["dueDate"],
         code: z.ZodIssueCode.custom,
-        message: "Due Date: Must be a valid date.",
+        message: "Due Date: Must be a valid date."
       });
       return;
     } 
@@ -125,7 +125,7 @@ export const TaskSchema = z.object({
       ctx.addIssue({
         path: ["dueDate"],
         code: z.ZodIssueCode.custom,
-        message: "Due Date: Must be in the future.",
+        message: "Due Date: Must be in the future."
       });
       return;
     }
@@ -133,7 +133,7 @@ export const TaskSchema = z.object({
       ctx.addIssue({
         path: ["dueDate"],
         code: z.ZodIssueCode.custom,
-        message: "Due Date: Must be on or before the project deadline.",
+        message: "Due Date: Must be on or before the project deadline."
       });
       return;
     }

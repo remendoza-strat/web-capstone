@@ -54,7 +54,7 @@ export const taskAssigneesRelations = relations(taskAssignees, ({ one }) => ({
 }));
 
 // Table comments relations
-export const commentsRelations = relations(comments, ({one, many}) => ({
+export const commentsRelations = relations(comments, ({ one }) => ({
   task: one(tasks, {
     fields: [comments.taskId],
     references: [tasks.id]

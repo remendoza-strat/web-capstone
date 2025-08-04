@@ -7,17 +7,26 @@ import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import { TaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
-import { QueryUser, QueryProject, Priority, PriorityArr } from "@/lib/customtype"
-import { getProjectMembersAction, createTaskAction, assignTaskAction, getProjectDeadlineAction, updateProjectTimeAction } from "@/lib/db/actions"
-import type { NewTask, NewTaskAssignee } from "@/lib/db/schema"
+import { Priority, PriorityArr } from "@/lib/customtype"
+import { createTaskAction, createTaskAssigneeAction, updateProjectTimeAction } from "@/lib/db/actions"
+import type { NewTask, NewTaskAssignee, Project, User} from "@/lib/db/schema"
+import type { UserProjects } from "@/lib/customtype"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
 
-export function CreateTaskButton({ close, projects } : { close: () => void; projects: QueryProject[] }){
+export function CreateTaskButton({ close, userProjs } : { close: () => void; userProjs: UserProjects[] }){
+  // Get all projects from prop
+  const projects: Project[] = userProjs.map(({ members, tasks, ...project}) => project); 
+
   // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
+  // Hook for user
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<{ user: User }[]>([]);
+  
   // Hook for input
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -25,37 +34,46 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
   const [priority, setPriority] = useState<Priority>("Low");
   const [label, setLabel] = useState("");
 
-  // Hook for user
-  const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<QueryUser[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<{ user: QueryUser }[]>([]);
-
-  // Set initial selected project if not empty
-  useEffect(() => {
+  // Set initial selected project
+  useEffect(() =>{
     if(projects.length > 0){
-      setSelectedProjectId(projects[0].projectId);
+      setSelectedProjectId(projects[0].id);
     }
-  }, [projects]);
+  }, []);
+
+  // Remove selected and suggestion when project is changed
+  useEffect(() =>{
+    setSuggestions([]);
+    setSelectedUsers([]);
+  }, [selectedProjectId]);
 
   // Getting suggested user and removing already selected user
   useEffect(() => {
-    try{
-      const timeout = setTimeout(async () => {
+    const timeout = setTimeout(async () => {
+      try{
         if(!query || !selectedProjectId){
           setSuggestions([]);
           return;
         }
-        const users = await getProjectMembersAction(selectedProjectId, query);
-        const selectedIds = selectedUsers.map((u) => u.user.userId);
-        setSuggestions(users.filter((u) => !selectedIds.includes(u.userId)));
-      }, 300);
-      return () => clearTimeout(timeout);
-    }
-    catch{return}
-  }, [selectedProjectId, query, selectedUsers]);
+        const project = userProjs.find((up) => up.id == selectedProjectId)
+        const members = project?.members.map((m) => m.user) || [];
+        const selectedIds = selectedUsers.map((u) => u.user.id);
+        const remainingMembers = members.filter((m) => !selectedIds.includes(m.id));
+        const search = query.toLowerCase();
+        const userList = remainingMembers.filter((user) => 
+          (user.lname).toLowerCase().includes(search) ||
+          (user.fname).toLowerCase().includes(search) ||
+          (user.email).toLowerCase().includes(search)
+        )
+        setSuggestions(userList);
+      }
+      catch{return}
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, [query, selectedUsers]);
 
   // Add selected user to array
-  const handleAddUser = (user: QueryUser) => {
+  const handleAddUser = (user: User) => {
     setSelectedUsers((prev) => [...prev, { user }]);
     setQuery("");
     setSuggestions([]);
@@ -87,9 +105,12 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
         }
       }
 
-      // Get selected project deadline
-      const projDeadline = await getProjectDeadlineAction(selectedProjectId);
-      const deadline = projDeadline?.[0]?.dueDate;
+      // Get selected project due date
+      const project = projects.find(p => p.id === selectedProjectId);
+      const deadline = project?.dueDate;
+
+      // Return if deadline is null
+      if (!deadline) return;
 
       // Get raw text of description
       const descriptionRaw = StripHTML(String(description).trim());
@@ -145,12 +166,12 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
       const taskId = await createTaskAction(newTask);
 
       // Iterate the array and add user content to database
-      for(const {user} of selectedUsers){
+      for(const { user } of selectedUsers){
         const newTaskAssignee: NewTaskAssignee = {
           taskId: taskId,
-          userId: user.userId
+          userId: user.id
         };
-        await assignTaskAction(newTaskAssignee);
+        await createTaskAssigneeAction(newTaskAssignee);
       }
 
       // Update project for activity
@@ -187,8 +208,8 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
                 ) : 
                 (
                   projects.map((project) => (
-                    <option key={project.projectId} value={project.projectId}>
-                      {project.projectName}
+                    <option key={project.id} value={project.id}>
+                      {project.name}
                     </option>
                   ))
                 )}
@@ -232,9 +253,9 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
               className="w-full cursor-pointer modal-form-input"
               value={priority} onChange={(e) => setPriority(e.target.value as Priority)}
             >
-              {PriorityArr.map((p) => (
-                <option key={p} value={p}>
-                  {p}
+              {PriorityArr.map((priority) => (
+                <option key={priority} value={priority}>
+                  {priority}
                 </option>
               ))}
             </select>
@@ -260,15 +281,15 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
                 value={query} onChange={(e) => setQuery(e.target.value)}/>
                   {query && suggestions.length > 0 && (
                     <ul className="absolute w-full overflow-y-auto z-60 max-h-48 modal-form-suggestion-ul">
-                      {suggestions.map((sug) => (
+                      {suggestions.map((user) => (
                         <li
-                          key={sug.userId}
+                          key={user.id}
                           className="modal-form-suggestion-li"
-                          onClick={() => handleAddUser(sug)}>
+                          onClick={() => handleAddUser(user)}>
                             <div className="modal-form-suggestion-main">
-                              {sug.userFname} {sug.userLname}
+                              {user.fname} {user.lname}
                             </div>
-                            <div className="modal-form-suggestion-sec">{sug.userEmail}</div>
+                            <div className="modal-form-suggestion-sec">{user.email}</div>
                         </li>
                       ))}
                     </ul>
@@ -281,13 +302,13 @@ export function CreateTaskButton({ close, projects } : { close: () => void; proj
                 Selected Users
               </label>
               <ul className="space-y-2">
-                {selectedUsers.map((item, index) => (
-                  <li key={item.user.userId} className="flex items-center justify-between gap-2 modal-form-input">
+                {selectedUsers.map((user, index) => (
+                  <li key={user.user.id} className="flex items-center justify-between gap-2 modal-form-input">
                     <div className="flex-1">
                       <div className="modal-form-suggestion-main">
-                        {item.user.userFname} {item.user.userLname}
+                        {user.user.fname} {user.user.lname}
                       </div>
-                      <div className="modal-form-suggestion-sec">{item.user.userEmail}</div>
+                      <div className="modal-form-suggestion-sec">{user.user.email}</div>
                     </div>
                     <button type="button" onClick={() => handleRemoveUser(index)}>
                       <Trash className="modal-form-trash" size={18}/>

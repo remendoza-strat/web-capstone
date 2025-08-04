@@ -5,7 +5,8 @@ export function StripHTML(html: string): string{
 
 // Format date for display
 export function DateTimeFormatter(date: Date | string | null): string{
-  if(!date) return "Unknown date";
+  const backup = new Date();
+  if(!date) return String(backup);
   
   const d = new Date(date);
 

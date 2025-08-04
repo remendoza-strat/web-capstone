@@ -1,14 +1,31 @@
 import "./globals.css"
 import { FolderCheck, FolderX, Clock, AlarmClockOff } from "lucide-react"
+import type { Task } from "@/lib/db/schema"
+import type { UserProjects } from "@/lib/customtype"
 
-export function DashboardStats({ activeProj, overdueProj, activeTask, overdueTask } : { activeProj: number; overdueProj: number; activeTask: number; overdueTask: number }){
-  
-  // Storage of data to display
+export function DashboardStats({ userProjs, userTasks } : { userProjs: UserProjects[]; userTasks: Task[] }){
+  // Active and overdue project computation
+  const activeProjs = (userProjs.filter((p) => 
+    p.dueDate > new Date() && 
+    p.tasks.some((t) => t.position < 100))).length;
+  const overdueProjs = (userProjs.filter((p) => 
+    p.dueDate < new Date() &&
+    p.tasks.some((t) => t.position < 100))).length;
+
+  // Active and overdue task computation
+  const activeTasks = (userTasks.filter((t) => 
+    t.dueDate > new Date() && 
+    t.position < 100)).length;
+  const overdueTasks = (userTasks.filter((t) => 
+    t.dueDate < new Date() &&
+    t.position < 100)).length;
+
+  // Put values together
   const values = [
-    { name: "Active Project", value: activeProj, icon: FolderCheck },
-    { name: "Overdue Project", value: overdueProj, icon: FolderX },
-    { name: "Active Task", value: activeTask, icon: Clock },
-    { name: "Overdue Task", value: overdueTask, icon: AlarmClockOff }
+    { name: "Active Project", value: activeProjs, icon: FolderCheck },
+    { name: "Overdue Project", value: overdueProjs, icon: FolderX },
+    { name: "Active Task", value: activeTasks, icon: Clock },
+    { name: "Overdue Task", value: overdueTasks, icon: AlarmClockOff }
   ];
 
   return(

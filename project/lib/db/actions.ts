@@ -1,95 +1,60 @@
 "use server"
 import { queries } from "@/lib/db/queries"
-import type { NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
+import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 
-// Action to get all data necessary for dashboard page
-export async function getDashboardData(userId: string){
-  const [projects, activeProj, overdueProj, activeTask, overdueTask, recentProj] = await Promise.all([
-    getUserMembershipAction(userId),
-    getUserActiveProjectCountAction(userId),
-    getUserOverdueProjectCountAction(userId),
-    getUserActiveTaskCountAction(userId),
-    getUserOverdueTaskCountAction(userId),
-    getUserProjectsInfoAction(userId)
-  ]);
-
-  return{
-    projects, activeProj, overdueProj, 
-    activeTask, overdueTask, recentProj
-  };
-}
-
-// Action to get user id with clerk id
+// Return = "id" 
+// of user with given clerkId
 export async function getUserIdAction(clerkId: string){
   return await queries.users.getUserId(clerkId);
 }
 
-// Action to create project
+// Return = "id"
+// of the created newProject
 export async function createProjectAction(newProject: NewProject){
   return await queries.projects.createProject(newProject);
 }
 
-// Action to add member to a project
-export async function addProjectMemberAction(newProjectMember: NewProjectMember){
-  await queries.projectMembers.addProjectMember(newProjectMember);
-}
-
-// Action to get projects a user is member in
-export async function getUserMembershipAction(userId: string){
-  return await queries.projectMembers.getUserMembership(userId);
-}
-
-// Action to get users that is not yet a member of a project
-export async function getNonProjectMembersAction(projectId: string, query: string){
-  return await queries.projectMembers.getNonProjectMembers(projectId, query);
-}
-
-// Action to get project members
-export async function getProjectMembersAction(projectId: string, query: string){
-  return await queries.projectMembers.getProjectMembers(projectId, query);
-}
-
-// Action to create task
+// Return = "id"
+// of the created newTask
 export async function createTaskAction(newTask: NewTask){
   return await queries.tasks.createTask(newTask);
 }
 
-// Action to assign user to a task
-export async function assignTaskAction(taskAssignee: NewTaskAssignee){
-  await queries.taskAssignees.assignTask(taskAssignee);
+// Return = users
+// that is not a member of the project or not yet invited
+export async function getNonProjectMembersAction(projectId: string){
+  return await queries.projectMembers.getNonProjectMembers(projectId);
 }
 
-// Action to get project deadline
-export async function getProjectDeadlineAction(projectId: string){
-  return await queries.projects.getProjectDeadline(projectId);
+// Return = tasks
+// of the given userId
+export async function getUserTasksAction(userId: string){
+  return await queries.tasks.getUserTasks(userId);
 }
 
-// Action to get all active projects of user
-export async function getUserActiveProjectCountAction(userId: string){
-  return await queries.projects.getUserActiveProjectCount(userId);
+// Return = projects with its approved project members and tasks
+// of the given userId
+export async function getUserProjectsAction(userId: string){
+  return await queries.projects.getUserProjects(userId);
 }
 
-// Action to get all overdue projects of user
-export async function getUserOverdueProjectCountAction(userId: string){
-  return await queries.projects.getUserOverdueProjectCount(userId);
+// Create user
+export async function createUserAction(newUser: NewUser){
+  return await queries.users.createUser(newUser);
 }
 
-// Action to get all active tasks of user
-export async function getUserActiveTaskCountAction(userId: string){
-  return await queries.tasks.getUserActiveTaskCount(userId);
+// Create project member
+export async function createProjectMemberAction(newProjectMember: NewProjectMember){
+  await queries.projectMembers.createProjectMember(newProjectMember);
 }
 
-// Action to get all overdue tasks of user
-export async function getUserOverdueTaskCountAction(userId: string){
-  return await queries.tasks.getUserOverdueTaskCount(userId);
+// Create task assignee
+export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){
+  await queries.taskAssignees.createTaskAssignee(newTaskAssignee);
 }
 
-// Action to get brief information of user projects
-export async function getUserProjectsInfoAction(userId: string){
-  return await queries.projects.getUserProjectsInfo(userId);
-}
-
-// Action to update project updated at time when an activity occur
+// Update = "updatedAt"
+// of given projectId
 export async function updateProjectTimeAction(projectId: string){
   await queries.projects.updateProjectTime(projectId);
 }

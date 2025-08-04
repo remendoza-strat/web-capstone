@@ -3,43 +3,63 @@ import "./globals.css"
 import { X, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
-import type { NewProjectMember } from "@/lib/db/schema"
-import { getNonProjectMembersAction, addProjectMemberAction, updateProjectTimeAction } from "@/lib/db/actions"
+import type { NewProjectMember, Project, User } from "@/lib/db/schema"
+import { getNonProjectMembersAction, createProjectMemberAction } from "@/lib/db/actions"
 import { ProjectMemberSchema } from "@/lib/validations"
-import { QueryUser, QueryProject, Role, RoleArr } from "@/lib/customtype"
+import { Role, RoleArr } from "@/lib/customtype"
+import type { UserProjects } from "@/lib/customtype"
 
-export function AddMemberButton({ close, projects } : { close: () => void; projects: QueryProject[] }){
+export function AddMemberButton({ close, userProjs } : { close: () => void; userProjs: UserProjects[] }){
+  // Get all projects from prop
+  const projects: Project[] = userProjs.map(({ members, tasks, ...project}) => project); 
+  
   // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
   // Hook for user
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<QueryUser[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<{ user: QueryUser; role: Role }[]>([]);
+  const [suggestions, setSuggestions] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<{ user: User; role: Role }[]>([]);
 
-  // Set initial selected project if not empty
-  useEffect(() => {
+  // Set initial selected project
+  useEffect(() =>{
     if(projects.length > 0){
-      setSelectedProjectId(projects[0].projectId);
+      setSelectedProjectId(projects[0].id);
     }
-  }, [projects]);
+  }, []);
+
+  // Remove selected and suggestion when project is changed
+  useEffect(() =>{
+    setSuggestions([]);
+    setSelectedUsers([]);
+  }, [selectedProjectId]);
 
   // Getting suggested user and removing already selected user
   useEffect(() => {
     const timeout = setTimeout(async () => {
-      if(!query || !selectedProjectId){
-        setSuggestions([]);
-        return;
+      try{
+        if(!query || !selectedProjectId){
+          setSuggestions([]);
+          return;
+        }
+        const nonmembers = await getNonProjectMembersAction(selectedProjectId);
+        const selectedIds = selectedUsers.map((u) => u.user.id);
+        const remainingUsers = nonmembers.filter((u) => !selectedIds.includes(u.id));
+        const search = query.toLowerCase();
+        const userList = remainingUsers.filter((user) => 
+            (user.lname).toLowerCase().includes(search) ||
+            (user.fname).toLowerCase().includes(search) ||
+            (user.email).toLowerCase().includes(search)
+          )
+        setSuggestions(userList);
       }
-      const users = await getNonProjectMembersAction(selectedProjectId, query);
-      const selectedIds = selectedUsers.map((u) => u.user.userId);
-      setSuggestions(users.filter((u) => !selectedIds.includes(u.userId)));
-    }, 300);
+      catch{return}
+    }, 200);
     return () => clearTimeout(timeout);
-  }, [selectedProjectId, query, selectedUsers]);
+  }, [query, selectedUsers]);
 
   // Add selected user to array
-  const handleAddUser = (user: QueryUser) => {
+  const handleAddUser = (user: User) => {
     setSelectedUsers((prev) => [...prev, { user, role: "Project Manager" }]);
     setQuery("");
     setSuggestions([]);
@@ -85,17 +105,14 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
 
       // Iterate the array and add user content to database
       for(const { user, role } of selectedUsers){
-        const newMember: NewProjectMember = {
+        const newProjectMember: NewProjectMember = {
           projectId: selectedProjectId,
-          userId: user.userId,
+          userId: user.id,
           role: role,
           approved: false
         }; 
-        await addProjectMemberAction(newMember);
+        await createProjectMemberAction(newProjectMember);
       }
-
-      // Update project for activity
-      await updateProjectTimeAction(selectedProjectId);
 
       // Display success and close modal
       toast.success("Project membership invitation sent.");
@@ -128,8 +145,8 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
                 ) : 
                 (
                   projects.map((project) => (
-                    <option key={project.projectId} value={project.projectId}>
-                      {project.projectName}
+                    <option key={project.id} value={project.id}>
+                      {project.name}
                     </option>
                   ))
                 )}
@@ -146,15 +163,15 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
                 value={query} onChange={(e) => setQuery(e.target.value)}/>
                   {query && suggestions.length > 0 && (
                     <ul className="absolute w-full overflow-y-auto z-60 max-h-48 modal-form-suggestion-ul">
-                      {suggestions.map((sug) => (
+                      {suggestions.map((user) => (
                         <li
-                          key={sug.userId}
+                          key={user.id}
                           className="modal-form-suggestion-li"
-                          onClick={() => handleAddUser(sug)}>
+                          onClick={() => handleAddUser(user)}>
                             <div className="modal-form-suggestion-main">
-                              {sug.userFname} {sug.userLname}
+                              {user.fname} {user.lname}
                             </div>
-                            <div className="modal-form-suggestion-sec">{sug.userEmail}</div>
+                            <div className="modal-form-suggestion-sec">{user.email}</div>
                         </li>
                       ))}
                     </ul>
@@ -167,20 +184,20 @@ export function AddMemberButton({ close, projects } : { close: () => void; proje
                 Selected Users
               </label>
               <ul className="space-y-2">
-                {selectedUsers.map((item, index) => (
-                  <li key={item.user.userId} className="flex items-center justify-between gap-2 modal-form-input">
+                {selectedUsers.map((user, index) => (
+                  <li key={user.user.id} className="flex items-center justify-between gap-2 modal-form-input">
                     <div className="flex-1">
                       <div className="modal-form-suggestion-main">
-                        {item.user.userFname} {item.user.userLname}
+                        {user.user.fname} {user.user.lname}
                       </div>
-                      <div className="modal-form-suggestion-sec">{item.user.userEmail}</div>
+                      <div className="modal-form-suggestion-sec">{user.user.email}</div>
                     </div>
                     <select
                       className="modal-form-input w-fit"
-                      value={item.role} onChange={(e) => handleRoleChange(index, e.target.value as Role)}>
-                        {RoleArr.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
+                      value={user.role} onChange={(e) => handleRoleChange(index, e.target.value as Role)}>
+                        {RoleArr.map((role) => (
+                          <option key={role} value={role}>
+                            {role}
                           </option>
                         ))}
                     </select>
