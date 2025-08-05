@@ -26,7 +26,7 @@ export default function DashboardPage(){
   const [userProjs, setUserProjs] = useState<UserProjects[]>([]);
   
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       try{
         // Return if user is null
         if (!user) return;
@@ -50,7 +50,7 @@ export default function DashboardPage(){
       }
       catch{return}
     };
-    fetchProjects();
+    fetchData();
   }, [user, isOpen]);
 
   return(

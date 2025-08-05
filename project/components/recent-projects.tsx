@@ -1,38 +1,25 @@
 import "./globals.css"
 import Link from "next/link"
 import { Users, Calendar, Clipboard } from "lucide-react"
-import { DateTimeFormatter, LimitChar } from "@/lib/utils"
+import { ComputeProgress, DateTimeFormatter, LimitChar } from "@/lib/utils"
 import { UserProjects } from "@/lib/customtype"
 
 export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
-  // Progress calculator
-  const computeProgress = (position: number, columnCount: number) => {
-    if (position === 100) return 100;
-    return Math.round((position / columnCount) * 100);
-  }
 
   // Sort by most recent updated date
   const recent = [...userProjs].sort((a, b) =>
     new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
   );
 
-  // Get all needed data from three recent projects
-  const projects = recent.slice(0, 3).map((proj) => {
-    // Get member and task count of project
-    const memberCount = proj.members.length;
-    const taskCount = proj.tasks.length;
-
-    // Get total value of tasks
-    const total = proj.tasks.reduce((acc, task) => {
-      return acc + computeProgress(task.position, task.columnCount);
-    }, 0);
-
-    // Average the task
-    const progress = taskCount > 0 ? Math.round(total / taskCount): 0;
-
-    // Return data
+  // Get important data per project
+  const projects = recent.slice(0, 3).map((project) => {
+    const memberCount = project.members.length;
+    const taskCount = project.tasks.length;
+    const briefDesc = LimitChar(project.description, 120);
+    const detailedDate = DateTimeFormatter(project.dueDate);
+    const progress = ComputeProgress(project.tasks);
     return{
-      ...proj, memberCount, taskCount, progress
+      ...project, memberCount, taskCount, progress, briefDesc, detailedDate
     };
   })
 
@@ -55,12 +42,12 @@ export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
                   {project.name}
                 </h4>
                 <p className="py-1 page-sub-text">
-                  {LimitChar(project.description, 120)}
+                  {project.briefDesc}
                 </p>
                 <div className="flex items-center py-1 space-x-4 page-gray-text">
                   <div className="flex items-center">
                     <Calendar size={16} className="mr-1"/>
-                    {DateTimeFormatter(project.dueDate)}
+                    {project.detailedDate}
                   </div>
                   <div className="flex items-center">
                     <Users size={16} className="mr-1"/>
