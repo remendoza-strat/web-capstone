@@ -55,7 +55,7 @@ export function CreateTaskButton({ close, userProjs } : { close: () => void; use
           setSuggestions([]);
           return;
         }
-        const project = userProjs.find((up) => up.id == selectedProjectId)
+        const project = userProjs.find((up) => up.id === selectedProjectId)
         const members = project?.members.map((m) => m.user) || [];
         const selectedIds = selectedUsers.map((u) => u.user.id);
         const remainingMembers = members.filter((m) => !selectedIds.includes(m.id));
