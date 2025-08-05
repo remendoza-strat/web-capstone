@@ -93,4 +93,10 @@
 	.page-btn-sub-text{
 		@apply text-sm font-normal text-page_dark;
 	}
+	.page-tag-active{
+		@apply text-sm font-medium text-green-900 bg-green-200;
+	}
+	.page-tag-overdue{
+		@apply text-sm font-medium text-red-900 bg-red-200;
+	}
 }

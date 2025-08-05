@@ -11,6 +11,7 @@ import { ProjectGrid } from "@/components/project-grid";
 export default function ProjectsPage() {
   const { user } = useUser();
   const [userProjs, setUserProjs] = useState<UserProjects[]>([]);
+  const [filteredProjs, setFilteredProjs] = useState<UserProjects[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,6 +25,7 @@ export default function ProjectsPage() {
 
       const userProjs = await getUserProjectsAction(userId);
       setUserProjs(userProjs);
+      setFilteredProjs(userProjs);
     }
     fetchData();
   }, [user])
@@ -61,7 +63,7 @@ export default function ProjectsPage() {
           </button>
         </div>
 
-        <ProjectGrid userProjs={userProjs}/>
+        <ProjectGrid filteredProjs={filteredProjs}/>
 
         {/* Component Placeholders */}
         <div className="p-6 mt-8 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 dark:bg-gray-800/50 dark:border-gray-600">

@@ -13,6 +13,24 @@ export function LimitChar(paragraph: string, limit: number): string{
   return paragraph.slice(0, limit) + "...";
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function ComputeProgress(tasks: Task[]): number{
   var total = 0;
   const taskCount = tasks.length;
@@ -36,6 +54,7 @@ export function ComputeProgress(tasks: Task[]): number{
 
 export function DaysLeft(date: Date){
   if (!date) return [];
+  
   const now = new Date();
 
   const dueDateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
@@ -44,10 +63,14 @@ export function DaysLeft(date: Date){
   const daysDiff = Math.floor((dueDateUTC - curDateUTC) / (1000 * 60 * 60 * 24));
 
   if(daysDiff < 0){
-    const display = (daysDiff * 1) + " days overdue";
+    const display = (daysDiff * -1) == 1? "1 day overdue" : daysDiff + " days overdue";
     return ["overdue", display];
   }
   else if(daysDiff == 0){
+    const milliDiff = date.getTime() - now.getTime();
+    if(milliDiff < 0){
+      return ["overdue", "Past due today"];
+    }
     return ["active", "Due date today"];
   }
   else{
@@ -57,9 +80,8 @@ export function DaysLeft(date: Date){
 }
 
 // Format date for display
-export function DateTimeFormatter(date: Date | string | null): string{
-  const backup = new Date();
-  if(!date) return String(backup);
+export function DateTimeFormatter(date: Date){
+  if (!date) return "";
   
   const d = new Date(date);
 
