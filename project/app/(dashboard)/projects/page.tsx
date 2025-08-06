@@ -71,7 +71,7 @@ export default function ProjectsPage(){
       setFilteredProjs(result);
     }, 200);
     return () => clearTimeout(delay);
-  }, [filteredProjs, search, status, dueDate, role, filterBtn]);
+  }, [search, status, dueDate, role, filterBtn]);
 
   return(
     <DashboardLayout>
