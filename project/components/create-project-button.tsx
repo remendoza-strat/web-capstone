@@ -6,14 +6,12 @@ import { toast } from "sonner"
 import { createProjectAction, createProjectMemberAction } from "@/lib/db/actions"
 import type { NewProject, NewProjectMember } from "@/lib/db/schema"
 import { ProjectSchema } from "@/lib/validations"
-import { Role, RoleArr } from "@/lib/customtype"
 
 export function CreateProjectButton({ close, userId } : { close : () => void; userId: string }){
   // Hooks for input
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [role, setRole] = useState<Role>("Project Manager");
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +44,6 @@ export function CreateProjectButton({ close, userId } : { close : () => void; us
 
       // Create object of new project
       const newProject: NewProject = {
-        ownerId: userId,
         name: name,
         description: description,
         dueDate: new Date(dueDate)
@@ -59,7 +56,7 @@ export function CreateProjectButton({ close, userId } : { close : () => void; us
       const newProjectMember: NewProjectMember = {
         projectId: projectId,
         userId: userId,
-        role: role,
+        role: "Project Manager",
         approved: true
       }
 
@@ -114,21 +111,6 @@ export function CreateProjectButton({ close, userId } : { close : () => void; us
               type="datetime-local"
               className="w-full cursor-pointer modal-form-input"
             />
-          </div>
-          <div>
-            <label className="block m-2 modal-form-label">
-              Your Role
-            </label>
-            <select
-              className="w-full cursor-pointer modal-form-input"
-              value={role} onChange={(e) => setRole(e.target.value as Role)}
-            >
-              {RoleArr.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
           </div>
           <div className="flex justify-end pt-4 space-x-3">
             <button onClick={close} type="button" className="modal-sub-btn">

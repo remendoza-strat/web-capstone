@@ -9,9 +9,11 @@ import { ProjectMemberSchema } from "@/lib/validations"
 import { Role, RoleArr } from "@/lib/customtype"
 import type { UserProjects } from "@/lib/customtype"
 
-export function AddMemberButton({ close, userProjs } : { close: () => void; userProjs: UserProjects[] }){
+export function AddMemberButton({ close, userId, userProjs } : { close: () => void; userId: string; userProjs: UserProjects[] }){
   // Get all projects from prop
-  const projects: Project[] = userProjs.map(({ members, tasks, ...project}) => project); 
+  const projects: Project[] = userProjs
+    .filter((project) => project.members.some((member) => member.userId === userId && member.role === "Project Manager"))
+    .map(({ members, tasks, ...project }) => project);
   
   // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");

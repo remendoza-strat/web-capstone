@@ -15,9 +15,11 @@ import type { UserProjects } from "@/lib/customtype"
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
 
-export function CreateTaskButton({ close, userProjs } : { close: () => void; userProjs: UserProjects[] }){
+export function CreateTaskButton({ close, userId, userProjs } : { close: () => void; userId: string; userProjs: UserProjects[] }){
   // Get all projects from prop
-  const projects: Project[] = userProjs.map(({ members, tasks, ...project}) => project); 
+  const projects: Project[] = userProjs
+    .filter((project) => project.members.some((member) => member.userId === userId && member.role === "Project Manager"))
+    .map(({ members, tasks, ...project }) => project);
 
   // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");

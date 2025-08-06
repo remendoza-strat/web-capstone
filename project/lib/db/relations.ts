@@ -3,7 +3,6 @@ import { relations } from "drizzle-orm"
 
 // Table users relations
 export const usersRelations = relations(users, ({ many }) => ({
-  createdProjects: many(projects),
   projectMemberships: many(projectMembers),
   taskAssignees: many(taskAssignees),
   comments: many(comments)
@@ -11,10 +10,6 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 // Table projects relations
 export const projectsRelations = relations(projects, ({ one, many }) => ({
-  owner: one(users, {
-    fields: [projects.ownerId],
-    references: [users.id]
-  }),
   members: many(projectMembers),
   tasks: many(tasks)
 }));
