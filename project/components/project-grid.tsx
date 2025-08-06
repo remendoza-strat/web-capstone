@@ -1,13 +1,16 @@
 import "./globals.css"
 import { UserProjects } from "@/lib/customtype"
-import { ComputeProgress, DateTimeFormatter, ProjectStatus, LimitChar } from "@/lib/utils"
+import { ComputeProgress, DateTimeFormatter, ProjectStatus, LimitChar, ByRecentProjects } from "@/lib/utils"
 import { Calendar, Users, SquareCheckBig, Clock, ListCheck } from "lucide-react"
 
 export function ProjectGrid({ filteredProjs } : { filteredProjs: UserProjects[] }){
+  // Sort by most recent updated date
+  const recent = ByRecentProjects(filteredProjs);
+
   // Get important data per project
-  const projects = filteredProjs.map((project) => {
+  const projects = recent.map((project) => {
     const [projLabel, projStatus] = ProjectStatus(project.tasks, project.dueDate);
-    const briefDesc = LimitChar(project.description, 120);
+    const briefDesc = LimitChar(project.description, 70);
     const memberCount = (project.members.length);
     const taskDone = (project.tasks.filter((t) => t.position === 100)).length;
     const taskCount = project.tasks.length;

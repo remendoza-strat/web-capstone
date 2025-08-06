@@ -3,19 +3,17 @@ import Link from "next/link"
 import { Users, Calendar, Clipboard } from "lucide-react"
 import { ComputeProgress, DateTimeFormatter, LimitChar } from "@/lib/utils"
 import { UserProjects } from "@/lib/customtype"
+import { ByRecentProjects } from "@/lib/utils"
 
 export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
-
   // Sort by most recent updated date
-  const recent = [...userProjs].sort((a, b) =>
-    new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
-  );
+  const recent = ByRecentProjects(userProjs);
 
   // Get important data per project
   const projects = recent.slice(0, 3).map((project) => {
     const memberCount = project.members.length;
     const taskCount = project.tasks.length;
-    const briefDesc = LimitChar(project.description, 120);
+    const briefDesc = LimitChar(project.description, 75);
     const detailedDate = DateTimeFormatter(project.dueDate);
     const progress = ComputeProgress(project.tasks);
     return{

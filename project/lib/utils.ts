@@ -150,3 +150,10 @@ export function ProjectsByRole(userId: string, role: string, result: UserProject
   }
   return result;
 }
+
+export function ByRecentProjects(projects: UserProjects[]){
+  const recent = [...projects].sort((a, b) =>
+    new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
+  );
+  return recent;
+}
