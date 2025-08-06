@@ -26,8 +26,8 @@ export function CreateTaskButton({ close, userId, userProjs } : { close: () => v
 
   // Hook for user
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<User[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<{ user: User }[]>([]);
+  const [suggestions, setSuggestions] = useState<{user: User, role: string}[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<{user: User, role: string}[]>([]);
   
   // Hook for input
   const [title, setTitle] = useState("");
@@ -58,14 +58,14 @@ export function CreateTaskButton({ close, userId, userProjs } : { close: () => v
           return;
         }
         const project = userProjs.find((up) => up.id === selectedProjectId)
-        const members = project?.members.map((m) => m.user) || [];
+        const members = project?.members || [];
         const selectedIds = selectedUsers.map((u) => u.user.id);
-        const remainingMembers = members.filter((m) => !selectedIds.includes(m.id));
+        const remainingMembers = members.filter((m) => !selectedIds.includes(m.user.id));
         const search = query.toLowerCase();
-        const userList = remainingMembers.filter((user) => 
-          (user.lname).toLowerCase().includes(search) ||
-          (user.fname).toLowerCase().includes(search) ||
-          (user.email).toLowerCase().includes(search)
+        const userList = remainingMembers.filter((u) => 
+          (u.user.lname).toLowerCase().includes(search) ||
+          (u.user.fname).toLowerCase().includes(search) ||
+          (u.user.email).toLowerCase().includes(search)
         )
         setSuggestions(userList);
       }
@@ -75,8 +75,8 @@ export function CreateTaskButton({ close, userId, userProjs } : { close: () => v
   }, [query, selectedUsers]);
 
   // Add selected user to array
-  const handleAddUser = (user: User) => {
-    setSelectedUsers((prev) => [...prev, { user }]);
+  const handleAddUser = ({ user, role } : { user: User, role: string }) => {
+    setSelectedUsers((prev) => [...prev, { user, role }]);
     setQuery("");
     setSuggestions([]);
   };
@@ -285,13 +285,13 @@ export function CreateTaskButton({ close, userId, userProjs } : { close: () => v
                     <ul className="absolute w-full overflow-y-auto z-60 max-h-48 modal-form-suggestion-ul">
                       {suggestions.map((user) => (
                         <li
-                          key={user.id}
+                          key={user.user.id}
                           className="modal-form-suggestion-li"
                           onClick={() => handleAddUser(user)}>
                             <div className="modal-form-suggestion-main">
-                              {user.fname} {user.lname}
+                              {user.user.fname} {user.user.lname}
                             </div>
-                            <div className="modal-form-suggestion-sec">{user.email}</div>
+                            <div className="modal-form-suggestion-sec">{user.user.email} - {user.role}</div>
                         </li>
                       ))}
                     </ul>
@@ -310,7 +310,7 @@ export function CreateTaskButton({ close, userId, userProjs } : { close: () => v
                       <div className="modal-form-suggestion-main">
                         {user.user.fname} {user.user.lname}
                       </div>
-                      <div className="modal-form-suggestion-sec">{user.user.email}</div>
+                      <div className="modal-form-suggestion-sec">{user.user.email} - {user.role}</div>
                     </div>
                     <button type="button" onClick={() => handleRemoveUser(index)}>
                       <Trash className="modal-form-trash" size={18}/>
