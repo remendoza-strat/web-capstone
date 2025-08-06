@@ -145,8 +145,9 @@ module.exports = {
           100: "#ffffff"      // card
         },
         page_gray: {
-          DEFAULT: "#616a77", // text, text
-          100: "#d1cfd1"      // border
+          DEFAULT: "#616a77",   // text, text
+          100: "#d1cfd1",       // border
+           200: "#46494c"
         },
         page_dark: {
           DEFAULT: "#0e1011",   // page

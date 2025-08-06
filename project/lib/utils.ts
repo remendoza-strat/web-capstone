@@ -1,15 +1,71 @@
-// Remove tags from input
-export function StripHTML(html: string): string{
+import type { Task } from "@/lib/db/schema"
+import { UserProjects } from "@/lib/customtype"
+
+// Remove html tags from text
+export function StripHTML(html: string){
   return html.replace(/<[^>]+>/g, "").trim();
 }
 
-// Format date for display
-export function DateTimeFormatter(date: Date | string | null): string{
-  const backup = new Date();
-  if(!date) return String(backup);
-  
-  const d = new Date(date);
+// Cut sentence based on characters count
+export function LimitChar(paragraph: string, limit: number){
+  if(paragraph.length <= limit){
+    return paragraph;
+  }
+  return paragraph.slice(0, limit) + "...";
+}
 
+// Calculate progress per project tasks
+export function ComputeProgress(tasks: Task[]){
+  if (tasks.length === 0) return 0;
+
+  var total = 0;
+  const taskCount = tasks.length;
+
+  for(const t of tasks){
+    const position = t.position;
+    const column = t.columnCount;
+
+    if(position === 100){
+      total += 100;
+    }
+    else{
+      total += Math.round((position/column) * 100);
+    }
+  }
+
+  return Math.round(total/taskCount);
+}
+
+// Get status of the project
+export function ProjectStatus(tasks: Task[], date: Date){
+  const done = tasks.every((task) => task.position === 100);
+  if (done && tasks.length !== 0) return ["done", "Project done"];
+  
+  const now = new Date();
+  const dueDateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const curDateUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const daysDiff = Math.floor((dueDateUTC - curDateUTC) / (1000 * 60 * 60 * 24));
+
+  if(daysDiff < 0){
+    const display = daysDiff === -1? "1 day overdue" : (daysDiff * -1) + " days overdue";
+    return ["overdue", display];
+  }
+  else if(daysDiff === 0){
+    const milliDiff = date.getTime() - now.getTime();
+    if(milliDiff < 0){
+      return ["overdue", "Past due today"];
+    }
+    return ["active", "Due date today"];
+  }
+  else{
+    const display = daysDiff === 1? "1 day left" : daysDiff + " days left";
+    return ["active", display];
+  }
+}
+
+// Format date
+export function DateTimeFormatter(date: Date){
+  const d = new Date(date);
   const utc = d.getTime() + d.getTimezoneOffset() * 60000;
   const phTime = new Date(utc + 8 * 60 * 60 * 1000);
 
@@ -34,10 +90,79 @@ export function DateTimeFormatter(date: Date | string | null): string{
   return `${month} ${day}, ${year} at ${hours}:${paddedMinutes}${ampm}`;
 }
 
-// Limit character to display
-export function LimitChar(paragraph: string, limit: number): string{
-  if(paragraph.length <= limit){
-    return paragraph;
+// Sort projects by status
+export function ProjectsByStatus(status: string, result: UserProjects[]){
+  if(status === "done"){
+    result = result.filter((p) => 
+      p.tasks.length !== 0 && p.tasks.every((t) => t.position === 100)
+    );
   }
-  return paragraph.slice(0, limit) + "...";
+  else if(status === "active"){
+    result = result.filter((p) => {
+      const milliDiff = p.dueDate.getTime() - (new Date()).getTime();
+      return milliDiff >= 0;
+    });
+  }
+  else if(status === "overdue"){
+    result = result.filter((p) => {
+      const milliDiff = p.dueDate.getTime() - (new Date()).getTime();
+      return milliDiff < 0 && p.tasks.every((t) => t.position !== 100);
+    });
+  }
+  return result;
+}
+
+// Sort projects by due date
+export function ProjectsByDueDate(dueDate: string, result: UserProjects[]){
+  if(dueDate === "today"){
+    result = result.filter((p) => {
+      const due = new Date(p.dueDate);
+      const now = new Date();
+
+      return due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth() && due.getDate() === now.getDate();
+    });
+  }
+  else if(dueDate === "week"){
+    result = result.filter((p) => {
+      const due = new Date(p.dueDate);
+      const now = new Date();
+
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      return due >= startOfWeek && due <= endOfWeek;
+    })
+  }
+  else if(dueDate === "month"){
+    result = result.filter((p) => {
+      const due = new Date(p.dueDate);
+      const now = new Date();
+
+      return due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth();
+    });
+  }
+  return result;
+}
+
+// Sort projects by user role
+export function ProjectsByRole(userId: string, role: string, result: UserProjects[]){
+  if(role){
+    result = result.filter((p) => 
+      p.members.some((m) => m.userId === userId && m.role === role)
+    );
+  }
+  return result;
+}
+
+// Sort projects by most recent updated
+export function ByRecentProjects(projects: UserProjects[]){
+  const recent = [...projects].sort((a, b) =>
+    new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
+  );
+  return recent;
 }
