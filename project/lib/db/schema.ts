@@ -33,8 +33,6 @@ export type UpdateUser = Partial<NewUser>;
 // Table "projects" schema and export types
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
-  ownerId: uuid("owner_id").notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description").notNull(),
   dueDate: timestamp("due_date").notNull(),
