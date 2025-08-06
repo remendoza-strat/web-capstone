@@ -71,14 +71,14 @@ export default function ProjectsPage(){
       setFilteredProjs(result);
     }, 200);
     return () => clearTimeout(delay);
-  }, [search, status, dueDate, role, filterBtn]);
+  }, [filteredProjs, search, status, dueDate, role, filterBtn]);
 
   return(
     <DashboardLayout>
       {isOpen && (
         <CreateProjectButton close={() => setIsOpen(false)} userId={userId}/>
       )}   
-      <button onClick={() => setIsOpen(true)} className="fixed flex items-center p-3 rounded-full bottom-8 right-8 modal-main-btn">
+      <button onClick={() => setIsOpen(true)} className="fixed flex items-center p-3 rounded-full bottom-7 right-7 modal-main-btn">
         <Plus size={25} className="mr-1"/> New Project
       </button>
       <div className="space-y-6">

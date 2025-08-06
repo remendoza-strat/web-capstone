@@ -1,10 +1,12 @@
 import type { Task } from "@/lib/db/schema"
 import { UserProjects } from "@/lib/customtype"
 
+// Remove html tags from text
 export function StripHTML(html: string){
   return html.replace(/<[^>]+>/g, "").trim();
 }
 
+// Cut sentence based on characters count
 export function LimitChar(paragraph: string, limit: number){
   if(paragraph.length <= limit){
     return paragraph;
@@ -12,6 +14,7 @@ export function LimitChar(paragraph: string, limit: number){
   return paragraph.slice(0, limit) + "...";
 }
 
+// Calculate progress per project tasks
 export function ComputeProgress(tasks: Task[]){
   if (tasks.length === 0) return 0;
 
@@ -33,9 +36,10 @@ export function ComputeProgress(tasks: Task[]){
   return Math.round(total/taskCount);
 }
 
+// Get status of the project
 export function ProjectStatus(tasks: Task[], date: Date){
   const done = tasks.every((task) => task.position === 100);
-  if (done && tasks.length != 0) return ["done", "Project done"];
+  if (done && tasks.length !== 0) return ["done", "Project done"];
   
   const now = new Date();
   const dueDateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
@@ -43,7 +47,7 @@ export function ProjectStatus(tasks: Task[], date: Date){
   const daysDiff = Math.floor((dueDateUTC - curDateUTC) / (1000 * 60 * 60 * 24));
 
   if(daysDiff < 0){
-    const display = (daysDiff * -1) === 1? "1 day overdue" : (daysDiff * -1) + " days overdue";
+    const display = daysDiff === -1? "1 day overdue" : (daysDiff * -1) + " days overdue";
     return ["overdue", display];
   }
   else if(daysDiff === 0){
@@ -59,6 +63,7 @@ export function ProjectStatus(tasks: Task[], date: Date){
   }
 }
 
+// Format date
 export function DateTimeFormatter(date: Date){
   const d = new Date(date);
   const utc = d.getTime() + d.getTimezoneOffset() * 60000;
@@ -85,10 +90,11 @@ export function DateTimeFormatter(date: Date){
   return `${month} ${day}, ${year} at ${hours}:${paddedMinutes}${ampm}`;
 }
 
+// Sort projects by status
 export function ProjectsByStatus(status: string, result: UserProjects[]){
   if(status === "done"){
     result = result.filter((p) => 
-      p.tasks.length != 0 && p.tasks.every((t) => t.position === 100)
+      p.tasks.length !== 0 && p.tasks.every((t) => t.position === 100)
     );
   }
   else if(status === "active"){
@@ -106,6 +112,7 @@ export function ProjectsByStatus(status: string, result: UserProjects[]){
   return result;
 }
 
+// Sort projects by due date
 export function ProjectsByDueDate(dueDate: string, result: UserProjects[]){
   if(dueDate === "today"){
     result = result.filter((p) => {
@@ -142,6 +149,7 @@ export function ProjectsByDueDate(dueDate: string, result: UserProjects[]){
   return result;
 }
 
+// Sort projects by user role
 export function ProjectsByRole(userId: string, role: string, result: UserProjects[]){
   if(role){
     result = result.filter((p) => 
@@ -151,6 +159,7 @@ export function ProjectsByRole(userId: string, role: string, result: UserProject
   return result;
 }
 
+// Sort projects by most recent updated
 export function ByRecentProjects(projects: UserProjects[]){
   const recent = [...projects].sort((a, b) =>
     new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
