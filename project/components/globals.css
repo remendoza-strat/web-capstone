@@ -76,7 +76,7 @@
 		@apply text-2xl font-semibold text-page_blue-100;
 	}
 	.page-section-sub{
-		@apply text-sm font-semibold text-page_blue-100 hover:text-page_blue;
+		@apply text-sm font-semibold text-page_blue-100 hover:text-opacity-70;
 	}
 	.page-main-btn{
 		@apply border bg-page_blue-100 border-page_gray-100 hover:bg-opacity-80;
@@ -116,5 +116,17 @@
 	}
 	.page-search-input{
 		@apply w-full py-2 pl-10 pr-4 border-2 border-page_blue-100 focus:outline-none bg-page_light-100 dark:bg-page_gray-200;
+	}
+	.page-theme-button{
+		@apply p-2 text-page_gray-200 bg-page_gray-100 hover:bg-opacity-80;
+	}
+	.page-navs{
+		@apply border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
+	}
+	.page-logo{
+		@apply text-2xl font-bold text-page_blue-100 hover:text-opacity-80;
+	}
+	.page-generic-btn{
+		@apply text-base font-bold text-page_light-100 bg-page_blue-100 hover:bg-opacity-80;
 	}
 }

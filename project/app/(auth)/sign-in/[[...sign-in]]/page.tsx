@@ -6,12 +6,12 @@ import { Footer } from "@/components/footer"
 
 export default function SignInPage(){
   const { theme } = useTheme();
-  const colorBackground = theme === "dark" ? "bg-black_shades-200" : "bg-platinum-100";
+  const colorBackground = theme === "dark" ? "bg-page_light-100" : "bg-page_dark-100";
 
   return(
     <>
       <Header/>
-      <div className="flex items-center justify-center min-h-screen p-8 bg-platinum-300 dark:bg-black_shades-100">
+      <div className="flex items-center justify-center min-h-screen p-8 bg-page_light dark:bg-page_dark">
         <div className="flex justify-center w-full max-w-md mx-auto">
           <SignIn
             appearance={{
