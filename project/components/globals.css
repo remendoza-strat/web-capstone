@@ -39,47 +39,56 @@
 	.modal-form-trash{
 		@apply text-red-500 hover:text-red-700;
 	}
-
-
-
+/*--------------------------------------PAGE DESIGNS--------------------------------------*/
 	
-		.page-border-gray{
+	/*BORDER*/
+	.page-gray-border{
 		@apply border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
 	}
 
+	/*TEXT*/
 	.page-light-dark-text{
 		@apply text-page_dark dark:text-page_light;
 	}
-
-
-	.page-stats-value{
-		@apply text-3xl font-semibold text-page_dark dark:text-page_light;
-	}
-		.page-main-title{
-		@apply text-lg font-semibold text-page_dark dark:text-page_light;
-	}
-
-		.page-gray-text{
+	.page-gray-text{
 		@apply text-page_gray;
 	}
 	.page-dark-blue-text{
 		@apply text-page_blue-100;
 	}
+	.page-sm-md-text{
+		@apply text-sm font-medium;
+	}
+
+	/*BACKGROUND*/
 	.page-light-blue-bg{
 		@apply bg-page_blue;
 	}
 
-		
+	/*OTHERS*/
+	.page-progress-text{
+		@apply text-sm font-bold text-page_blue-100;
+	}
+	.page-btn-sub-text{
+		@apply text-sm text-page_dark;
+	}
+	.page-btn-main-text{
+		@apply text-lg font-extrabold text-page_dark;
+	}
+	.page-stats-value{
+		@apply text-3xl font-semibold;
+	}
+	.page-main-title{
+		@apply text-lg font-semibold;
+	}
+	.page-section-sub{
+		@apply text-sm font-semibold text-page_blue-100 hover:text-opacity-70;
+	}
 	.page-hero-title{
 		@apply font-bold text-8xl text-page_gray-200 dark:text-page_gray;
 	}
-
-
-	
-
-
-	.page-progress-text{
-		@apply text-sm font-bold text-page_blue-100;
+	.page-select-bg{
+		@apply border-2 cursor-pointer border-page_blue-100 bg-page_light-100 dark:bg-page_gray-200;
 	}
 	.page-progress-div{
 		@apply w-full h-3 rounded-full bg-page_gray-100 dark:bg-page_gray;
@@ -90,9 +99,6 @@
 	.page-section-main{
 		@apply text-2xl font-semibold text-page_blue-100;
 	}
-	.page-section-sub{
-		@apply text-sm font-semibold text-page_blue-100 hover:text-opacity-70;
-	}
 	.page-main-btn{
 		@apply border bg-page_blue-100 border-page_gray-100 hover:bg-opacity-80;
 	}
@@ -102,29 +108,11 @@
 	.page-btn-icon{
 		@apply bg-page_light-100 text-page_blue-100;
 	}
-	.page-btn-main-text{
-		@apply text-lg font-extrabold text-page_dark;
-	}
-	.page-btn-sub-text{
-		@apply text-sm font-normal text-page_dark;
-	}
-	.page-tag-active{
-		@apply text-sm font-medium text-orange-900 bg-orange-200;
-	}
-	.page-tag-overdue{
-		@apply text-sm font-medium text-red-900 bg-red-200;
-	}
-	.page-tag-done{
-		@apply text-sm font-medium text-green-900 bg-green-200;
-	}
-	.page-select-bg{
-		@apply border-2 cursor-pointer border-page_blue-100 bg-page_light-100 dark:bg-page_gray-200 text-page_dark dark:text-page_light;
-	}
 	.page-mute-btn{
-		@apply inline-flex items-center px-4 py-2 text-base font-light border-2 border-page_blue-100 text-page_gray bg-page_light dark:bg-page_dark hover:bg-page_blue-100 hover:bg-opacity-60 dark:hover:bg-page_blue-100 dark:hover:bg-opacity-60;
+		@apply inline-flex items-center px-4 py-2 font-light border-2 border-page_blue-100 text-page_gray bg-page_light dark:bg-page_dark hover:bg-page_blue-100 hover:bg-opacity-60 dark:hover:bg-page_blue-100 dark:hover:bg-opacity-60;
 	}
 	.page-mute-btn-active{
-		@apply font-normal text-page_light bg-page_blue-100 dark:bg-page_blue-100;
+		@apply text-page_light bg-page_blue-100 dark:bg-page_blue-100;
 	}
 	.page-search-icon{
 		@apply absolute font-bold transform -translate-y-1/2 left-3 top-1/2 text-page_blue-100;
@@ -135,16 +123,19 @@
 	.page-theme-button{
 		@apply p-2 text-page_gray-200 bg-page_gray-100 hover:bg-opacity-80;
 	}
-	
 	.page-logo{
 		@apply text-2xl font-bold text-page_blue-100 hover:text-opacity-80;
 	}
 	.page-generic-btn{
-		@apply text-base font-bold text-page_light-100 bg-page_blue-100 hover:bg-opacity-80;
+		@apply font-bold text-page_light-100 bg-page_blue-100 hover:bg-opacity-80;
 	}
-	
-
-
-
-
+	.page-tag-active{
+		@apply text-orange-900 bg-orange-200;
+	}
+	.page-tag-overdue{
+		@apply text-red-900 bg-red-200;
+	}
+	.page-tag-done{
+		@apply text-green-900 bg-green-200;
+	}
 }

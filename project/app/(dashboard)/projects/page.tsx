@@ -99,7 +99,7 @@ export default function ProjectsPage(){
           </button>
         </div>
         {filterBtn && (
-          <div className="flex justify-between border page-border-gray">
+          <div className="flex justify-between border page-gray-border">
             <div className="w-full p-3 md:w-64">
               <p className="p-2 page-light-dark-text">By Status:</p>
               <select 

@@ -22,7 +22,7 @@ export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
   })
 
   return(
-    <div className="border page-border-gray">
+    <div className="border page-gray-border">
       <div className="flex items-center justify-between p-5">
         <h3 className="page-section-main">
           Recent Projects
@@ -33,10 +33,10 @@ export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
       </div>
       <div>
         {projects.map((project) => (
-          <div key={project.id} className="px-3 border-t page-border-gray">
+          <div key={project.id} className="px-3 border-t page-gray-border">
             <div className="flex items-start justify-between">
               <div className="flex-1 p-4">
-                <h4 className="py-1 page-main-title">
+                <h4 className="py-1 page-main-title page-light-dark-text">
                   {project.name}
                 </h4>
                 <p className="py-1 page-light-dark-text">
