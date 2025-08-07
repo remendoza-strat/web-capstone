@@ -1,20 +1,17 @@
-import Link from "next/link"
-import { ArrowRight, CheckCircle, Users, Kanban } from "lucide-react"
 import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
 import { Hero } from "@/components/hero"
 import { Features } from "@/components/features"
+import { Footer } from "@/components/footer"
 
-export default function HomePage() {
-  return (
+export default function HomePage(){
+  return(
     <>
       <Header/>
-      <div className="bg-page_light dark:bg-page_dark">
-        <Hero/>
-      <Features/>
-      </div>
-      
+        <div className="page-background">
+          <Hero/>
+          <Features/>
+        </div>
       <Footer/>
     </>
-  )
+  );
 }

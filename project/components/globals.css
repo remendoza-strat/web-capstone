@@ -41,15 +41,20 @@
 	}
 /*--------------------------------------PAGE DESIGNS--------------------------------------*/
 	
-	/*BORDER*/
-	.page-gray-border{
+	.page-background{
+		@apply bg-page_light dark:bg-page_dark;
+	}
+	.page-card{
 		@apply border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
 	}
 
-	/*TEXT*/
-	.page-light-dark-text{
+	.page-dark-light-text{
 		@apply text-page_dark dark:text-page_light;
 	}
+	.page-dark-light-1-text{
+		@apply text-page_dark-100 dark:text-page_light-100;
+	}
+
 	.page-gray-text{
 		@apply text-page_gray;
 	}
@@ -59,13 +64,14 @@
 	.page-sm-md-text{
 		@apply text-sm font-medium;
 	}
+	.page-4-bd-text{
+		@apply text-4xl font-bold;
+	}
 
-	/*BACKGROUND*/
 	.page-light-blue-bg{
 		@apply bg-page_blue;
 	}
-
-	/*OTHERS*/
+	
 	.page-progress-text{
 		@apply text-sm font-bold text-page_blue-100;
 	}
@@ -85,7 +91,7 @@
 		@apply text-sm font-semibold text-page_blue-100 hover:text-opacity-70;
 	}
 	.page-hero-title{
-		@apply font-bold text-8xl text-page_gray-200 dark:text-page_gray;
+		@apply font-bold text-7xl text-page_gray-200 dark:text-page_gray;
 	}
 	.page-select-bg{
 		@apply border-2 cursor-pointer border-page_blue-100 bg-page_light-100 dark:bg-page_gray-200;
@@ -137,5 +143,8 @@
 	}
 	.page-tag-done{
 		@apply text-green-900 bg-green-200;
+	}
+	.page-features-sub{
+		@apply text-xl text-page_gray-200 dark:text-page_gray;
 	}
 }

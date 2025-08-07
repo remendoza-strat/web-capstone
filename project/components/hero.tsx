@@ -9,7 +9,7 @@ export function Hero(){
             Streamline Your
             <span className="page-dark-blue-text"> Project Management</span>
           </h1>
-          <p className="m-5 page-light-dark-text">
+          <p className="m-5 page-dark-light-text">
             Organize tasks, collaborate with your team, and deliver projects on time with our intuitive Kanban-style
             project management platform.
           </p>

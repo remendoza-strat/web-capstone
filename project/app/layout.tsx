@@ -14,15 +14,15 @@ export const metadata: Metadata = {
   generator: "v0.dev"
 }
 
-export default function RootLayout({children}: {children: React.ReactNode}){
+export default function RootLayout({ children }: { children: React.ReactNode }){
   return(
     <ClerkProvider>
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider>{children}</ThemeProvider>
-        <Toaster richColors position="bottom-right"/>
-      </body>
-    </html>
+      <html lang="en" suppressHydrationWarning>
+        <body className={inter.className}>
+          <ThemeProvider>{children}</ThemeProvider>
+          <Toaster richColors position="bottom-right"/>
+        </body>
+      </html>
     </ClerkProvider>
   );
 }

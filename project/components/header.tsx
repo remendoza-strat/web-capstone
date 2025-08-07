@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 
 export function Header(){
   return(
-    <header className="border-b page-gray-border">
+    <header className="border-b page-card">
       <div className="px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
