@@ -33,48 +33,50 @@ export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
       </div>
       <div>
         {projects.map((project) => (
-          <div key={project.id} className="px-3 border-t page-card">
-            <div className="flex items-start justify-between">
-              <div className="flex-1 p-4">
-                <h4 className="py-1 page-main-title page-dark-light-text">
-                  {project.name}
-                </h4>
-                <p className="py-1 page-dark-light-text">
-                  {project.briefDesc}
-                </p>
-                <div className="flex items-center py-1 space-x-4 page-gray-text">
-                  <div className="flex items-center">
-                    <Calendar size={16} className="mr-1"/>
-                    {project.detailedDate}
+          <Link href={`projects/${project.id}`} key={project.id}>
+            <div className="px-3 border-t page-card page-project-hover">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 p-4">
+                  <h4 className="py-1 page-main-title page-dark-light-text">
+                    {project.name}
+                  </h4>
+                  <p className="py-1 page-dark-light-text">
+                    {project.briefDesc}
+                  </p>
+                  <div className="flex items-center py-1 space-x-4 page-gray-text">
+                    <div className="flex items-center">
+                      <Calendar size={16} className="mr-1"/>
+                      {project.detailedDate}
+                    </div>
+                    <div className="flex items-center">
+                      <Users size={16} className="mr-1"/>
+                      {project.memberCount}
+                    </div>
+                    <div className="flex items-center">
+                      <Clipboard size={16} className="mr-1"/>
+                      {project.taskCount}
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <Users size={16} className="mr-1"/>
-                    {project.memberCount}
-                  </div>
-                  <div className="flex items-center">
-                    <Clipboard size={16} className="mr-1"/>
-                    {project.taskCount}
-                  </div>
-                 </div>
-                <div className="py-2">
-                  <div className="flex items-center justify-between page-progress-text">
-                    <span className="py-1">
-                      Progress
-                    </span>
-                    <span>
-                      {project.progress}%
-                    </span>
-                  </div>
-                  <div className="page-progress-div">
-                    <div
-                      className="page-progress-bar"
-                      style={{ width: `${project.progress}%` }}
-                    />
+                  <div className="py-2">
+                    <div className="flex items-center justify-between page-progress-text">
+                      <span className="py-1">
+                        Progress
+                      </span>
+                      <span>
+                        {project.progress}%
+                      </span>
+                    </div>
+                    <div className="page-progress-div">
+                      <div
+                        className="page-progress-bar"
+                        style={{ width: `${project.progress}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
-               </div>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

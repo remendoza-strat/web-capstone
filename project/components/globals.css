@@ -48,6 +48,10 @@
 		@apply border-page_gray-100 bg-page_light-100 dark:bg-page_dark-100;
 	}
 
+	.page-project-hover{
+		@apply hover:bg-page_gray-200 hover:bg-opacity-10;
+	}
+
 	.page-dark-light-text{
 		@apply text-page_dark dark:text-page_light;
 	}
