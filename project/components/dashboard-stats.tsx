@@ -31,11 +31,11 @@ export function DashboardStats({ userProjs, userTasks } : { userProjs: UserProje
   return(
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
       {values.map((val) => (
-        <div key={val.name} className="p-5 border page-card">
+        <div key={val.name} className="p-5 border page-border-gray">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="flex items-center justify-center w-12 h-12 page-icon-bg">
-                <val.icon className="page-icon-color" size={30}/>
+              <div className="flex items-center justify-center w-12 h-12 page-light-blue-bg">
+                <val.icon className="page-dark-blue-text" size={30}/>
               </div>
             </div>
             <div className="flex-1 w-0 ml-5">

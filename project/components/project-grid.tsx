@@ -25,7 +25,7 @@ export function ProjectGrid({ filteredProjs } : { filteredProjs: UserProjects[] 
   return(
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
-        <div key={project.id} className="p-5 border page-card">
+        <div key={project.id} className="p-5 border page-border-gray">
           <div className="flex justify-end">
             <div className={`flex p-1 items-center 
               ${project.projLabel === "overdue" ? "page-tag-overdue" : 
@@ -40,7 +40,7 @@ export function ProjectGrid({ filteredProjs } : { filteredProjs: UserProjects[] 
           <h3 className="p-2 page-main-title">
             {project.name}
           </h3>
-          <p className="p-2 page-sub-text">
+          <p className="p-2 page-light-dark-text">
             {project.briefDesc}
           </p>
           <div className="flex justify-between p-2 page-gray-text">

@@ -99,9 +99,9 @@ export default function ProjectsPage(){
           </button>
         </div>
         {filterBtn && (
-          <div className="flex justify-between border page-card">
+          <div className="flex justify-between border page-border-gray">
             <div className="w-full p-3 md:w-64">
-              <p className="p-2 page-sub-text">By Status:</p>
+              <p className="p-2 page-light-dark-text">By Status:</p>
               <select 
                 value={status} onChange={(e) => setStatus(e.target.value)}
                 className="w-full p-2 page-select-bg">
@@ -112,7 +112,7 @@ export default function ProjectsPage(){
               </select>
             </div>
             <div className="w-full p-3 md:w-64">
-              <p className="p-2 page-sub-text">By Your Role:</p>
+              <p className="p-2 page-light-dark-text">By Your Role:</p>
               <select 
                 value={role} onChange={(e) => setRole(e.target.value)}
                 className="w-full p-2 page-select-bg">
@@ -125,7 +125,7 @@ export default function ProjectsPage(){
               </select>
             </div>
             <div className="w-full p-3 md:w-64">
-              <p className="p-2 page-sub-text">By Due Date:</p>
+              <p className="p-2 page-light-dark-text">By Due Date:</p>
               <select 
                 value={dueDate} onChange={(e) => setDueDate(e.target.value)}
                 className="w-full p-2 page-select-bg">

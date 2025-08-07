@@ -70,7 +70,7 @@ export default function DashboardPage(){
           <div className="xl:col-span-7">
             <RecentProjects userProjs={userProjs}/>
           </div>
-          <div className="p-5 border xl:col-span-5 page-card">
+          <div className="p-5 border xl:col-span-5 page-border-gray">
             <h3 className="mb-5 page-section-main">
               Quick Actions
             </h3>
