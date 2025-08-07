@@ -14,21 +14,24 @@ export default function SignInPage(){
       <div className="flex items-center justify-center min-h-screen p-8 bg-page_light dark:bg-page_dark">
         <div className="flex justify-center w-full max-w-md mx-auto">
           <SignIn
-            appearance={{
+            appearance = {{
               variables: {
-                colorPrimary: "#146a7f",
+                colorPrimary: "#1985a1",
+                borderRadius: "0",
                 colorBackground: "colorBackground"
               },
               elements: {
-                dividerText: "text-gray-300",
-                dividerLine: "bg-gray-300",
-                card: "bg-platinum-100 dark:bg-black_shades-200",
-                headerTitle: "font-bold text-3xl text-black_shades dark:text-french_gray-50",
-                headerSubtitle: "text-base text-platinum-600",
-                socialButtonsBlockButton: "bg-french_gray-50 text-black_shades hover:text-french_gray-50 hover:bg-blue_munsell-400",
-                formFieldLabel: "text-base text-black_shades dark:text-french_gray-50",
-                footerActionText: "text-sm text-platinum-600",
-                footerActionLink: "text-sm text-blue_munsell-400 hover:underline"
+                card: "bg-page_light-100 dark:bg-page_dark-100",
+                headerTitle: "text-3xl font-bold text-page_dark dark:text-page_light",
+                headerSubtitle: "text-base font-light text-page_gray-200 dark:text-page_gray-100",
+                socialButtonsBlockButton: "bg-page_light-100 hover:text-page_light-100 hover:bg-page_blue-100",
+                dividerText: "text-page_gray dark:text-page_gray-100",
+                dividerLine: "bg-page_gray bg:text-page_gray-100",
+                formFieldLabel: "text-base font-normal text-page_dark dark:text-page_light",
+                footerActionText: "text-page_gray dark:text-page_gray-100",
+                footerActionLink: "text-page_blue-100",
+                identityPreviewText: "text-page_dark dark:text-page_light",
+                otpCodeFieldInput: "text-page_dark dark:text-page_light"
               }
             }}
           />

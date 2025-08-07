@@ -141,17 +141,17 @@ module.exports = {
         red-700 
         */
         page_light: {
-          DEFAULT: "#f4f4f4", // page, text
+          DEFAULT: "#f4f4f4", // page
           100: "#ffffff"      // card
-        },
-        page_gray: {
-          DEFAULT: "#616a77",   // text, text
-          100: "#d1cfd1",       // border
-           200: "#46494c"
         },
         page_dark: {
           DEFAULT: "#0e1011",   // page
           100: "#17191a"        // card
+        },
+        page_gray: {
+          DEFAULT: "#616a77",   // text
+          100: "#d1cfd1",       // border
+           200: "#46494c"
         },
         page_blue: {
           DEFAULT: "#8edaed",   // background
