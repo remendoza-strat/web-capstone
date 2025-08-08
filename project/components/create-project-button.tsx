@@ -46,7 +46,9 @@ export function CreateProjectButton({ close, success, userId } : { close : () =>
       const newProject: NewProject = {
         name: name,
         description: description,
-        dueDate: new Date(dueDate)
+        dueDate: new Date(dueDate),
+        columnCount: 5,
+        columnNames: ["Backlog", "This Week", "In Progress", "To Review", "Done"]
       };
       
       // Add and get the project id of the created project

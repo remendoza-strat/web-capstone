@@ -15,7 +15,7 @@ export function LimitChar(paragraph: string, limit: number){
 }
 
 // Calculate progress per project tasks
-export function ComputeProgress(tasks: Task[]){
+export function ComputeProgress(tasks: Task[], columnCount: number){
   if (tasks.length === 0) return 0;
 
   var total = 0;
@@ -23,7 +23,7 @@ export function ComputeProgress(tasks: Task[]){
 
   for(const t of tasks){
     const position = t.position;
-    const column = t.columnCount;
+    const column = columnCount;
 
     if(position === 100){
       total += 100;

@@ -160,7 +160,6 @@ export function CreateTaskButton({ close, success, userId, userProjs } : { close
         dueDate: new Date(dueDate),
         priority: priority,
         position: 0,
-        columnCount: 5,
         label: label
       };
       

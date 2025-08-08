@@ -15,7 +15,7 @@ export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
     const taskCount = project.tasks.length;
     const briefDesc = LimitChar(project.description, 75);
     const detailedDate = DateTimeFormatter(project.dueDate);
-    const progress = ComputeProgress(project.tasks);
+    const progress = ComputeProgress(project.tasks, project.columnCount);
     return{
       ...project, memberCount, taskCount, progress, briefDesc, detailedDate
     };

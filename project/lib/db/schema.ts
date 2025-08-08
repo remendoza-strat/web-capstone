@@ -36,6 +36,8 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   dueDate: timestamp("due_date").notNull(),
+  columnCount: integer("column_count").notNull(),
+  columnNames: text("column_names").array().notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
@@ -69,7 +71,6 @@ export const tasks = pgTable("tasks", {
   dueDate: timestamp("due_date").notNull(),
   priority: priorityEnum("priority").notNull(),
   position: integer("position").notNull(),
-  columnCount: integer("column_count").notNull(),
   label: text("label").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()

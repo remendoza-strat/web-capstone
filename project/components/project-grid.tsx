@@ -16,7 +16,7 @@ export function ProjectGrid({ filteredProjs } : { filteredProjs: UserProjects[] 
     const taskDone = (project.tasks.filter((t) => t.position === 100)).length;
     const taskCount = project.tasks.length;
     const detailedDate = DateTimeFormatter(project.dueDate);
-    const progress = ComputeProgress(project.tasks);
+    const progress = ComputeProgress(project.tasks, project.columnCount);
     return{
       ...project, projLabel, projStatus, briefDesc, memberCount, 
       taskDone, taskCount, detailedDate, progress
