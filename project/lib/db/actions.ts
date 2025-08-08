@@ -38,6 +38,12 @@ export async function getUserProjectsAction(userId: string){
   return await queries.projects.getUserProjects(userId);
 }
 
+// Return = project information with its approved members and tasks
+// of the given projectId
+export async function getProjectByIdAction(projectId: string){
+  return await queries.projects.getProjectById(projectId);
+}
+
 // Create user
 export async function createUserAction(newUser: NewUser){
   return await queries.users.createUser(newUser);

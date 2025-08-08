@@ -1,8 +1,43 @@
-import { ArrowLeft, Settings, Users, Calendar, MoreHorizontal } from "lucide-react"
+import { ArrowLeft, Settings, Users, Calendar, MoreHorizontal, User } from "lucide-react"
 import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
+import { notFound } from "next/navigation";
+import { getProjectByIdAction, getUserIdAction, getUserProjectsAction } from "@/lib/db/actions";
+import { currentUser } from "@clerk/nextjs/server";
+import { UserProjects } from "@/lib/customtype";
 
-export default function ProjectPage() {
+export default async function ProjectPage({ params } :  {params: Promise<{ id: string }>}) {
+  
+  // Get project id from params
+  const { id } = await params;
+  if (!id) return notFound();
+
+  // Storage of project data
+  let projectData: UserProjects;
+  
+  // For invalid id access or non existent project
+  try{
+    const result = await getProjectByIdAction(id);
+    if (!result) return notFound();
+    projectData = result;
+  }
+  catch{
+    return notFound();
+  }
+
+  // Get user and clerk id
+  const user = await currentUser();
+  if (!user) return; 
+  const clerkId = user.id;
+
+  // Get user id with clerk id
+  const userId = await getUserIdAction(clerkId);
+  if (!userId) return;
+
+  // Check if user is accessing a project he is a member of
+  const isMember = projectData.members.some((m) => m.userId === userId);
+  if(!isMember) return notFound();
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -55,7 +90,8 @@ export default function ProjectPage() {
         {/* Kanban Board Placeholder */}
         <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
           <div className="flex pb-4 space-x-6 overflow-x-auto">
-            {["To Do", "In Progress", "Review", "Done"].map((columnTitle, columnIndex) => (
+            
+            {(projectData.columnNames).map((columnTitle, columnIndex) => (
               <div key={columnTitle} className="flex-shrink-0 w-80">
                 <div className="border rounded-lg bg-platinum-800 dark:bg-outer_space-400 border-french_gray-300 dark:border-payne's_gray-400">
                   <div className="p-4 border-b border-french_gray-300 dark:border-payne's_gray-400">
@@ -73,20 +109,20 @@ export default function ProjectPage() {
                   </div>
 
                   <div className="p-4 space-y-3 min-h-[400px]">
-                    {[1, 2, 3].map((taskIndex) => (
+                    {(projectData.tasks).map((task) => ( task.position === columnIndex &&
                       <div
-                        key={taskIndex}
+                        key={task.id}
                         className="p-4 bg-white border rounded-lg dark:bg-outer_space-300 border-french_gray-300 dark:border-payne's_gray-400 cursor-pointer hover:shadow-md transition-shadow"
                       >
                         <h4 className="mb-2 text-sm font-medium text-outer_space-500 dark:text-platinum-500">
-                          Sample Task {taskIndex}
+                          {task.title}
                         </h4>
                         <p className="text-xs text-payne's_gray-500 dark:text-french_gray-400 mb-3">
-                          This is a placeholder task description
+                          {task.description}
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue_munsell-100 text-blue_munsell-700 dark:bg-blue_munsell-900 dark:text-blue_munsell-300">
-                            Medium
+                            {task.priority}
                           </span>
                           <div className="flex items-center justify-center w-6 h-6 text-xs font-semibold text-white rounded-full bg-blue_munsell-500">
                             U
