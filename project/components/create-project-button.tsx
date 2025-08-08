@@ -7,7 +7,7 @@ import { createProjectAction, createProjectMemberAction } from "@/lib/db/actions
 import type { NewProject, NewProjectMember } from "@/lib/db/schema"
 import { ProjectSchema } from "@/lib/validations"
 
-export function CreateProjectButton({ close, userId } : { close : () => void; userId: string }){
+export function CreateProjectButton({ close, success, userId } : { close : () => void; success: () => void; userId: string }){
   // Hooks for input
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -65,6 +65,7 @@ export function CreateProjectButton({ close, userId } : { close : () => void; us
       
       // Display success and close the modal
       toast.success("Project created.");
+      success();
       close();
     }
     catch{return}

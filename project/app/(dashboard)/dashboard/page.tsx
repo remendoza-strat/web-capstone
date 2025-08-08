@@ -24,45 +24,55 @@ export default function DashboardPage(){
   const [userId, setUserId] = useState("");
   const [userTasks, setUserTasks] = useState<Task[]>([]);
   const [userProjs, setUserProjs] = useState<UserProjects[]>([]);
-  
+
+  // Get user id
   useEffect(() => {
-    const fetchData = async () => {
-      try{
-        // Return if user is null
-        if (!user) return;
-        
-        // Get clerk id
-        const clerkId = user.id;
-        if (!clerkId) return;
-        
-        // Get user id with clerk id
-        const userId = await getUserIdAction(clerkId);
-        if (!userId) return;
-        setUserId(userId);
+    getUserId();
+  }, [user]);
 
-        // Get user tasks
-        const userTasks = await getUserTasksAction(userId);
-        setUserTasks(userTasks);
+  const getUserId = async () => {
+    try{
+      // Return if user is null
+      if (!user) return;
+      
+      // Get clerk id
+      const clerkId = user.id;
+      if (!clerkId) return;
+      
+      // Get user id with clerk id
+      const userId = await getUserIdAction(clerkId);
+      if (!userId) return;
 
-        // Get user projects
-        const userProjs = await getUserProjectsAction(userId);
-        setUserProjs(userProjs);
-      }
-      catch{return}
-    };
-    fetchData();
-  }, [user, isOpen]);
+      // Set user id
+      setUserId(userId);
+
+      // Get data needed
+      getData(userId);
+    }
+    catch{return}
+  };
+
+  const getData = async (userId: string) => {
+    try{
+      // Get user tasks
+      setUserTasks(await getUserTasksAction(userId));
+
+      // Get user projects
+      setUserProjs(await getUserProjectsAction(userId));
+    }
+    catch{return}
+  }
 
   return(
     <DashboardLayout>
       {isOpen && modalType === "project" && (
-        <CreateProjectButton close={() => setIsOpen(false)} userId={userId}/>
+        <CreateProjectButton close={() => setIsOpen(false)} success={() => getData(userId)} userId={userId}/>
       )}
       {isOpen && modalType === "member" && (
         <AddMemberButton close={() => setIsOpen(false)} userId={userId} userProjs={userProjs}/>
       )}
       {isOpen && modalType === "task" && (
-        <CreateTaskButton close={() => setIsOpen(false)} userId={userId} userProjs={userProjs}/>
+        <CreateTaskButton close={() => setIsOpen(false)} success={() => getData(userId)} userId={userId} userProjs={userProjs}/>
       )}
       <div className="space-y-6 ">
         <DashboardStats userProjs={userProjs} userTasks={userTasks}/>

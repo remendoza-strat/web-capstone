@@ -26,27 +26,42 @@ export default function ProjectsPage(){
   const [dueDate, setDueDate] = useState("");
   const [role, setRole] = useState("");
 
+  // Get user id
   useEffect(() => {
+    getUserId();
+  }, [user]);
+
+  const getUserId = async () => {
     try{
-      const fetchData = async () => {
-        // Getting clerkId
-        if (!user) return;
-        const clerkId = user.id;
-        if (!clerkId) return;
+      // Return if user is null
+      if (!user) return;
+      
+      // Get clerk id
+      const clerkId = user.id;
+      if (!clerkId) return;
+      
+      // Get user id with clerk id
+      const userId = await getUserIdAction(clerkId);
+      if (!userId) return;
 
-        // Getting userId
-        const userId = await getUserIdAction(clerkId);
-        if (!userId) return;
-        setUserId(userId);
+      // Set user id
+      setUserId(userId);
 
-        // Getting user projects and its data
-        const userProjs = await getUserProjectsAction(userId);
-        setUserProjs(userProjs);
-        setFilteredProjs(userProjs);
-      }
-      fetchData();
-    } catch{return}
-  }, [user, isOpen]);
+      // Get data needed
+      getData(userId);
+    }
+    catch{return}
+  };
+
+  const getData = async (userId: string) => {
+    try{
+      // Get user projects
+      const projs = await getUserProjectsAction(userId);
+      setUserProjs(projs);
+      setFilteredProjs(projs);
+    }
+    catch{return}
+  }
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -76,7 +91,7 @@ export default function ProjectsPage(){
   return(
     <DashboardLayout>
       {isOpen && (
-        <CreateProjectButton close={() => setIsOpen(false)} userId={userId}/>
+        <CreateProjectButton close={() => setIsOpen(false)} success={() => {getData(userId); setFilterBtn(!filterBtn)}} userId={userId}/>
       )}   
       <button onClick={() => setIsOpen(true)} className="fixed flex items-center p-3 rounded-full bottom-7 right-7 modal-main-btn">
         <Plus size={25} className="mr-1"/> New Project
