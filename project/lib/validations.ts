@@ -5,13 +5,13 @@ export const ProjectSchema = z.object({
 
   // Name validation
   name: z
-    .string()
+    .string().trim()
     .min(3, "Name: Must be at least 3 characters.")
     .max(50, "Name: Must not exceed 50 characters."),
 
   // Description validation
   description: z
-    .string()
+    .string().trim()
     .min(10, "Description: Must be at least 10 characters.")
     .max(500, "Description:  Must not exceed 500 characters."),
 
@@ -76,19 +76,19 @@ export const TaskSchema = z.object({
 
   // Title validation
   title: z
-    .string()
+    .string().trim()
     .min(3, "Title: Must be at least 3 characters.")
     .max(50, "Title: Must not exceed 50 characters."),
 
   // Description validation
   description: z
-    .string()
+    .string().trim()
     .min(10, "Description: Must be at least 10 characters.")
     .max(500, "Description:  Must not exceed 500 characters."),
 
   // Label validation
   label: z
-    .string()
+    .string().trim()
     .min(3, "Label: Must be at least 3 characters.")
     .max(50, "Label: Must not exceed 50 characters."),
 
