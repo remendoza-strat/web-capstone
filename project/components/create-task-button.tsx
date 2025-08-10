@@ -187,8 +187,8 @@ export function CreateTaskButton({ close, success, userId, userProjs } : { close
   };
 
   return(
-    <div className="fixed inset-0 z-50 flex items-center justify-center modal-open-bg">
-      <div className="w-full max-w-md h-[90vh] p-6 mx-4 rounded-lg modal-form-color overflow-y-auto">
+    <div className="modal-background">
+      <div className="max-w-md h-[90vh] overflow-y-auto modal-form">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
             Create New Task
@@ -199,11 +199,11 @@ export function CreateTaskButton({ close, success, userId, userProjs } : { close
         </div>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block m-2 modal-form-label">
+            <label className="modal-form-label">
               Project
             </label>
             <select
-              className="w-full cursor-pointer modal-form-input"
+              className="cursor-pointer modal-form-input"
               value={selectedProjectId} onChange={(e) => setSelectedProjectId(e.target.value)}>
                 {projects.length === 0 ? (
                   <option disabled>No projects available</option>
@@ -218,43 +218,42 @@ export function CreateTaskButton({ close, success, userId, userProjs } : { close
             </select>
           </div>
           <div>
-            <label className="block m-2 modal-form-label">
+            <label className="modal-form-label">
               Title
             </label>
             <input
               value={title} onChange={(e) => setTitle(e.target.value)}
               type="text" placeholder="Enter task title"
-              className="w-full modal-form-input"
+              className="modal-form-input"
             />
           </div>
           <div>
-            <label className="block m-2 modal-form-label">
+            <label className="modal-form-label">
               Description
             </label>
 						<ReactQuill 
               theme="snow"
-              className="w-full modal-form-input"
+              className="modal-form-input"
               value={description} onChange={setDescription}
             />
           </div>
           <div>
-            <label className="block m-2 modal-form-label">
+            <label className="modal-form-label">
               Due Date
             </label>
             <input
               value={dueDate} onChange={(e) => setDueDate(e.target.value)}
               type="datetime-local"
-              className="w-full cursor-pointer modal-form-input"
+              className="cursor-pointer modal-form-input"
             />
           </div>
           <div>
-            <label className="block m-2 modal-form-label">
+            <label className="modal-form-label">
               Priority
             </label>
             <select
-              className="w-full cursor-pointer modal-form-input"
-              value={priority} onChange={(e) => setPriority(e.target.value as Priority)}
-            >
+              className="cursor-pointer modal-form-input"
+              value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
               {PriorityArr.map((priority) => (
                 <option key={priority} value={priority}>
                   {priority}
@@ -263,26 +262,26 @@ export function CreateTaskButton({ close, success, userId, userProjs } : { close
             </select>
           </div>
           <div>
-            <label className="block m-2 modal-form-label">
+            <label className="modal-form-label">
               Label
             </label>
             <input
               value={label} onChange={(e) => setLabel(e.target.value)}
               type="text" placeholder="Enter task label"
-              className="w-full modal-form-input"
+              className="modal-form-input"
             />
           </div>
           <div>
-            <label className="block m-2 modal-form-label">
+            <label className="modal-form-label">
               User
             </label>
             <div className="relative">
               <input
-                className="w-full modal-form-input"
+                className="modal-form-input"
                 type="text" placeholder="Search by name or email"
                 value={query} onChange={(e) => setQuery(e.target.value)}/>
                   {query && suggestions.length > 0 && (
-                    <ul className="absolute w-full overflow-y-auto z-60 max-h-48 modal-form-suggestion-ul">
+                    <ul className="modal-form-suggestion-ul">
                       {suggestions.map((user) => (
                         <li
                           key={user.user.id}
@@ -300,7 +299,7 @@ export function CreateTaskButton({ close, success, userId, userProjs } : { close
           </div>
           {selectedUsers.length > 0 && (
             <div>
-              <label className="block m-2 modal-form-label">
+              <label className="modal-form-label">
                 Selected Users
               </label>
               <ul className="space-y-2">
@@ -320,7 +319,7 @@ export function CreateTaskButton({ close, success, userId, userProjs } : { close
               </ul>
             </div>
           )}
-          <div className="flex justify-end pt-4 space-x-3">
+          <div className="modal-btn-div">
             <button onClick={close} type="button" className="modal-sub-btn">
               Cancel
             </button>

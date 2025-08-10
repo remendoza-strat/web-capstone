@@ -3,35 +3,39 @@
 @tailwind utilities;
 
 @layer components{
-  .modal-open-bg{
-		@apply bg-black bg-opacity-50;
+	/*--------------------------------------MODAL DESIGNS--------------------------------------*/
+  .modal-background{
+		@apply fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 dark:bg-white dark:bg-opacity-20;
 	}
-	.modal-form-color{
-    @apply bg-modal_light dark:bg-modal_dark;
+	.modal-form{
+    @apply w-full p-6 mx-4 bg-modal_light dark:bg-modal_dark;
   }
   .modal-form-title{
     @apply text-lg font-bold text-modal_dark dark:text-modal_light;
   }
-	.modal-sub-btn{
-		@apply px-4 py-2 text-base font-light text-modal_dark-100 dark:text-modal_light-100 hover:bg-modal_light-100 dark:hover:bg-modal_dark-100;
-	}
 	.modal-form-label{
-		@apply text-sm font-normal text-modal_dark dark:text-modal_light;
+		@apply block m-2 text-sm text-modal_dark dark:text-modal_light;
 	}
 	.modal-form-input{
-		@apply px-3 py-2 bg-modal_light-100 dark:bg-modal_dark-100 text-modal_dark dark:text-modal_light focus:outline-none focus:ring-2 focus:ring-modal_blue;
+		@apply w-full px-3 py-2 bg-modal_light-100 dark:bg-modal_dark-100 text-modal_dark dark:text-modal_light focus:outline-none focus:ring-2 focus:ring-modal_blue;
 	}
 	.modal-main-btn{
-		@apply px-4 py-2 text-base font-normal text-white rounded-lg bg-modal_blue hover:bg-modal_blue-100;
+		@apply px-4 py-2 text-white bg-modal_blue hover:bg-modal_blue-100;
+	}
+	.modal-sub-btn{
+		@apply px-4 py-2 text-modal_dark-100 dark:text-modal_light-100 hover:bg-modal_light-100 dark:hover:bg-modal_dark-100;
+	}
+	.modal-btn-div{
+		@apply flex justify-end pt-4 space-x-3;
 	}
 	.modal-form-suggestion-main{
-		@apply px-1 py-1 text-base font-bold text-modal_dark dark:text-modal_light;
+		@apply px-1 py-1 font-bold text-modal_dark dark:text-modal_light;
 	}
 	.modal-form-suggestion-sec{
-		@apply px-1 py-1 text-sm font-normal text-modal_dark dark:text-modal_light;
+		@apply px-1 py-1 text-sm text-modal_dark dark:text-modal_light;
 	}
 	.modal-form-suggestion-ul{
-		@apply bg-modal_light-100 dark:bg-modal_dark-100;
+		@apply absolute z-50 w-full overflow-y-auto max-h-48 bg-modal_light-100 dark:bg-modal_dark-100;
 	}
 	.modal-form-suggestion-li{
 		@apply cursor-pointer hover:bg-gray-300 dark:hover:bg-modal_dark;
@@ -39,6 +43,17 @@
 	.modal-form-trash{
 		@apply text-red-500 hover:text-red-700;
 	}
+	/*--------------------------------------MODAL DESIGNS--------------------------------------*/
+
+
+
+
+
+
+
+
+
+	
 /*--------------------------------------PAGE DESIGNS--------------------------------------*/
 	
 	.page-background{
