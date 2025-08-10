@@ -64,3 +64,9 @@ export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee)
 export async function updateProjectTimeAction(projectId: string){
   await queries.projects.updateProjectTime(projectId);
 }
+
+// Delete = project
+// of given projectId
+export async function deleteProjectAction(projectId: string){
+  await queries.projects.deleteProject(projectId);
+}

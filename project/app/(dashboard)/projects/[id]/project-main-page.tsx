@@ -1,9 +1,9 @@
 "use client"
-import { ArrowLeft, Settings, Users, Calendar, MoreHorizontal, User } from "lucide-react"
+import { ArrowLeft, Users, Calendar, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import UpdateProject from "@/components/projects-modal/update";
-import DeleteProject from "@/components/projects-modal/delete";
+import {DeleteProject} from "@/components/projects-modal/delete";
 import { useModal } from "@/lib/states";
 import { Role, UserProjects } from "@/lib/customtype";
 import { hasPermission } from "@/lib/permissions";
@@ -20,7 +20,7 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
 	return(
 		<DashboardLayout>
       {display && isOpen && modalType === "updateProject" && <UpdateProject />}
-      {display &&isOpen && modalType === "deleteProject" && <DeleteProject />}
+      {display &&isOpen && modalType === "deleteProject" && <DeleteProject projectId={projectData.id}/>}
 
       <div className="space-y-6">
         {/* Project Header */}
@@ -34,10 +34,10 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">
-                Project: {projectData.name}
+                {projectData.name}
               </h1>
               <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-1">
-                Kanban board view for project management
+                {projectData.description}
               </p>
             </div>
           </div>
@@ -45,15 +45,7 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
           <div className="flex items-center space-x-2">
             <button
               className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-              onClick={() => openModal("updateProject")}
-              aria-label="Update Project"
-            >
-              <Users size={20} />
-            </button>
-            <button
-              className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-              onClick={() => openModal("deleteProject")}
-              aria-label="Delete Project"
+              aria-label="More options"
             >
               <Calendar size={20} />
             </button>
@@ -61,28 +53,23 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
               className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
               aria-label="Settings"
             >
-              <Settings size={20} />
+              <Users size={20} />
             </button>
             <button
               className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-              aria-label="More options"
+              onClick={() => openModal("updateProject")}
+              aria-label="Update Project"
             >
-              <MoreHorizontal size={20} />
+              <Pencil size={20} />
             </button>
+            <button
+              className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
+              onClick={() => openModal("deleteProject")}
+              aria-label="Delete Project"
+            >
+              <Trash2 size={20} />
+            </button>            
           </div>
-        </div>
-
-        {/* Implementation Tasks Banner */}
-        <div className="p-4 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
-          <h3 className="mb-2 text-sm font-medium text-blue-900 dark:text-blue-100">
-            🎯 Kanban Board Implementation Tasks
-          </h3>
-          <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
-            <li>• Task 5.1: Design responsive Kanban board layout</li>
-            <li>• Task 5.2: Implement drag-and-drop functionality with dnd-kit</li>
-            <li>• Task 5.4: Implement optimistic UI updates for smooth interactions</li>
-            <li>• Task 5.6: Create task detail modals and editing interfaces</li>
-          </ul>
         </div>
 
         {/* Kanban Board Placeholder */}

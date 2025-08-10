@@ -1,13 +1,49 @@
 "use client"
 import "../globals.css"
+import { toast } from "sonner"
+import { useState } from "react"
 import { X } from "lucide-react"
-
+import { useRouter } from "next/navigation"
 import { useModal } from "@/lib/states"
+import { deleteProject } from "@/lib/hooks/projects"
+import { ProjectDelete } from "@/lib/validations"
 
-export default function DeleteProject() {
-  const { closeModal } = useModal()
+export function DeleteProject({ projectId } : { projectId: string }){
+  const { closeModal } = useModal();
+  const [code, setCode] = useState("");
+  const deleteMutation = deleteProject();
+  const router = useRouter();
 
- return(
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try{
+      // Validate input
+      const result = ProjectDelete.safeParse({ code });
+
+      // Display error from validation
+      if(!result.success){
+        toast.error(result.error.flatten().fieldErrors.code);
+        return;
+      }
+
+      // Delete project
+      deleteMutation.mutate(projectId, {
+        onSuccess: () => {
+          closeModal();
+          router.push("/projects");
+          toast.success("Project deleted.");
+        },
+        onError: () => {
+          toast.error("Error occured.");
+        }
+      });
+    }
+    catch{return} 
+  }
+
+  return(
     <div className="modal-background">
       <div className="max-w-md modal-form">
         <div className="flex items-center justify-between mb-4">
@@ -18,13 +54,14 @@ export default function DeleteProject() {
             <X size={20}/>
           </button>
         </div>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="modal-form-label">
               Type "DELETE THIS PROJECT" to proceed
             </label>
             <input
-              type="text" placeholder=""
+              value={code} onChange={(e) => setCode(e.target.value)}
+              type="text" placeholder="DELETE THIS PROJECT"
               className="modal-form-input"
             />
           </div>
@@ -32,8 +69,8 @@ export default function DeleteProject() {
             <button onClick={closeModal} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn">
-              Delete Project
+            <button type="submit" className="modal-main-btn" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending? "Deleting..." : "Delete Project"}
             </button>
           </div>
         </form>

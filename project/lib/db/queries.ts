@@ -35,6 +35,9 @@ export const queries = {
 
       return result.id;
     },
+    deleteProject: async (projectId: string) => {
+      await db.delete(projects).where(eq(projects.id, projectId));
+    },
     getUserProjects: async (userId: string) => {
       const query = await db.query.projectMembers.findMany({
         where: (pm, {and, eq}) => and(eq(pm.approved, true), eq(pm.userId, userId)),

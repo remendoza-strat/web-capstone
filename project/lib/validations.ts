@@ -138,3 +138,13 @@ export const TaskSchema = z.object({
       return;
     }
 });
+
+// Project delete data input validation
+export const ProjectDelete = z.object({
+  code: z
+    .string().trim()
+    .refine(
+      (val) => val === "DELETE THIS PROJECT",
+      "Code: Must exactly match DELETE THIS PROJECT."
+    )
+});
