@@ -5,16 +5,22 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import UpdateProject from "@/components/projects-modal/update";
 import DeleteProject from "@/components/projects-modal/delete";
 import { useModal } from "@/lib/states";
-import { UserProjects } from "@/lib/customtype";
+import { Role, UserProjects } from "@/lib/customtype";
+import { hasPermission } from "@/lib/permissions";
 
 
-export default function ProjectMainPage({projectData} : {projectData: UserProjects}){
+export default function ProjectMainPage({userId, projectData} : {userId: string, projectData: UserProjects}){
+  const role: Role = projectData.members.find((m) => m.userId === userId)?.role as Role;
+  
+  const display = (hasPermission(role, "editProject"));
+
+  
 	const { isOpen, modalType, openModal } = useModal();
 	
 	return(
 		<DashboardLayout>
-      {isOpen && modalType === "updateProject" && <UpdateProject />}
-      {isOpen && modalType === "deleteProject" && <DeleteProject />}
+      {display && isOpen && modalType === "updateProject" && <UpdateProject />}
+      {display &&isOpen && modalType === "deleteProject" && <DeleteProject />}
 
       <div className="space-y-6">
         {/* Project Header */}

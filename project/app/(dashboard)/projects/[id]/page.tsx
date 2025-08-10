@@ -53,5 +53,5 @@ export default function ProjectPage(){
   }
 
   // Display the main page
-  return <ProjectMainPage projectData={projectData}/>
+  return <ProjectMainPage userId={userId} projectData={projectData}/>
 }
