@@ -1,17 +1,28 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { DndContext } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { KanbanColumn } from "@/components/kanban-column"
 import { updateTask } from "@/lib/hooks/tasks"
-import { Task } from "@/lib/db/schema"
+import { UserProjects } from "@/lib/customtype"
+import { useModal } from "@/lib/states"
+import { CreateColumn } from "@/components/columns-modal/create"
 
-export function KanbanBoard({ columnNames, tasks } : { columnNames: string[]; tasks: Task[] }){
+export function KanbanBoard({ projectData } : { projectData: UserProjects }){
+  const columnNames = projectData.columnNames;
+  const tasks = projectData.tasks;
+  const { isOpen, modalType, openModal } = useModal();
+
   // To update task position and order
   const updateTaskMutation = updateTask();
   
   // Display of column names and tasks
   const [boardData, setBoardData] = useState({ columnNames, tasks });
+
+  // Update when new data is created
+  useEffect(() => {
+    setBoardData({ columnNames, tasks });
+  }, [columnNames, tasks]);
 
   // Handle task movements
   function handleDragEnd(event: any){
@@ -168,28 +179,9 @@ export function KanbanBoard({ columnNames, tasks } : { columnNames: string[]; ta
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
   return (
+    <div>
+      {isOpen && modalType === "columnProject" && <CreateColumn projectData={projectData}/>}
     <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
       <DndContext onDragEnd={handleDragEnd}>
         <div className="flex pb-4 space-x-6 overflow-x-auto">
@@ -213,12 +205,14 @@ export function KanbanBoard({ columnNames, tasks } : { columnNames: string[]; ta
             );
           })}
 
-          {/* Add column button */}
-          <button className="flex-shrink-0 p-3 border-2 border-dashed rounded-lg w-80 border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors">
+          <button
+          onClick={() => openModal("columnProject")}
+          className="flex-shrink-0 p-3 border-2 border-dashed rounded-lg w-80 border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors">
             + Add Column
           </button>
         </div>
       </DndContext>
+    </div>
     </div>
   );
 }

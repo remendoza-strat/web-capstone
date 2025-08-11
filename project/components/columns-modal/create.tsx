@@ -3,16 +3,20 @@ import "../globals.css"
 import { toast } from "sonner"
 import { useState } from "react"
 import { X } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useModal } from "@/lib/states"
-import { deleteProject } from "@/lib/hooks/projects"
+import { UserProjects } from "@/lib/customtype"
 import { ProjectSchema } from "@/lib/validations"
+import { updateProject } from "@/lib/hooks/projects"
+import { projects } from "@/lib/db/schema"
 
-export function DeleteProject({ projectId } : { projectId: string }){
+export function CreateColumn({ projectData } : { projectData: UserProjects }){
   const { closeModal } = useModal();
-  const [code, setCode] = useState("");
-  const deleteMutation = deleteProject();
-  const router = useRouter();
+  const [columnName, setColumnName] = useState("");
+  const updateMutation = updateProject();
+
+  // Get existing column names and count
+  const columnNames = projectData.columnNames;
+  const columnCount = projectData.columnCount;
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,30 +24,36 @@ export function DeleteProject({ projectId } : { projectId: string }){
 
     try{
       // Validate input
-      const result = ProjectSchema.safeParse({ projectDeleteCode: code });
-
+      const result = ProjectSchema.safeParse({ columnName });
+    
       // Display error from validation
       if(!result.success){
         const errors = result.error.flatten().fieldErrors;
-        if(errors.projectDeleteCode?.[0]){
-          toast.error(errors.projectDeleteCode[0]);
+        if(errors.columnName?.[0]){
+          toast.error(errors.columnName[0]);
           return;
         }
       }
 
-      // Delete project
-      deleteMutation.mutate(projectId, {
+      // Setup project data to update
+      const updProject: Partial<typeof projects.$inferInsert> = {
+        columnCount: (columnCount + 1),
+        columnNames: [...columnNames, columnName],
+        updatedAt: new Date()
+      }
+          
+      // Update project  
+      updateMutation.mutate({projectId: projectData.id, updProject}, {
         onSuccess: () => {
           closeModal();
-          router.push("/projects");
-          toast.success("Project deleted.");
+          toast.success("Column created.");
         },
         onError: () => {
           toast.error("Error occured.");
         }
       });
     }
-    catch{return} 
+    catch{return}
   }
 
   return(
@@ -51,7 +61,7 @@ export function DeleteProject({ projectId } : { projectId: string }){
       <div className="max-w-md modal-form">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
-            Delete Project
+            Create New Project Column
           </h3>
           <button onClick={closeModal} className="modal-sub-btn">
             <X size={20}/>
@@ -60,11 +70,11 @@ export function DeleteProject({ projectId } : { projectId: string }){
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="modal-form-label">
-              Type "DELETE THIS PROJECT" to proceed
+              Column Name
             </label>
             <input
-              value={code} onChange={(e) => setCode(e.target.value)}
-              type="text" placeholder="DELETE THIS PROJECT"
+              value={columnName} onChange={(e) => setColumnName(e.target.value)}
+              type="text" placeholder="Enter column name"
               className="modal-form-input"
             />
           </div>
@@ -72,8 +82,8 @@ export function DeleteProject({ projectId } : { projectId: string }){
             <button onClick={closeModal} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn" disabled={deleteMutation.isPending}>
-              {deleteMutation.isPending? "Deleting..." : "Delete Project"}
+            <button type="submit" className="modal-main-btn" disabled={updateMutation.isPending}>
+              {updateMutation.isPending? "Creating..." : "Create Column"}
             </button>
           </div>
         </form>

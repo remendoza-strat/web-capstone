@@ -73,7 +73,7 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
         </div>
 
 
-        <KanbanBoard columnNames={projectData.columnNames} tasks={projectData.tasks}/>
+        <KanbanBoard projectData={projectData}/>
 
       </div>
 

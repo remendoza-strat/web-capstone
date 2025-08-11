@@ -51,8 +51,22 @@ export const ProjectSchema = z.object({
     .refine(
       val => !val, {
       message: "Due Date: Tasks due date is beyond the project due."
-    })
+    }),
 
+  // Code for project deletion validation
+  projectDeleteCode: z
+    .string().trim()
+    .refine(
+      (val) => val === "DELETE THIS PROJECT",
+      "Code: Must exactly match DELETE THIS PROJECT."
+    ),
+
+  // Column name validation
+  columnName: z
+    .string().trim()
+    .min(3, "Column Name: Must be at least 3 characters.")
+    .max(30, "Column Name: Must not exceed 30 characters.")
+  
 });
 
 // Project member data input validation
@@ -145,14 +159,4 @@ export const TaskSchema = z.object({
       });
       return;
     }
-});
-
-// Project delete data input validation
-export const ProjectDelete = z.object({
-  code: z
-    .string().trim()
-    .refine(
-      (val) => val === "DELETE THIS PROJECT",
-      "Code: Must exactly match DELETE THIS PROJECT."
-    )
 });
