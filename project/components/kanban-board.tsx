@@ -1,152 +1,224 @@
 "use client"
-
 import { useState } from "react"
+import { DndContext } from "@dnd-kit/core"
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { KanbanColumn } from "@/components/kanban-column"
+import { updateTask } from "@/lib/hooks/tasks"
+import { Task } from "@/lib/db/schema"
 
-// TODO: Task 5.1 - Design responsive Kanban board layout
-// TODO: Task 5.2 - Implement drag-and-drop functionality with dnd-kit
+export function KanbanBoard({ columnNames, tasks } : { columnNames: string[]; tasks: Task[] }){
+  // To update task position and order
+  const updateTaskMutation = updateTask();
+  
+  // Display of column names and tasks
+  const [boardData, setBoardData] = useState({ columnNames, tasks });
 
-/*
-TODO: Implementation Notes for Interns:
+  // Handle task movements
+  function handleDragEnd(event: any){
+    const { active, over } = event;
 
-This is the main Kanban board component that should:
-- Display columns (lists) horizontally
-- Allow drag and drop of tasks between columns
-- Support adding new tasks and columns
-- Handle real-time updates
-- Be responsive on mobile
+    // Task is dragged outside the board
+    if (!over) return;
 
-Key dependencies to install:
-- @dnd-kit/core
-- @dnd-kit/sortable
-- @dnd-kit/utilities
+    // Id of task dragged
+    const activeId = active.id as string;
 
-Features to implement:
-- Drag and drop tasks between columns
-- Drag and drop to reorder tasks within columns
-- Add new task button in each column
-- Add new column functionality
-- Optimistic updates (Task 5.4)
-- Real-time persistence (Task 5.5)
-- Mobile responsive design
-- Loading states
-- Error handling
+    // Id of column or task dragged onto
+    const overId = over.id as string;
 
-State management:
-- Use Zustand store for board state (Task 5.3)
-- Implement optimistic updates
-- Handle conflicts with server state
-*/
+    // No change in task dragged position
+    if (activeId === overId) return;
 
-const initialColumns = [
-  {
-    id: "todo",
-    title: "To Do",
-    tasks: [
-      {
-        id: "1",
-        title: "Design homepage mockup",
-        description: "Create initial design concepts",
-        priority: "high",
-        assignee: "John Doe",
-      },
-      {
-        id: "2",
-        title: "Research competitors",
-        description: "Analyze competitor websites",
-        priority: "medium",
-        assignee: "Jane Smith",
-      },
-      {
-        id: "3",
-        title: "Define user personas",
-        description: "Create detailed user personas",
-        priority: "low",
-        assignee: "Mike Johnson",
-      },
-    ],
-  },
-  {
-    id: "in-progress",
-    title: "In Progress",
-    tasks: [
-      {
-        id: "4",
-        title: "Develop navigation component",
-        description: "Build responsive navigation",
-        priority: "high",
-        assignee: "Sarah Wilson",
-      },
-      {
-        id: "5",
-        title: "Content strategy",
-        description: "Plan content structure",
-        priority: "medium",
-        assignee: "Tom Brown",
-      },
-    ],
-  },
-  {
-    id: "review",
-    title: "Review",
-    tasks: [
-      {
-        id: "6",
-        title: "Logo design options",
-        description: "Present logo variations",
-        priority: "high",
-        assignee: "Lisa Davis",
-      },
-    ],
-  },
-  {
-    id: "done",
-    title: "Done",
-    tasks: [
-      {
-        id: "7",
-        title: "Project kickoff meeting",
-        description: "Initial team meeting completed",
-        priority: "medium",
-        assignee: "John Doe",
-      },
-      {
-        id: "8",
-        title: "Requirements gathering",
-        description: "Collected all requirements",
-        priority: "high",
-        assignee: "Jane Smith",
-      },
-    ],
-  },
-]
+    // Get the task dragged
+    const activeTask = boardData.tasks.find((task) => task.id === activeId);
+    if (!activeTask) return;
 
-export function KanbanBoard({ projectId }: { projectId: string }) {
-  const [columns, setColumns] = useState(initialColumns)
+    // Set default column destination
+    let destColumn = activeTask.position;
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-      case "medium":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-      case "low":
-        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-      default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+    // Task dragged in column
+    if(overId.startsWith("column-")){
+      destColumn = Number(overId.replace("column-", ""));
+    } 
+    // Task dragged in task
+    else {
+      const overTask = boardData.tasks.find((task) => task.id === overId);
+      if (!overTask) return;
+      destColumn = overTask.position;
+    }
+
+    // Copy tasks
+    const updatedTasks = [...boardData.tasks];
+    
+    // Tasks without the dragged task
+    const withoutActive = updatedTasks.filter((t) => t.id !== activeId);
+
+    // Same column reordering
+    if(activeTask.position === destColumn){
+      // Dropped onto the column
+      if(overId.startsWith("column-")){
+        // Get column tasks but exclude the dragged task
+        const colTasks = boardData.tasks
+          .filter((task) => task.position === destColumn && task.id !== activeId)
+          .sort((a, b) => a.order - b.order);
+
+        // Put the dragged task at the end
+        const moved = { ...activeTask, order: colTasks.length };
+        colTasks.push(moved);
+
+        // Update database
+        colTasks.forEach((task, index) => {
+          task.order = index;
+          updateTaskMutation.mutate({ taskId: task.id, updTask: { order: index } });
+        });
+
+        // Update display
+        setBoardData((prev) => ({...prev, tasks: prev.tasks.map((task) => task.id === activeTask.id
+              ? { ...task, order: colTasks.length - 1 }
+              : colTasks.find((ctask) => ctask.id === task.id) || task)
+        }));
+      }
+      // Dropped onto the task
+      else{
+        // Get column tasks
+        const colTasks = boardData.tasks
+          .filter((task) => task.position === destColumn)
+          .sort((a, b) => a.order - b.order);
+
+        // Get old and new task task index
+        const oldIndex = colTasks.findIndex((task) => task.id === activeId);
+        const newIndex = colTasks.findIndex((task) => task.id === overId);
+
+        // Remove and add the dragged task
+        const reordered = [...colTasks];
+        const [moved] = reordered.splice(oldIndex, 1);
+        reordered.splice(newIndex, 0, moved);
+
+        // Update database
+        reordered.forEach((task, index) => {
+          task.order = index;
+          updateTaskMutation.mutate({ taskId: task.id, updTask: { order: index } });
+        });
+
+        // Update display
+        setBoardData((prev) => ({...prev, tasks: prev.tasks.map((task) => 
+          reordered.find((rtask) => rtask.id === task.id) || task)
+        }));
+      } 
+    }
+    // Different column
+    else{
+      // Tasks in the original column
+      const sourceCol = withoutActive
+        .filter((task) => task.position === activeTask.position)
+        .sort((a, b) => a.order - b.order);
+
+      // Task in the destination column
+      const destCol = withoutActive
+        .filter((task) => task.position === destColumn)
+        .sort((a, b) => a.order - b.order);
+
+      // If dragged on column, then append the task
+      if(overId.startsWith("column-")){
+        destCol.push({ ...activeTask, position: destColumn, order: destCol.length });
+      } 
+      // If dragged on task, insert it before the task
+      else{
+        const insertIndex = destCol.findIndex((task) => task.id === overId);
+        const index = insertIndex === -1 ? destCol.length : insertIndex;
+        destCol.splice(index, 0, { ...activeTask, position: destColumn, order: index });
+      }
+
+      // Update order for database of original column
+      sourceCol.forEach((task, index) => {
+        task.order = index;
+        updateTaskMutation.mutate({ taskId: task.id, updTask: { order: index } });
+      });
+
+      // Update order for database of destination column
+      destCol.forEach((task, index) => {
+        task.order = index;
+        task.position = destColumn;
+        updateTaskMutation.mutate({ taskId: task.id, updTask: { position: task.position, order: index } });
+      });
+
+      // Update the list
+      const merged = updatedTasks.map((task) => {
+    
+        // If task is in original column, get the updated order and position
+        const inSource = sourceCol.find((source) => source.id === task.id);
+        if (inSource) return { ...task, order: inSource.order, position: inSource.position };
+
+        // If task is in destination column, get the updated order and position
+        const inDest = destCol.find((des) => des.id === task.id);
+        if (inDest) return { ...task, order: inDest.order, position: inDest.position };
+
+        // Return task
+        return task;
+        
+      });
+
+      // Update order for display
+      setBoardData((prev) => ({
+        ...prev,
+        tasks: merged
+      }));
     }
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
   return (
-    <div className="bg-white dark:bg-outer_space-500 rounded-lg border border-french_gray-300 dark:border-payne's_gray-400 p-6">
-      <div className="text-center text-payne's_gray-500 dark:text-french_gray-400">
-        <h3 className="text-lg font-semibold mb-2">TODO: Implement Kanban Board</h3>
-        <p className="text-sm mb-4">Project ID: {projectId}</p>
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded border border-yellow-200 dark:border-yellow-800">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
-            📋 This will be the main interactive Kanban board with drag-and-drop functionality
-          </p>
+    <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
+      <DndContext onDragEnd={handleDragEnd}>
+        <div className="flex pb-4 space-x-6 overflow-x-auto">
+          {boardData.columnNames.map((columnTitle, columnIndex) => {
+            const columnTasks = boardData.tasks
+              .filter((task) => task.position === columnIndex)
+              .sort((a, b) => a.order - b.order);
+
+            return (
+              <SortableContext
+                key={columnIndex}
+                items={columnTasks.map((task) => task.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <KanbanColumn
+                  id={`column-${columnIndex}`}
+                  title={columnTitle}
+                  tasks={columnTasks}
+                />
+              </SortableContext>
+            );
+          })}
+
+          {/* Add column button */}
+          <button className="flex-shrink-0 p-3 border-2 border-dashed rounded-lg w-80 border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors">
+            + Add Column
+          </button>
         </div>
-      </div>
+      </DndContext>
     </div>
-  )
+  );
 }

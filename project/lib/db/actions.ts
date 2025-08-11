@@ -1,7 +1,7 @@
 "use server"
 import { queries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
-import { projects } from "@/lib/db/schema"
+import { projects, tasks } from "@/lib/db/schema"
 
 // Return = "id"
 // of the created newProject
@@ -78,4 +78,10 @@ export async function deleteProjectAction(projectId: string){
 // of given projectId
 export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
   await queries.projects.updateProject(projectId, updProject);
+}
+
+// Update = task
+// of given taskId
+export async function updateTaskAction(taskId: string, updTask: Partial<typeof tasks.$inferInsert>){
+  await queries.tasks.updateTask(taskId, updTask);
 }

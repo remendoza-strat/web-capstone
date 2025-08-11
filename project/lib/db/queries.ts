@@ -98,6 +98,11 @@ export const queries = {
 
       return result.id;
     },
+    updateTask: async (taskId: string, updTask: Partial<typeof tasks.$inferInsert>) => {
+      await db.update(tasks)
+      .set({...updTask})
+      .where(eq(tasks.id, taskId));
+    },
     getUserTasks: async (userId: string) => {
       const query = await db.query.taskAssignees.findMany({
         where: (ta, {eq}) => eq(ta.userId, userId),
