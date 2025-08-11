@@ -15,7 +15,7 @@ import type { UserProjects } from "@/lib/customtype"
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
 
-export function CreateTaskButton({ close, success, userId, userProjs } : { close: () => void; success: () => void; userId: string; userProjs: UserProjects[] }){
+export function CreateTaskButton({ close, success, userId, userProjs, column, order } : { close: () => void; success: () => void; userId: string; userProjs: UserProjects[]; column: number; order: number }){
   // Get all projects from prop
   const projects: Project[] = userProjs
     .filter((project) => project.members.some((member) => member.userId === userId && member.role === "Project Manager"))
@@ -159,7 +159,8 @@ export function CreateTaskButton({ close, success, userId, userProjs } : { close
         description: description,
         dueDate: new Date(dueDate),
         priority: priority,
-        position: 0,
+        position: column,
+        order: order,
         label: label
       };
       

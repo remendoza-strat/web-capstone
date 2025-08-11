@@ -72,7 +72,7 @@ export default function DashboardPage(){
         <AddMemberButton close={() => setIsOpen(false)} userId={userId} userProjs={userProjs}/>
       )}
       {isOpen && modalType === "task" && (
-        <CreateTaskButton close={() => setIsOpen(false)} success={() => getData(userId)} userId={userId} userProjs={userProjs}/>
+        <CreateTaskButton close={() => setIsOpen(false)} success={() => getData(userId)} userId={userId} userProjs={userProjs} column={0} order={0}/>
       )}
       <div className="space-y-6 ">
         <DashboardStats userProjs={userProjs} userTasks={userTasks}/>
