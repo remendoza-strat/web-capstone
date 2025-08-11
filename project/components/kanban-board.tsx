@@ -8,7 +8,7 @@ import { UserProjects } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
 import { CreateColumn } from "@/components/columns-modal/create"
 
-export function KanbanBoard({ projectData } : { projectData: UserProjects }){
+export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: UserProjects }){
   const columnNames = projectData.columnNames;
   const tasks = projectData.tasks;
   const { isOpen, modalType, openModal } = useModal();
@@ -181,7 +181,7 @@ export function KanbanBoard({ projectData } : { projectData: UserProjects }){
 
   return (
     <div>
-      {isOpen && modalType === "columnProject" && <CreateColumn projectData={projectData}/>}
+      {isOpen && modalType === "createColumn" && <CreateColumn projectData={projectData}/>}
     <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
       <DndContext onDragEnd={handleDragEnd}>
         <div className="flex pb-4 space-x-6 overflow-x-auto">
@@ -205,11 +205,13 @@ export function KanbanBoard({ projectData } : { projectData: UserProjects }){
             );
           })}
 
+          {editProject && 
           <button
-          onClick={() => openModal("columnProject")}
+          onClick={() => openModal("createColumn")}
           className="flex-shrink-0 p-3 border-2 border-dashed rounded-lg w-80 border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors">
             + Add Column
           </button>
+          }
         </div>
       </DndContext>
     </div>

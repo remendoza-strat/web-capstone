@@ -13,13 +13,13 @@ import { KanbanBoard } from "@/components/kanban-board";
 
 export default function ProjectMainPage({userId, projectData} : {userId: string, projectData: UserProjects}){
   const role: Role = projectData.members.find((m) => m.userId === userId)?.role as Role;
-  const display = (hasPermission(role, "editProject"));
+  const editProject = (hasPermission(role, "editProject"));
 	const { isOpen, modalType, openModal } = useModal();
 
   return (
     <DashboardLayout>
-      {display && isOpen && modalType === "updateProject" && <UpdateProject projectData={projectData}/>}
-      {display &&isOpen && modalType === "deleteProject" && <DeleteProject projectId={projectData.id}/>}
+      {isOpen && modalType === "updateProject" && <UpdateProject projectData={projectData}/>}
+      {isOpen && modalType === "deleteProject" && <DeleteProject projectId={projectData.id}/>}
 
       <div className="space-y-6">
 
@@ -52,7 +52,7 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
             <button className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors">
               <Users size={20} />
             </button>
-            {display && (
+            {editProject && (
               <>
                 <button
                   className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
@@ -73,7 +73,7 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
         </div>
 
 
-        <KanbanBoard projectData={projectData}/>
+        <KanbanBoard editProject={editProject} projectData={projectData}/>
 
       </div>
 
