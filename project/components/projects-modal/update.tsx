@@ -4,13 +4,13 @@ import { toast } from "sonner"
 import { useState } from "react"
 import { X } from "lucide-react"
 import { useModal } from "@/lib/states"
-import { UserProjects } from "@/lib/customtype"
+import { ProjectsWithTasks } from "@/lib/customtype"
 import { ProjectSchema } from "@/lib/validations"
 import { updateProject } from "@/lib/hooks/projects"
 import { projects } from "@/lib/db/schema"
 import { FormatDateDisplay } from "@/lib/utils"
 
-export function UpdateProject({ projectData } : { projectData: UserProjects }){
+export function UpdateProject({ projectData } : { projectData: ProjectsWithTasks }){
   const { closeModal } = useModal();
   const [name, setName] = useState(projectData.name);
   const [description, setDescription] = useState(projectData.description);

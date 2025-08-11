@@ -4,14 +4,16 @@ import { DndContext } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { KanbanColumn } from "@/components/kanban-column"
 import { updateTask } from "@/lib/hooks/tasks"
-import { UserProjects } from "@/lib/customtype"
+import { ProjectsWithTasks } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
 import { CreateColumn } from "@/components/columns-modal/create"
+import { Project } from "@/lib/db/schema"
 
-export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: UserProjects }){
+export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: ProjectsWithTasks }){
   const columnNames = projectData.columnNames;
   const tasks = projectData.tasks;
   const { isOpen, modalType, openModal } = useModal();
+  const project: Project = (({ tasks, ...rest }) => rest)(projectData);
 
   // To update task position and order
   const updateTaskMutation = updateTask();
@@ -181,7 +183,7 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
 
   return (
     <div>
-      {isOpen && modalType === "createColumn" && <CreateColumn projectData={projectData}/>}
+      {isOpen && modalType === "createColumn" && <CreateColumn projectData={project}/>}
     <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
       <DndContext onDragEnd={handleDragEnd}>
         <div className="flex pb-4 space-x-6 overflow-x-auto">

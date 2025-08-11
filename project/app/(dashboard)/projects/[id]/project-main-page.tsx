@@ -7,7 +7,7 @@ import { UpdateProject } from "@/components/projects-modal/update";
 import { DeleteProject } from "@/components/projects-modal/delete";
 import { useModal } from "@/lib/states";
 import { hasPermission } from "@/lib/permissions";
-import { Role, UserProjects } from "@/lib/customtype";
+import { ProjectsWithTasks, Role, UserProjects } from "@/lib/customtype";
 import { DateTimeFormatter } from "@/lib/utils";
 import { KanbanBoard } from "@/components/kanban-board";
 
@@ -15,10 +15,12 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
   const role: Role = projectData.members.find((m) => m.userId === userId)?.role as Role;
   const editProject = (hasPermission(role, "editProject"));
 	const { isOpen, modalType, openModal } = useModal();
+  const projectWithTasks: ProjectsWithTasks = (({ members, ...rest }) => rest)(projectData);
 
+   
   return (
     <DashboardLayout>
-      {isOpen && modalType === "updateProject" && <UpdateProject projectData={projectData}/>}
+      {isOpen && modalType === "updateProject" && <UpdateProject projectData={projectWithTasks}/>}
       {isOpen && modalType === "deleteProject" && <DeleteProject projectId={projectData.id}/>}
 
       <div className="space-y-6">
@@ -73,7 +75,7 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
         </div>
 
 
-        <KanbanBoard editProject={editProject} projectData={projectData}/>
+        <KanbanBoard editProject={editProject} projectData={projectWithTasks}/>
 
       </div>
 

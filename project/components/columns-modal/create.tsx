@@ -4,12 +4,11 @@ import { toast } from "sonner"
 import { useState } from "react"
 import { X } from "lucide-react"
 import { useModal } from "@/lib/states"
-import { UserProjects } from "@/lib/customtype"
 import { ProjectSchema } from "@/lib/validations"
 import { updateProject } from "@/lib/hooks/projects"
-import { projects } from "@/lib/db/schema"
+import { Project, projects } from "@/lib/db/schema"
 
-export function CreateColumn({ projectData } : { projectData: UserProjects }){
+export function CreateColumn({ projectData } : { projectData: Project }){
   const { closeModal } = useModal();
   const [columnName, setColumnName] = useState("");
   const updateMutation = updateProject();
@@ -61,7 +60,7 @@ export function CreateColumn({ projectData } : { projectData: UserProjects }){
       <div className="max-w-md modal-form">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
-            Create New Project Column
+            Create New Column
           </h3>
           <button onClick={closeModal} className="modal-sub-btn">
             <X size={20}/>
