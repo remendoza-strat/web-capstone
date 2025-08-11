@@ -91,7 +91,7 @@ export default function ProjectsPage(){
   return(
     <DashboardLayout>
       {isOpen && (
-        <CreateProjectButton close={() => setIsOpen(false)} success={() => {getData(userId); setFilterBtn(!filterBtn)}} userId={userId}/>
+        <CreateProjectButton close={() => setIsOpen(false)} success={() => {getData(userId); setFilterBtn(false)}} userId={userId}/>
       )}   
       <button onClick={() => setIsOpen(true)} className="fixed flex items-center p-3 rounded-full bottom-7 right-7 modal-main-btn">
         <Plus size={25} className="mr-1"/> New Project

@@ -1,12 +1,7 @@
 "use server"
 import { queries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
-
-// Return = "id" 
-// of user with given clerkId
-export async function getUserIdAction(clerkId: string){
-  return await queries.users.getUserId(clerkId);
-}
+import { projects } from "@/lib/db/schema"
 
 // Return = "id"
 // of the created newProject
@@ -38,12 +33,6 @@ export async function getUserProjectsAction(userId: string){
   return await queries.projects.getUserProjects(userId);
 }
 
-// Return = project information with its approved members and tasks
-// of the given projectId
-export async function getProjectByIdAction(projectId: string){
-  return await queries.projects.getProjectById(projectId);
-}
-
 // Create user
 export async function createUserAction(newUser: NewUser){
   return await queries.users.createUser(newUser);
@@ -65,8 +54,28 @@ export async function updateProjectTimeAction(projectId: string){
   await queries.projects.updateProjectTime(projectId);
 }
 
+/******************************************************************************************/
+
+// Return = "id" 
+// of user with given clerkId
+export async function getUserIdAction(clerkId: string){
+  return await queries.users.getUserId(clerkId);
+}
+
+// Return = project information with its approved members and tasks
+// of the given projectId
+export async function getProjectByIdAction(projectId: string){
+  return await queries.projects.getProjectById(projectId);
+}
+
 // Delete = project
 // of given projectId
 export async function deleteProjectAction(projectId: string){
   await queries.projects.deleteProject(projectId);
+}
+
+// Update = project
+// of given projectId
+export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
+  await queries.projects.updateProject(projectId, updProject);
 }

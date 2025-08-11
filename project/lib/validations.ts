@@ -43,7 +43,15 @@ export const ProjectSchema = z.object({
         }
       }
     )
-  )
+  ),
+
+  // Due date of project and tasks overlap validation
+  isOverlap: z
+    .boolean()
+    .refine(
+      val => !val, {
+      message: "Due Date: Tasks due date is beyond the project due."
+    })
 
 });
 

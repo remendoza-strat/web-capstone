@@ -172,3 +172,13 @@ export function ValidID(id: string){
   const idRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return idRegex.test(id);
 }
+
+// Convert date to PH timezone for display
+export const FormatDateDisplay = (date: Date) => {
+  const display = new Date(date);
+
+  const phOffset = 8 * 60;
+  const localDate = new Date(display.getTime() + phOffset * 60 * 1000);
+
+  return localDate.toISOString().slice(0, 16);
+};

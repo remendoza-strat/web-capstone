@@ -2,24 +2,22 @@
 import { ArrowLeft, Users, Calendar, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import UpdateProject from "@/components/projects-modal/update";
+import {UpdateProject} from "@/components/projects-modal/update";
 import {DeleteProject} from "@/components/projects-modal/delete";
 import { useModal } from "@/lib/states";
 import { Role, UserProjects } from "@/lib/customtype";
 import { hasPermission } from "@/lib/permissions";
+import { DateTimeFormatter } from "@/lib/utils";
 
 
 export default function ProjectMainPage({userId, projectData} : {userId: string, projectData: UserProjects}){
   const role: Role = projectData.members.find((m) => m.userId === userId)?.role as Role;
-  
   const display = (hasPermission(role, "editProject"));
-
-  
 	const { isOpen, modalType, openModal } = useModal();
 	
 	return(
 		<DashboardLayout>
-      {display && isOpen && modalType === "updateProject" && <UpdateProject />}
+      {display && isOpen && modalType === "updateProject" && <UpdateProject projectData={projectData}/>}
       {display &&isOpen && modalType === "deleteProject" && <DeleteProject projectId={projectData.id}/>}
 
       <div className="space-y-6">
@@ -38,6 +36,9 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
               </h1>
               <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-1">
                 {projectData.description}
+              </p>
+              <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-1">
+                {DateTimeFormatter(projectData.dueDate)}
               </p>
             </div>
           </div>
@@ -75,7 +76,7 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
         {/* Kanban Board Placeholder */}
         <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:gray-400">
           <div className="flex pb-4 space-x-6 overflow-x-auto">
-            {(["backlog", "this week", "in progress", "to review", "done"]).map((columnTitle) => (
+            {(projectData.columnNames).map((columnTitle, columnIndex) => (
               <div key={columnTitle} className="flex-shrink-0 w-80">
                 <div className="border rounded-lg bg-platinum-800 dark:bg-outer_space-400 border-french_gray-300 dark:gray-400">
                   <div className="p-4 border-b border-french_gray-300 dark:gray-400">
@@ -93,23 +94,23 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
                   </div>
 
                   <div className="p-4 space-y-3 min-h-[400px]">
-                    {["task 1"].map((task) => (
+                    {(projectData.tasks).map((task) => (
                       <div
-                        key={task}
+                        key={task.id}
                         className="p-4 transition-shadow bg-white border rounded-lg cursor-pointer dark:bg-outer_space-300 border-french_gray-300 dark:gray-400 hover:shadow-md"
                       >
                         <h4 className="mb-2 text-sm font-medium text-outer_space-500 dark:text-platinum-500">
-                          {task}
+                          {DateTimeFormatter(task.dueDate)}
                         </h4>
                         <p className="text-xs text-payne's_gray-500 dark:text-french_gray-400 mb-3">
-                          {task}
+                          {task.title}
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue_munsell-100 text-blue_munsell-700 dark:bg-blue_munsell-900 dark:text-blue_munsell-300">
-                            {task}
+                            {task.label}
                           </span>
                           <div className="flex items-center justify-center w-6 h-6 text-xs font-semibold text-white rounded-full bg-blue_munsell-500">
-                            U
+                            U 
                           </div>
                         </div>
                       </div>

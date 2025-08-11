@@ -38,6 +38,11 @@ export const queries = {
     deleteProject: async (projectId: string) => {
       await db.delete(projects).where(eq(projects.id, projectId));
     },
+    updateProject: async (projectId: string, updProject: Partial<typeof projects.$inferInsert>) => {
+      await db.update(projects)
+      .set({...updProject})
+      .where(eq(projects.id, projectId));
+    },
     getUserProjects: async (userId: string) => {
       const query = await db.query.projectMembers.findMany({
         where: (pm, {and, eq}) => and(eq(pm.approved, true), eq(pm.userId, userId)),
