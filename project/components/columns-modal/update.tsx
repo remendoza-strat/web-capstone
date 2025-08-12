@@ -9,15 +9,11 @@ import { updateProject } from "@/lib/hooks/projects"
 import { projects } from "@/lib/db/schema"
 import { useKanbanContext } from "@/components/kanban-provider"
 
-export function CreateColumn(){
+export function UpdateColumn({ columnIndex } : { columnIndex: number }){
   const { projectData } = useKanbanContext();
   const { closeModal } = useModal();
-  const [columnName, setColumnName] = useState("");
-  const createMutation = updateProject();
-
-  // Get existing column names and count
-  const columnNames = projectData.columnNames;
-  const columnCount = projectData.columnCount;
+  const [columnName, setColumnName] = useState(projectData.columnNames[columnIndex]);
+  const updateMutation = updateProject();
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,18 +32,22 @@ export function CreateColumn(){
         }
       }
 
+      // Update list of column names
+      const columnNames = projectData.columnNames;
+      const updatedNames = [...columnNames];
+      updatedNames[columnIndex] = columnName;
+
       // Setup project data to update
       const updProject: Partial<typeof projects.$inferInsert> = {
-        columnCount: (columnCount + 1),
-        columnNames: [...columnNames, columnName],
+        columnNames: updatedNames,
         updatedAt: new Date()
       }
           
       // Update project  
-      createMutation.mutate({projectId: projectData.id, updProject}, {
+      updateMutation.mutate({projectId: projectData.id, updProject}, {
         onSuccess: () => {
           closeModal();
-          toast.success("Column created.");
+          toast.success("Column updated.");
         },
         onError: () => {
           toast.error("Error occured.");
@@ -62,7 +62,7 @@ export function CreateColumn(){
       <div className="max-w-md modal-form">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
-            Create Column
+            Update Column
           </h3>
           <button onClick={closeModal} className="modal-sub-btn">
             <X size={20}/>
@@ -83,8 +83,8 @@ export function CreateColumn(){
             <button onClick={closeModal} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn" disabled={createMutation.isPending}>
-              {createMutation.isPending? "Creating..." : "Create Column"}
+            <button type="submit" className="modal-main-btn" disabled={updateMutation.isPending}>
+              {updateMutation.isPending? "Updating..." : "Update Column"}
             </button>
           </div>
         </form>

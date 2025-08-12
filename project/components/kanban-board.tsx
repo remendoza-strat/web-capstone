@@ -8,12 +8,14 @@ import { ProjectsWithTasks } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
 import { CreateColumn } from "@/components/columns-modal/create"
 import { Project } from "@/lib/db/schema"
+import { KanbanProvider } from "@/components/kanban-provider"
+import { UpdateColumn } from "@/components/columns-modal/update"
 
 export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: ProjectsWithTasks }){
+  const [editingColumnIndex, setEditingColumnIndex] = useState<number | null>(null);
   const columnNames = projectData.columnNames;
   const tasks = projectData.tasks;
   const { isOpen, modalType, openModal } = useModal();
-  const project: Project = (({ tasks, ...rest }) => rest)(projectData);
 
   // To update task position and order
   const updateTaskMutation = updateTask();
@@ -181,9 +183,18 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
 
 
 
+  
+
   return (
+    <KanbanProvider editProject={editProject} projectData={projectData}>
     <div>
-      {isOpen && modalType === "createColumn" && <CreateColumn projectData={project}/>}
+      {isOpen && modalType === "createColumn" && <CreateColumn/>}
+      {isOpen && modalType === "updateColumn" && editingColumnIndex !== null && ( <UpdateColumn columnIndex={editingColumnIndex} />)}
+
+
+
+
+      
     <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
       <DndContext onDragEnd={handleDragEnd}>
         <div className="flex pb-4 space-x-6 overflow-x-auto">
@@ -198,11 +209,7 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
                 items={columnTasks.map((task) => task.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <KanbanColumn
-                  id={`column-${columnIndex}`}
-                  title={columnTitle}
-                  tasks={columnTasks}
-                />
+                <KanbanColumn id={`column-${columnIndex}`} title={columnTitle} tasks={columnTasks} onEdit={() => setEditingColumnIndex(columnIndex)}/>
               </SortableContext>
             );
           })}
@@ -218,5 +225,6 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
       </DndContext>
     </div>
     </div>
+  </KanbanProvider>
   );
 }
