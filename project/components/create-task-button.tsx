@@ -65,7 +65,8 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
         const userList = remainingMembers.filter((u) => 
           (u.user.lname).toLowerCase().includes(search) ||
           (u.user.fname).toLowerCase().includes(search) ||
-          (u.user.email).toLowerCase().includes(search)
+          (u.user.email).toLowerCase().includes(search) ||
+          (u.role).toLowerCase().includes(search)
         )
         setSuggestions(userList);
       }

@@ -32,12 +32,17 @@ export function UpdateProject({ projectData } : { projectData: ProjectsWithTasks
         isOverlap = new Date(taskDue) > new Date(dueDate);
       }
 
+      // Show error if task due overlap
+      if(isOverlap){
+        toast.error("Due Date: Tasks due date is beyond the new project due.");
+        return;
+      }
+
       // Validate input
       const result = ProjectSchema.safeParse({
         name,
         description,
-        dueDate,
-        isOverlap
+        dueDate
       });
     
       // Display error from validation
@@ -53,10 +58,6 @@ export function UpdateProject({ projectData } : { projectData: ProjectsWithTasks
         }
         if(errors.dueDate?.[0]){
           toast.error(errors.dueDate[0]);
-          return;
-        }
-        if(errors.isOverlap?.[0]){
-          toast.error(errors.isOverlap[0]);
           return;
         }
       }

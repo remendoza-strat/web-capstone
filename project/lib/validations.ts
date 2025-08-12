@@ -45,14 +45,6 @@ export const ProjectSchema = z.object({
     )
   ),
 
-  // Due date of project and tasks overlap validation
-  isOverlap: z
-    .boolean()
-    .refine(
-      val => !val, {
-      message: "Due Date: Tasks due date is beyond the project due."
-    }),
-
   // Code for project deletion validation
   projectDeleteCode: z
     .string().trim()
@@ -73,7 +65,7 @@ export const ProjectSchema = z.object({
     .refine(
       (val) => val === "DELETE THIS COLUMN",
       "Code: Must exactly match DELETE THIS COLUMN."
-    ),
+    )
   
 });
 

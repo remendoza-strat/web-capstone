@@ -10,10 +10,10 @@ export function ProjectGrid({ filteredProjs } : { filteredProjs: UserProjects[] 
 
   // Get important data per project
   const projects = recent.map((project) => {
-    const [projLabel, projStatus] = ProjectStatus(project.tasks, project.dueDate);
+    const [projLabel, projStatus] = ProjectStatus(project.tasks, project.columnCount, project.dueDate);
     const briefDesc = LimitChar(project.description, 70);
     const memberCount = (project.members.length);
-    const taskDone = (project.tasks.filter((t) => t.position === 100)).length;
+    const taskDone = (project.tasks.filter((t) => t.position === (project.columnCount - 1))).length;
     const taskCount = project.tasks.length;
     const detailedDate = DateTimeFormatter(project.dueDate);
     const progress = ComputeProgress(project.tasks, project.columnCount);

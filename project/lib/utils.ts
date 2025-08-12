@@ -25,7 +25,7 @@ export function ComputeProgress(tasks: Task[], columnCount: number){
     const position = t.position;
     const column = columnCount;
 
-    if(position === 100){
+    if(position === (columnCount - 1)){
       total += 100;
     }
     else{
@@ -37,8 +37,8 @@ export function ComputeProgress(tasks: Task[], columnCount: number){
 }
 
 // Get status of the project
-export function ProjectStatus(tasks: Task[], date: Date){
-  const done = tasks.every((task) => task.position === 100);
+export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
+  const done = tasks.every((task) => task.position === (columnCount - 1));
   if (done && tasks.length !== 0) return ["done", "Project done"];
   
   const now = new Date();
@@ -94,7 +94,7 @@ export function DateTimeFormatter(date: Date){
 export function ProjectsByStatus(status: string, result: UserProjects[]){
   if(status === "done"){
     result = result.filter((p) => 
-      p.tasks.length !== 0 && p.tasks.every((t) => t.position === 100)
+      p.tasks.length !== 0 && p.tasks.every((t) => t.position === (p.columnCount - 1))
     );
   }
   else if(status === "active"){
@@ -106,7 +106,7 @@ export function ProjectsByStatus(status: string, result: UserProjects[]){
   else if(status === "overdue"){
     result = result.filter((p) => {
       const milliDiff = p.dueDate.getTime() - (new Date()).getTime();
-      return milliDiff < 0 && p.tasks.every((t) => t.position !== 100);
+      return milliDiff < 0 && p.tasks.every((t) => t.position !== (p.columnCount - 1));
     });
   }
   return result;
