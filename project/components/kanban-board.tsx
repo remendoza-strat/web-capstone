@@ -4,16 +4,18 @@ import { DndContext } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { KanbanColumn } from "@/components/kanban-column"
 import { updateTask } from "@/lib/hooks/tasks"
-import { ProjectsWithTasks } from "@/lib/customtype"
+import { UserProjects } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
 import { KanbanProvider } from "@/components/kanban-provider"
 import { CreateColumn } from "@/components/columns-modal/create"
 import { UpdateColumn } from "@/components/columns-modal/update"
 import { DeleteColumn } from "@/components/columns-modal/delete"
+import { CreateTask } from "@/components/tasks-modal/create"
 
-export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: ProjectsWithTasks }){
+export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: UserProjects }){
   const [updateColumnIndex, setUpdateColumnIndex] = useState<number | null>(null);
   const [deleteColumnIndex, setDeleteColumnIndex] = useState<number | null>(null);
+  const [createTaskIndex, setCreateTaskIndex] = useState<number | null>(null);
   const columnNames = projectData.columnNames;
   const tasks = projectData.tasks;
   const { isOpen, modalType, openModal } = useModal();
@@ -182,12 +184,24 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
     }
   }
 
+
+
+
+
+
+
+
+
+
+
+  
   return(
     <KanbanProvider editProject={editProject} projectData={projectData}>
     <div>
       {isOpen && modalType === "createColumn" && <CreateColumn/>}
       {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && (<UpdateColumn columnIndex={updateColumnIndex}/>)}
       {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && (<DeleteColumn columnIndex={deleteColumnIndex}/>)}
+      {isOpen && modalType === "createTask" && createTaskIndex !== null && (<CreateTask columnIndex={createTaskIndex}/>)}
       
     <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
       <DndContext onDragEnd={handleDragEnd}>
@@ -207,8 +221,9 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
                   id={`column-${columnIndex}`} 
                   title={columnTitle} 
                   tasks={columnTasks} 
-                  onUpdate={() => setUpdateColumnIndex(columnIndex)}
-                  onDelete={() => setDeleteColumnIndex(columnIndex)}
+                  onUpdateColumn={() => setUpdateColumnIndex(columnIndex)}
+                  onDeleteColumn={() => setDeleteColumnIndex(columnIndex)}
+                  onCreateTask={() => setCreateTaskIndex(columnIndex)}
                 />
               </SortableContext>
             );

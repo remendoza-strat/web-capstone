@@ -75,7 +75,7 @@ export default function ProjectMainPage({userId, projectData} : {userId: string,
         </div>
 
 
-        <KanbanBoard editProject={editProject} projectData={projectWithTasks}/>
+        <KanbanBoard editProject={editProject} projectData={projectData}/>
 
       </div>
 

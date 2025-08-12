@@ -2,7 +2,6 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import  { getProjectByIdAction, deleteProjectAction, updateProjectAction } from "@/lib/db/actions"
 import { projects } from "@/lib/db/schema"
 
-
 // Uses getProjectByIdAction()
 export function getProjectById(projectId: string, options? : { enabled?: boolean }){
   return useQuery({
@@ -27,14 +26,12 @@ export function deleteProject(){
 // Uses updateProjectAction()
 export function updateProject(){
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async ({ projectId, updProject }: { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
+    mutationFn: async ({ projectId, updProject } : { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
       await updateProjectAction(projectId, updProject);
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      queryClient.invalidateQueries({ queryKey: ["projects", variables.projectId] });
     }
   });
 }

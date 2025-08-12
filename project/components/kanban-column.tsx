@@ -7,9 +7,9 @@ import { Task } from "@/lib/db/schema";
 import { useKanbanContext } from "./kanban-provider";
 import { Pencil, Trash2 } from "lucide-react";
 import { useModal } from "@/lib/states";
-import { UpdateColumn } from "./columns-modal/update";
 
-export function KanbanColumn({ id, title, tasks, onUpdate, onDelete } : { id: string; title: string; tasks: Task[]; onUpdate: () => void;  onDelete: () => void;}) {
+export function KanbanColumn({ id, title, tasks, onUpdateColumn, onDeleteColumn, onCreateTask } :
+   { id: string; title: string; tasks: Task[]; onUpdateColumn: () => void;  onDeleteColumn: () => void; onCreateTask: () => void;}) {
   const { setNodeRef, isOver } = useDroppable({ id });
   const { editProject, projectData } = useKanbanContext();
   const { isOpen, modalType, openModal } = useModal();
@@ -23,24 +23,20 @@ export function KanbanColumn({ id, title, tasks, onUpdate, onDelete } : { id: st
         isOver ? "bg-blue-100 dark:bg-blue-900" : "bg-gray-50 dark:bg-outer_space-400"
       }`}
     >
+
       {editProject && (
         <>
-
           <button
             className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-            onClick={() => {openModal("updateColumn"); onUpdate()}}>
+            onClick={() => {openModal("updateColumn"); onUpdateColumn()}}>
             <Pencil size={15}/>
           </button>
 
           <button
             className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-            onClick={() => {openModal("deleteColumn"); onDelete()}}>
+            onClick={() => {openModal("deleteColumn"); onDeleteColumn()}}>
               <Trash2 size={15}/>
           </button>
-
-
-
-          
         </>
       )}
             
@@ -57,10 +53,13 @@ export function KanbanColumn({ id, title, tasks, onUpdate, onDelete } : { id: st
             <KanbanTask key={task.id} task={task} />
           ))}
 
-          {/* Add Task button at the end */}
-          <button className="w-full p-3 border-2 border-dashed rounded-lg border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors">
-            + Add Task
-          </button>
+          {editProject && 
+            <button 
+              className="w-full p-3 border-2 border-dashed rounded-lg border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors"
+              onClick={() => {openModal("createTask"); onCreateTask()}}>
+                + Add Task
+            </button>
+          }
         </div>
       </SortableContext>
     </div>

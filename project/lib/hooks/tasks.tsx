@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { deleteTaskAction, updateTaskAction } from "@/lib/db/actions"
-import { tasks } from "@/lib/db/schema"
+import { createTaskAction, deleteTaskAction, updateTaskAction } from "@/lib/db/actions"
+import { NewTask, tasks } from "@/lib/db/schema"
 
 // Uses updateTaskAction()
 export function updateTask(){
@@ -20,6 +20,20 @@ export function deleteTask(){
   return useMutation({
     mutationFn: async (taskId: string) => {
       await deleteTaskAction(taskId);
+    }
+  });
+}
+
+// Uses createTaskAction()
+export function createTask(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (newTask: NewTask) => {
+      const data = await createTaskAction(newTask);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
     }
   });
 }

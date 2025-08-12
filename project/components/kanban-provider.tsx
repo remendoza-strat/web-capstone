@@ -1,11 +1,11 @@
 "use client"
 import { createContext, useContext, ReactNode } from "react"
-import { ProjectsWithTasks } from "@/lib/customtype"
+import { UserProjects } from "@/lib/customtype"
 
 // Props values
 interface KanbanContextProps {
   editProject: boolean;
-  projectData: ProjectsWithTasks;
+  projectData: UserProjects;
 }
 
 // Create context
