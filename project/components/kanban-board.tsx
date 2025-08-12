@@ -6,13 +6,14 @@ import { KanbanColumn } from "@/components/kanban-column"
 import { updateTask } from "@/lib/hooks/tasks"
 import { ProjectsWithTasks } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
-import { CreateColumn } from "@/components/columns-modal/create"
-import { Project } from "@/lib/db/schema"
 import { KanbanProvider } from "@/components/kanban-provider"
+import { CreateColumn } from "@/components/columns-modal/create"
 import { UpdateColumn } from "@/components/columns-modal/update"
+import { DeleteColumn } from "@/components/columns-modal/delete"
 
 export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: ProjectsWithTasks }){
-  const [editingColumnIndex, setEditingColumnIndex] = useState<number | null>(null);
+  const [updateColumnIndex, setUpdateColumnIndex] = useState<number | null>(null);
+  const [deleteColumnIndex, setDeleteColumnIndex] = useState<number | null>(null);
   const columnNames = projectData.columnNames;
   const tasks = projectData.tasks;
   const { isOpen, modalType, openModal } = useModal();
@@ -181,19 +182,12 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
     }
   }
 
-
-
-  
-
-  return (
+  return(
     <KanbanProvider editProject={editProject} projectData={projectData}>
     <div>
       {isOpen && modalType === "createColumn" && <CreateColumn/>}
-      {isOpen && modalType === "updateColumn" && editingColumnIndex !== null && ( <UpdateColumn columnIndex={editingColumnIndex} />)}
-
-
-
-
+      {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && (<UpdateColumn columnIndex={updateColumnIndex}/>)}
+      {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && (<DeleteColumn columnIndex={deleteColumnIndex}/>)}
       
     <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
       <DndContext onDragEnd={handleDragEnd}>
@@ -209,7 +203,13 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
                 items={columnTasks.map((task) => task.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <KanbanColumn id={`column-${columnIndex}`} title={columnTitle} tasks={columnTasks} onEdit={() => setEditingColumnIndex(columnIndex)}/>
+                <KanbanColumn 
+                  id={`column-${columnIndex}`} 
+                  title={columnTitle} 
+                  tasks={columnTasks} 
+                  onUpdate={() => setUpdateColumnIndex(columnIndex)}
+                  onDelete={() => setDeleteColumnIndex(columnIndex)}
+                />
               </SortableContext>
             );
           })}

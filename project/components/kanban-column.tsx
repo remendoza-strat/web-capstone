@@ -9,7 +9,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useModal } from "@/lib/states";
 import { UpdateColumn } from "./columns-modal/update";
 
-export function KanbanColumn({ id, title, tasks, onEdit } : { id: string; title: string; tasks: Task[]; onEdit: () => void }) {
+export function KanbanColumn({ id, title, tasks, onUpdate, onDelete } : { id: string; title: string; tasks: Task[]; onUpdate: () => void;  onDelete: () => void;}) {
   const { setNodeRef, isOver } = useDroppable({ id });
   const { editProject, projectData } = useKanbanContext();
   const { isOpen, modalType, openModal } = useModal();
@@ -25,19 +25,22 @@ export function KanbanColumn({ id, title, tasks, onEdit } : { id: string; title:
     >
       {editProject && (
         <>
+
           <button
             className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-       
-            onClick={() => {openModal("updateColumn"); onEdit()}}
-          >
-            <Pencil size={15} />
+            onClick={() => {openModal("updateColumn"); onUpdate()}}>
+            <Pencil size={15}/>
           </button>
+
           <button
             className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-            onClick={() => openModal("deleteColumn")}
-          >
-            <Trash2 size={15} />
+            onClick={() => {openModal("deleteColumn"); onDelete()}}>
+              <Trash2 size={15}/>
           </button>
+
+
+
+          
         </>
       )}
             

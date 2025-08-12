@@ -65,7 +65,15 @@ export const ProjectSchema = z.object({
   columnName: z
     .string().trim()
     .min(3, "Column Name: Must be at least 3 characters.")
-    .max(30, "Column Name: Must not exceed 30 characters.")
+    .max(30, "Column Name: Must not exceed 30 characters."),
+  
+  // Code for column deletion validation
+  columnDeleteCode: z
+    .string().trim()
+    .refine(
+      (val) => val === "DELETE THIS COLUMN",
+      "Code: Must exactly match DELETE THIS COLUMN."
+    ),
   
 });
 

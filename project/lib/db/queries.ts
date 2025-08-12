@@ -98,6 +98,9 @@ export const queries = {
 
       return result.id;
     },
+    deleteTask: async (taskId: string) => {
+      await db.delete(tasks).where(eq(tasks.id, taskId));
+    },
     updateTask: async (taskId: string, updTask: Partial<typeof tasks.$inferInsert>) => {
       await db.update(tasks)
       .set({...updTask})

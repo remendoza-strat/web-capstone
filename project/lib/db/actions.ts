@@ -62,7 +62,7 @@ export async function getUserIdAction(clerkId: string){
   return await queries.users.getUserId(clerkId);
 }
 
-// Return = project information with its approved members and tasks
+// Return = project with its approved members and tasks
 // of the given projectId
 export async function getProjectByIdAction(projectId: string){
   return await queries.projects.getProjectById(projectId);
@@ -78,6 +78,12 @@ export async function deleteProjectAction(projectId: string){
 // of given projectId
 export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
   await queries.projects.updateProject(projectId, updProject);
+}
+
+// Delete = task
+// of given taskId
+export async function deleteTaskAction(taskId: string){
+  await queries.tasks.deleteTask(taskId);
 }
 
 // Update = task
