@@ -42,16 +42,14 @@ export const ProjectSchema = z.object({
           });
         }
       }
-    )
-  ),
+    )),
 
   // Code for project deletion validation
   projectDeleteCode: z
     .string().trim()
     .refine(
       (val) => val === "DELETE THIS PROJECT",
-      "Code: Must exactly match DELETE THIS PROJECT."
-    ),
+      "Code: Must exactly match DELETE THIS PROJECT."),
 
   // Column name validation
   columnName: z
@@ -64,8 +62,7 @@ export const ProjectSchema = z.object({
     .string().trim()
     .refine(
       (val) => val === "DELETE THIS COLUMN",
-      "Code: Must exactly match DELETE THIS COLUMN."
-    )
+      "Code: Must exactly match DELETE THIS COLUMN.")
   
 });
 
@@ -76,8 +73,7 @@ export const ProjectMemberSchema = z.object({
   projectId: z
     .union([z.string(), z.undefined()])
     .refine((val) => val && val.length > 0, {
-      message: "Project: Must select a project to add member to."
-    }),
+      message: "Project: Must select a project to add member to."}),
 
   // User with role validation
   members: z.array(z
@@ -93,8 +89,7 @@ export const TaskSchema = z.object({
   projectId: z
     .union([z.string(), z.undefined()])
     .refine((val) => val && val.length > 0, {
-      message: "Project: Must select a project to assign task to."
-    }),
+      message: "Project: Must select a project to assign task to."}),
 
   // Title validation
   title: z
@@ -128,35 +123,24 @@ export const TaskSchema = z.object({
       }
       return null;
     },
-    z.date().nullable()
-  ),
-  deadline: z.any().optional()
-  
-})
-.superRefine((data, ctx) => {
-    const { dueDate, deadline } = data;
-    if(!dueDate){
-      ctx.addIssue({
-        path: ["dueDate"],
-        code: z.ZodIssueCode.custom,
-        message: "Due Date: Must be a valid date."
-      });
-      return;
-    } 
-    if(dueDate <= new Date()){
-      ctx.addIssue({
-        path: ["dueDate"],
-        code: z.ZodIssueCode.custom,
-        message: "Due Date: Must be in the future."
-      });
-      return;
-    }
-    if(dueDate && deadline && dueDate > deadline){
-      ctx.addIssue({
-        path: ["dueDate"],
-        code: z.ZodIssueCode.custom,
-        message: "Due Date: Must be on or before the project deadline."
-      });
-      return;
-    }
+    z
+      .date()
+      .nullable()
+      .superRefine((date, ctx) => {
+        if(date === null){
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Due Date: Must be a valid date."
+          });
+          return;
+        }
+        if(date <= new Date()){
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Due Date: Must be in the future."
+          });
+        }
+      }
+    ))
+
 });

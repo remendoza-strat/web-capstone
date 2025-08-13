@@ -44,25 +44,37 @@ export function DeleteColumn({ columnIndex } : { columnIndex: number }){
       // Delete column tasks
 			if(projectData.tasks.length > 0){
 				const deleteTasks = projectData.tasks.filter((task) => task.position === columnIndex);
-				for(const task of deleteTasks){
-					deleteTaskMutation.mutate(task.id)
-				}
+        try{
+          for(const task of deleteTasks){
+            await deleteTaskMutation.mutateAsync(task.id);
+          }
+        } 
+        catch{
+          toast.error("Error occurred.");
+          return;
+        }
 
 				// Adjust column position of affected tasks
-				if(columnIndex !== projectData.columnCount){
+				if((columnIndex + 1) !== projectData.columnCount){
 					const updateTasks = projectData.tasks.map((task) => {
 						if(task.position > columnIndex){
 							return {...task, position: task.position - 1}
 						}
 						return task;
 					});
-					for(const task of updateTasks){
-						const updTask: Partial<typeof tasks.$inferInsert> = {
-							position: task.position,
-							updatedAt: new Date()
-						}
-						updateTaskMutation.mutate({taskId: task.id, updTask})
-					}
+          try{
+            for(const task of updateTasks){
+              const updTask: Partial<typeof tasks.$inferInsert> = {
+                position: task.position,
+                updatedAt: new Date()
+						  }
+              await updateTaskMutation.mutateAsync({taskId: task.id, updTask});
+            }
+          } 
+          catch{
+            toast.error("Error occurred.");
+            return;
+          }
 				}
 			}
         
@@ -117,8 +129,8 @@ export function DeleteColumn({ columnIndex } : { columnIndex: number }){
             <button onClick={closeModal} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn" disabled={deleteMutation.isPending}>
-              {deleteMutation.isPending? "Deleting..." : "Delete Column"}
+            <button type="submit" className="modal-main-btn" disabled={deleteTaskMutation.isPending || updateTaskMutation.isPending || deleteMutation.isPending}>
+              {deleteTaskMutation.isPending || updateTaskMutation.isPending || deleteMutation.isPending? "Deleting..." : "Delete Column"}
             </button>
           </div>
         </form>

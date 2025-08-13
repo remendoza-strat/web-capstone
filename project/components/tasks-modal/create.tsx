@@ -8,20 +8,22 @@ import { useState, useEffect } from "react"
 import { TaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
 import { Priority, PriorityArr } from "@/lib/customtype"
-import type { NewTask, NewTaskAssignee, User} from "@/lib/db/schema"
-import { useKanbanContext } from "../kanban-provider"
+import type { NewTask, NewTaskAssignee, User } from "@/lib/db/schema"
+import { useKanbanContext } from "@/components/kanban-provider"
 import { useModal } from "@/lib/states"
 import { createTask } from "@/lib/hooks/tasks"
 import { createTaskAssignee } from "@/lib/hooks/taskAssignees"
+import { updateProject } from "@/lib/hooks/projects"
 
 // Dynamic import of react quill
-const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
-export function CreateTask({columnIndex} : {columnIndex: number}){
+export function CreateTask({ columnIndex } : { columnIndex: number }){
   const { closeModal } = useModal();
   const { projectData } = useKanbanContext();
   const createTaskMutation = createTask();
   const createTaskAssigneeMutation = createTaskAssignee();
+  const updateProjectMutation = updateProject();
 
   // Hook for user
   const [query, setQuery] = useState("");
@@ -35,8 +37,6 @@ export function CreateTask({columnIndex} : {columnIndex: number}){
   const [priority, setPriority] = useState<Priority>("Low");
   const [label, setLabel] = useState("");
 
-
-
   // Getting suggested user and removing already selected user
   useEffect(() => {
     const timeout = setTimeout(async () => {
@@ -46,16 +46,16 @@ export function CreateTask({columnIndex} : {columnIndex: number}){
           return;
         }
         const members = projectData.members;
-        const selectedIds = selectedUsers.map((u) => u.user.id);
-        const remainingMembers = members.filter((m) => !selectedIds.includes(m.user.id));
+        const selectedId = selectedUsers.map((user) => user.user.id);
+        const remainingMember = members.filter((member) => !selectedId.includes(member.user.id));
         const search = query.toLowerCase();
-        const userList = remainingMembers.filter((u) => 
-          (u.user.lname).toLowerCase().includes(search) ||
-          (u.user.fname).toLowerCase().includes(search) ||
-          (u.user.email).toLowerCase().includes(search) ||
-          (u.role).toLowerCase().includes(search)
+        const suggestionList = remainingMember.filter((member) => 
+          (member.user.lname).toLowerCase().includes(search) ||
+          (member.user.fname).toLowerCase().includes(search) ||
+          (member.user.email).toLowerCase().includes(search) ||
+          (member.role).toLowerCase().includes(search)
         )
-        setSuggestions(userList);
+        setSuggestions(suggestionList);
       }
       catch{return}
     }, 200);
@@ -81,11 +81,21 @@ export function CreateTask({columnIndex} : {columnIndex: number}){
     e.preventDefault();
 
     try{
+      // Get due dates
+      const projDue = new Date(projectData.dueDate);
+      const taskDue = new Date(dueDate);
 
-      const deadline = projectData.dueDate;
+      // Task due is beyond project due
+      if(taskDue > projDue){
+        toast.error("Due Date: Must be on or before the project deadline.");
+        return;
+      }
 
-      // Return if deadline is null
-      if (!deadline) return;
+      // No seleted user to assign task
+      if(selectedUsers.length === 0){
+        toast.error("User: Must select at least 1 user to assign task to.");
+        return;
+      }
 
       // Get raw text of description
       const descriptionRaw = StripHTML(String(description).trim());
@@ -95,9 +105,7 @@ export function CreateTask({columnIndex} : {columnIndex: number}){
         title: title,
         description: descriptionRaw,
         label: label,
-        members: selectedUsers,
-        dueDate: new Date(dueDate),
-        deadline: new Date(deadline)
+        dueDate: new Date(dueDate)
       })
 
       // Display errors
@@ -115,23 +123,19 @@ export function CreateTask({columnIndex} : {columnIndex: number}){
           toast.error(errors.label[0]);
           return;
         }
-        if(errors.members?.[0]){
-          toast.error(errors.members[0]);
-          return;
-        } 
         if(errors.dueDate?.[0]){
           toast.error(errors.dueDate[0]);
           return;
         } 
       }
 
-     const lastOrder = Math.max(
-  ...projectData.tasks
-    .filter(t => t.position === columnIndex) 
-    .map(t => t.order),                     
-  0                                         
-);
-
+      // Get the last order number in column
+      let lastOrder = 0;
+      const columnTasks = (projectData.tasks.filter((task) => task.position === columnIndex)).length;
+      if(columnTasks !== 0){
+        lastOrder = Math.max(...projectData.tasks.filter(t => t.position === columnIndex).map(t => t.order), 0);
+        lastOrder = lastOrder + 1;
+      }
 
       // Create object of new task
       const newTask: NewTask = {
@@ -141,22 +145,38 @@ export function CreateTask({columnIndex} : {columnIndex: number}){
         dueDate: new Date(dueDate),
         priority: priority,
         position: columnIndex,
-        order: lastOrder + 1,
+        order: lastOrder,
         label: label
       };
 
-const id = await createTaskMutation.mutateAsync(newTask); 
-    for (const { user } of selectedUsers) {
-      const newTaskAssignee: NewTaskAssignee = {
-        taskId: id,
-        userId: user.id,
-      };
-      await createTaskAssigneeMutation.mutateAsync(newTaskAssignee);
-    }
+      try{
+        // Create task
+        const id = await createTaskMutation.mutateAsync(newTask);
+        
+        // Assign task
+        for(const { user } of selectedUsers){
+          const newTaskAssignee: NewTaskAssignee = {
+            taskId: id,
+            userId: user.id,
+          };
+          await createTaskAssigneeMutation.mutateAsync(newTaskAssignee);
+        }
+      } 
+      catch{
+        toast.error("Error occurred.");
+        return;
+      }
 
-      // Display success and close modal
-      toast.success("All members assigned to task.");
-      closeModal();
+      // Update project  
+      updateProjectMutation.mutate({ projectId: projectData.id, updProject: {updatedAt: new Date()} }, {
+        onSuccess: () => {
+          closeModal();
+          toast.success("Task created successfully.");
+        },
+        onError: () => {
+          toast.error("Error occured.");
+        }
+      });
     }
     catch{return}
   };
@@ -234,7 +254,7 @@ const id = await createTaskMutation.mutateAsync(newTask);
             <div className="relative">
               <input
                 className="modal-form-input"
-                type="text" placeholder="Search by name or email"
+                type="text" placeholder="Search project members"
                 value={query} onChange={(e) => setQuery(e.target.value)}/>
                   {query && suggestions.length > 0 && (
                     <ul className="modal-form-suggestion-ul">
@@ -279,8 +299,8 @@ const id = await createTaskMutation.mutateAsync(newTask);
             <button onClick={closeModal} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn">
-              Create Task
+            <button type="submit" className="modal-main-btn" disabled={createTaskMutation.isPending || createTaskAssigneeMutation.isPending || updateProjectMutation.isPending}>
+              {createTaskMutation.isPending || createTaskAssigneeMutation.isPending || updateProjectMutation.isPending? "Creating..." : "Create Task"}
             </button>
           </div>
         </form>
