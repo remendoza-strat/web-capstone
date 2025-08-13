@@ -1,18 +1,6 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
-import  { getProjectByIdAction, deleteProjectAction, updateProjectAction } from "@/lib/db/actions"
+import  { getProjectDataAction, deleteProjectAction, updateProjectAction, getProjectAction } from "@/lib/db/actions"
 import { projects } from "@/lib/db/schema"
-
-// Uses getProjectByIdAction()
-export function getProjectById(projectId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["projects", projectId],
-    queryFn: async () => {
-      const data = await getProjectByIdAction(projectId);
-      return data;
-    },
-    enabled: options?.enabled ?? !!projectId
-  });
-}
 
 // Uses deleteProjectAction()
 export function deleteProject(){
@@ -31,7 +19,31 @@ export function updateProject(){
       await updateProjectAction(projectId, updProject);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project"] });
     }
+  });
+}
+
+// Uses getProjectAction()
+export function getProject(projectId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["project"],
+    queryFn: async () => {
+      const data = await getProjectAction(projectId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!projectId
+  });
+}
+
+// Uses getProjectDataAction()
+export function getProjectData(projectId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const data = await getProjectDataAction(projectId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!projectId
   });
 }

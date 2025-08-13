@@ -71,12 +71,13 @@ export function UpdateProject({ projectData } : { projectData: ProjectsWithTasks
       }
           
       // Update project  
-      updateMutation.mutate({projectId: projectData.id, updProject}, {
+      updateMutation.mutate({ projectId: projectData.id, updProject }, {
         onSuccess: () => {
           closeModal();
-          toast.success("Project updated.");
+          toast.success("Project updated successfully.");
         },
         onError: () => {
+          closeModal();
           toast.error("Error occured.");
         }
       });

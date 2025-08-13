@@ -36,9 +36,10 @@ export function DeleteProject({ projectId } : { projectId: string }){
         onSuccess: () => {
           closeModal();
           router.push("/projects");
-          toast.success("Project deleted.");
+          toast.success("Project deleted successfully.");
         },
         onError: () => {
+          closeModal();
           toast.error("Error occured.");
         }
       });
