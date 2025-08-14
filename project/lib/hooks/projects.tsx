@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
-import  { getProjectDataAction, deleteProjectAction, updateProjectAction, getProjectAction } from "@/lib/db/actions"
+import  { getProjectDataAction, deleteProjectAction, updateProjectAction, getProjectAction, getProjectWithTasksAction } from "@/lib/db/actions"
 import { projects } from "@/lib/db/schema"
 
 // Uses deleteProjectAction()
@@ -20,6 +20,7 @@ export function updateProject(){
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["project"] });
+      queryClient.invalidateQueries({ queryKey: ["kanban-display"] });
     }
   });
 }
@@ -42,6 +43,18 @@ export function getProjectData(projectId: string, options? : { enabled?: boolean
     queryKey: ["projects"],
     queryFn: async () => {
       const data = await getProjectDataAction(projectId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!projectId
+  });
+}
+
+// Uses getProjectAction()
+export function getProjectWithTasks(projectId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["kanban-display"],
+    queryFn: async () => {
+      const data = await getProjectWithTasksAction(projectId);
       return data ?? null;
     },
     enabled: options?.enabled ?? !!projectId

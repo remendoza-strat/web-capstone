@@ -7,17 +7,11 @@ import { useModal } from "@/lib/states"
 import { ProjectSchema } from "@/lib/validations"
 import { updateProject } from "@/lib/hooks/projects"
 import { projects } from "@/lib/db/schema"
-import { useKanbanContext } from "@/components/kanban-provider"
 
-export function CreateColumn(){
-  const { projectData } = useKanbanContext();
+export function CreateColumn({ columnNames, columnCount, projectId } : { columnNames: string[]; columnCount: number; projectId: string }){
   const { closeModal } = useModal();
   const [columnName, setColumnName] = useState("");
   const createMutation = updateProject();
-
-  // Get existing column names and count
-  const columnNames = projectData.columnNames;
-  const columnCount = projectData.columnCount;
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,12 +38,13 @@ export function CreateColumn(){
       }
           
       // Update project  
-      createMutation.mutate({projectId: projectData.id, updProject}, {
+      createMutation.mutate({projectId: projectId, updProject}, {
         onSuccess: () => {
           closeModal();
-          toast.success("Column created.");
+          toast.success("Column created successfully.");
         },
         onError: () => {
+          closeModal();
           toast.error("Error occured.");
         }
       });

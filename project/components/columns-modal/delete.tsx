@@ -7,14 +7,13 @@ import { useModal } from "@/lib/states"
 import { ProjectSchema } from "@/lib/validations"
 import { updateProject } from "@/lib/hooks/projects"
 import { projects, tasks } from "@/lib/db/schema"
-import { useKanbanContext } from "@/components/kanban-provider"
 import { deleteTask, updateTask } from "@/lib/hooks/tasks"
+import { ProjectsWithTasks } from "@/lib/customtype"
 
-export function DeleteColumn({ columnIndex } : { columnIndex: number }){
-  const { projectData } = useKanbanContext();
+export function DeleteColumn({ columnIndex, projectData } : { columnIndex: number; projectData: ProjectsWithTasks}){
   const { closeModal } = useModal();
   const [code, setCode] = useState("");
-  const deleteMutation = updateProject();
+  const deleteColumnMutation = updateProject();
 	const deleteTaskMutation = deleteTask();
 	const updateTaskMutation = updateTask();
 
@@ -25,7 +24,7 @@ export function DeleteColumn({ columnIndex } : { columnIndex: number }){
     try{
 			// Check count of column
 			if(projectData.columnCount <= 3){
-				toast.error("Minimum kanban column is 3.");
+				toast.error("Column: Minimum kanban column is 3.");
 				return;
 			}
 
@@ -90,12 +89,13 @@ export function DeleteColumn({ columnIndex } : { columnIndex: number }){
       }
 
 			// Update project  
-      deleteMutation.mutate({ projectId: projectData.id, updProject }, {
+      deleteColumnMutation.mutate({ projectId: projectData.id, updProject }, {
         onSuccess: () => {
           closeModal();
-          toast.success("Column deleted.");
+          toast.success("Column deleted successfully.");
         },
         onError: () => {
+          closeModal();
           toast.error("Error occured.");
         }
       });
@@ -129,8 +129,8 @@ export function DeleteColumn({ columnIndex } : { columnIndex: number }){
             <button onClick={closeModal} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn" disabled={deleteTaskMutation.isPending || updateTaskMutation.isPending || deleteMutation.isPending}>
-              {deleteTaskMutation.isPending || updateTaskMutation.isPending || deleteMutation.isPending? "Deleting..." : "Delete Column"}
+            <button type="submit" className="modal-main-btn" disabled={deleteTaskMutation.isPending || updateTaskMutation.isPending || deleteColumnMutation.isPending}>
+              {deleteTaskMutation.isPending || updateTaskMutation.isPending || deleteColumnMutation.isPending? "Deleting..." : "Delete Column"}
             </button>
           </div>
         </form>

@@ -10,16 +10,20 @@ export function updateTask(){
       await updateTaskAction(taskId, updTask);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects"] }) 
+      queryClient.invalidateQueries({ queryKey: ["kanban-display"] }) 
     }
   });
 }
 
 // Uses deleteTaskAction()
 export function deleteTask(){
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (taskId: string) => {
       await deleteTaskAction(taskId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["kanban-display"] }) 
     }
   });
 }

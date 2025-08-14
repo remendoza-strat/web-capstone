@@ -66,6 +66,14 @@ export const queries = {
       const result = query? {...query, members: query.members.filter(member => member.approved === true)} : null
       return result;
     },
+    getProjectWithTasks: async (projectId: string) => {
+      const result = await db.query.projects.findFirst({
+        where: (p, {eq}) => eq(p.id, projectId),
+        with: {tasks: true}
+      });
+      
+      return result;
+    },
     getProject: async (projectId: string) => {
       const result = await db.query.projects.findFirst({
         where: eq(projects.id, projectId)

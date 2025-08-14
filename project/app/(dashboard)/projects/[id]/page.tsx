@@ -15,7 +15,13 @@ import { ProjectsWithTasks, Role } from "@/lib/customtype";
 import { DateTimeFormatter } from "@/lib/utils";
 import { getProjectData, getProject } from "@/lib/hooks/projects"
 import { getUserId } from "@/lib/hooks/users"
+import { KanbanBoard } from "@/components/kanban-board";
+import { Task } from "@/lib/db/schema";
 
+
+
+
+//-----------------------------------------------DONE SECTION-----------------------------------------------/
 export default function ProjectPage(){
   // Get project id from parameter
   const params = useParams<{ id: string }>();
@@ -73,8 +79,9 @@ export default function ProjectPage(){
   const role: Role = projectData.members.find((m) => m.userId === userId)?.role as Role;
   const editProject = hasPermission(role, "editProject");
 
-  // Remove members in project data for updating project
-  const projectWithTasks: ProjectsWithTasks = (({ members, ...rest }) => rest)(projectData);
+  // Get tasks
+  const tasks: Task[] = projectData.tasks;
+//-----------------------------------------------DONE SECTION-----------------------------------------------/
 
 
 
@@ -90,7 +97,7 @@ export default function ProjectPage(){
   
    return (
       <DashboardLayout>
-        {isOpen && modalType === "updateProject" && <UpdateProject projectData={projectWithTasks}/>}
+        {isOpen && modalType === "updateProject" && <UpdateProject project={project} tasks={tasks}/>}
         {isOpen && modalType === "deleteProject" && <DeleteProject projectId={projectId}/>}
   
         <div className="space-y-6">
@@ -143,9 +150,9 @@ export default function ProjectPage(){
             </div>
   
           </div>
-              {/**
-               <KanbanBoard editProject={editProject} projectData={projectData}/>
-               */}
+            
+          <KanbanBoard editProject={editProject} projectId={projectId}/>
+         
         </div>
   
       </DashboardLayout>

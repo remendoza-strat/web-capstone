@@ -4,14 +4,13 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { KanbanTask } from "./kanban-task";
 import { Task } from "@/lib/db/schema";
-import { useKanbanContext } from "./kanban-provider";
 import { Pencil, Trash2 } from "lucide-react";
 import { useModal } from "@/lib/states";
 
-export function KanbanColumn({ id, title, tasks, onUpdateColumn, onDeleteColumn, onCreateTask } :
-   { id: string; title: string; tasks: Task[]; onUpdateColumn: () => void;  onDeleteColumn: () => void; onCreateTask: () => void;}) {
+export function KanbanColumn({ editProject, id, title, tasks, onUpdateColumn, onDeleteColumn, onCreateTask } :
+   { editProject: boolean; id: string; title: string; tasks: Task[]; onUpdateColumn: () => void;  onDeleteColumn: () => void; onCreateTask: () => void;}) {
   const { setNodeRef, isOver } = useDroppable({ id });
-  const { editProject, projectData } = useKanbanContext();
+  
   const { isOpen, modalType, openModal } = useModal();
 
   return (

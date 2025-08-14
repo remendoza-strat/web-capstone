@@ -4,33 +4,48 @@ import { DndContext } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { KanbanColumn } from "@/components/kanban-column"
 import { updateTask } from "@/lib/hooks/tasks"
-import { UserProjects } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
-import { KanbanProvider } from "@/components/kanban-provider"
 import { CreateColumn } from "@/components/columns-modal/create"
 import { UpdateColumn } from "@/components/columns-modal/update"
 import { DeleteColumn } from "@/components/columns-modal/delete"
-import { CreateTask } from "@/components/tasks-modal/create"
+import { getProjectWithTasks } from "@/lib/hooks/projects"
+import ErrorPage from "./pages/error"
+import LoadingPage from "./pages/loading"
 
-export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: UserProjects }){
+export function KanbanBoard({ editProject, projectId } : { editProject: boolean; projectId: string }){
+
+  // Query
+  const { data: projectData, isLoading: projectDataLoading, error: projectDataError } =
+    getProjectWithTasks(projectId, { enabled: Boolean(projectId) });
+
+
+  // All Hooks must be called unconditionally
+  const [boardData, setBoardData] = useState({
+    columnNames: projectData?.columnNames || [],
+    tasks: projectData?.tasks || [],
+  });
   const [updateColumnIndex, setUpdateColumnIndex] = useState<number | null>(null);
   const [deleteColumnIndex, setDeleteColumnIndex] = useState<number | null>(null);
   const [createTaskIndex, setCreateTaskIndex] = useState<number | null>(null);
-  const columnNames = projectData.columnNames;
-  const tasks = projectData.tasks;
   const { isOpen, modalType, openModal } = useModal();
 
-  // To update task position and order
   const updateTaskMutation = updateTask();
-  
-  // Display of column names and tasks
-  const [boardData, setBoardData] = useState({ columnNames, tasks });
 
-  // Update when new data is created
+  // Update boardData when projectData changes
   useEffect(() => {
-    setBoardData({ columnNames, tasks });
-  }, [columnNames, tasks]);
+    if (projectData) {
+      setBoardData({
+        columnNames: projectData.columnNames,
+        tasks: projectData.tasks,
+      });
+    }
+  }, [projectData]);
 
+  // Early returns
+  if (projectDataLoading) return <LoadingPage />;
+  if (projectDataError || !projectData) return <ErrorPage code={404} message="Project not found." />;
+
+  
   // Handle task movements
   function handleDragEnd(event: any){
     const { active, over } = event;
@@ -189,20 +204,27 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
 
 
 
-
-
-
-
-
-  
   return(
-    <KanbanProvider editProject={editProject} projectData={projectData}>
+   
     <div>
-      {isOpen && modalType === "createColumn" && <CreateColumn/>}
-      {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && (<UpdateColumn columnIndex={updateColumnIndex}/>)}
-      {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && (<DeleteColumn columnIndex={deleteColumnIndex}/>)}
-      {isOpen && modalType === "createTask" && createTaskIndex !== null && (<CreateTask columnIndex={createTaskIndex}/>)}
-      
+      {isOpen && modalType === "createColumn" &&  <CreateColumn 
+        columnNames={projectData.columnNames} 
+        columnCount={projectData.columnCount} 
+        projectId={projectData.id}/>
+      }
+
+      {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && <UpdateColumn
+        columnIndex={updateColumnIndex} 
+        columnNames={projectData.columnNames} 
+        projectId={projectData.id}/>
+      }
+
+      {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && <DeleteColumn 
+        columnIndex={deleteColumnIndex} 
+        projectData={projectData}/>
+      }
+  
+
     <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
       <DndContext onDragEnd={handleDragEnd}>
         <div className="flex pb-4 space-x-6 overflow-x-auto">
@@ -218,6 +240,7 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
                 strategy={verticalListSortingStrategy}
               >
                 <KanbanColumn 
+                  editProject={editProject}
                   id={`column-${columnIndex}`} 
                   title={columnTitle} 
                   tasks={columnTasks} 
@@ -240,6 +263,6 @@ export function KanbanBoard({ editProject, projectData } : { editProject: boolea
       </DndContext>
     </div>
     </div>
-  </KanbanProvider>
+
   );
 }

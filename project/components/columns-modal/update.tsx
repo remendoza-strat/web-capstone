@@ -7,12 +7,10 @@ import { useModal } from "@/lib/states"
 import { ProjectSchema } from "@/lib/validations"
 import { updateProject } from "@/lib/hooks/projects"
 import { projects } from "@/lib/db/schema"
-import { useKanbanContext } from "@/components/kanban-provider"
 
-export function UpdateColumn({ columnIndex } : { columnIndex: number }){
-  const { projectData } = useKanbanContext();
+export function UpdateColumn({columnIndex, columnNames, projectId } : { columnIndex: number; columnNames: string[]; projectId: string }){
   const { closeModal } = useModal();
-  const [columnName, setColumnName] = useState(projectData.columnNames[columnIndex]);
+  const [columnName, setColumnName] = useState(columnNames[columnIndex]);
   const updateMutation = updateProject();
 
   // Handle form submission
@@ -33,7 +31,6 @@ export function UpdateColumn({ columnIndex } : { columnIndex: number }){
       }
 
       // Update list of column names
-      const columnNames = projectData.columnNames;
       const updatedNames = [...columnNames];
       updatedNames[columnIndex] = columnName;
 
@@ -44,12 +41,13 @@ export function UpdateColumn({ columnIndex } : { columnIndex: number }){
       }
           
       // Update project  
-      updateMutation.mutate({projectId: projectData.id, updProject}, {
+      updateMutation.mutate({projectId: projectId, updProject}, {
         onSuccess: () => {
           closeModal();
-          toast.success("Column updated.");
+          toast.success("Column updated successfully.");
         },
         onError: () => {
+          closeModal();
           toast.error("Error occured.");
         }
       });

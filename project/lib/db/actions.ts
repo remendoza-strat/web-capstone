@@ -58,7 +58,7 @@ export async function updateProjectTimeAction(projectId: string){
 
 
 
-
+//-----------------------------------------------DONE SECTION-----------------------------------------------/
 // QUERY ACTIONS-----------------------------------------------------------------
 
 // Requires: clerk id
@@ -71,6 +71,12 @@ export async function getUserIdAction(clerkId: string){
 // Return: project with members and tasks
 export async function getProjectDataAction(projectId: string){
   return await queries.projects.getProjectData(projectId);
+}
+
+// Require: project id
+// Return: project with tasks
+export async function getProjectWithTasksAction(projectId: string){
+  return await queries.projects.getProjectWithTasks(projectId);
 }
 
 // Require: project id
@@ -116,3 +122,4 @@ export async function deleteProjectAction(projectId: string){
 export async function deleteTaskAction(taskId: string){
   await queries.tasks.deleteTask(taskId);
 }
+//-----------------------------------------------DONE SECTION-----------------------------------------------/

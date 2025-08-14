@@ -4,17 +4,16 @@ import { toast } from "sonner"
 import { useState } from "react"
 import { X } from "lucide-react"
 import { useModal } from "@/lib/states"
-import { ProjectsWithTasks } from "@/lib/customtype"
 import { ProjectSchema } from "@/lib/validations"
 import { updateProject } from "@/lib/hooks/projects"
-import { projects } from "@/lib/db/schema"
+import { projects, Task, Project } from "@/lib/db/schema"
 import { FormatDateDisplay } from "@/lib/utils"
 
-export function UpdateProject({ projectData } : { projectData: ProjectsWithTasks }){
+export function UpdateProject({ project, tasks } : { project: Project; tasks: Task[] }){
   const { closeModal } = useModal();
-  const [name, setName] = useState(projectData.name);
-  const [description, setDescription] = useState(projectData.description);
-  const [dueDate, setDueDate] = useState(FormatDateDisplay(projectData.dueDate));
+  const [name, setName] = useState(project.name);
+  const [description, setDescription] = useState(project.description);
+  const [dueDate, setDueDate] = useState(FormatDateDisplay(project.dueDate));
   const updateMutation = updateProject();
 
   // Handle form submission
@@ -24,11 +23,11 @@ export function UpdateProject({ projectData } : { projectData: ProjectsWithTasks
     try{
       // Check if there are tasks due beyond new project due date
       var isOverlap;
-      if(projectData.tasks.length === 0){
+      if(tasks.length){
         isOverlap = false;
       }
       else{
-        const taskDue = projectData.tasks.map((task) => new Date(task.dueDate)).reduce((max, date) => (date > max ? date : max));
+        const taskDue = tasks.map((task) => new Date(task.dueDate)).reduce((max, date) => (date > max ? date : max));
         isOverlap = new Date(taskDue) > new Date(dueDate);
       }
 
@@ -71,7 +70,7 @@ export function UpdateProject({ projectData } : { projectData: ProjectsWithTasks
       }
           
       // Update project  
-      updateMutation.mutate({ projectId: projectData.id, updProject }, {
+      updateMutation.mutate({ projectId: project.id, updProject }, {
         onSuccess: () => {
           closeModal();
           toast.success("Project updated successfully.");
