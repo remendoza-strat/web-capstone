@@ -7,9 +7,8 @@ import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import { TaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
-import { Priority, PriorityArr } from "@/lib/customtype"
+import { MembersWithData, Priority, PriorityArr, ProjectsWithTasks } from "@/lib/customtype"
 import type { NewTask, NewTaskAssignee, User } from "@/lib/db/schema"
-import { useKanbanContext } from "@/components/kanban-provider"
 import { useModal } from "@/lib/states"
 import { createTask } from "@/lib/hooks/tasks"
 import { createTaskAssignee } from "@/lib/hooks/taskAssignees"
@@ -18,9 +17,8 @@ import { updateProject } from "@/lib/hooks/projects"
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
-export function CreateTask({ columnIndex } : { columnIndex: number }){
+export function CreateTask({ columnIndex, projectData, projectMembers } : { columnIndex: number; projectData: ProjectsWithTasks; projectMembers: MembersWithData[] }){
   const { closeModal } = useModal();
-  const { projectData } = useKanbanContext();
   const createTaskMutation = createTask();
   const createTaskAssigneeMutation = createTaskAssignee();
   const updateProjectMutation = updateProject();
@@ -45,9 +43,8 @@ export function CreateTask({ columnIndex } : { columnIndex: number }){
           setSuggestions([]);
           return;
         }
-        const members = projectData.members;
         const selectedId = selectedUsers.map((user) => user.user.id);
-        const remainingMember = members.filter((member) => !selectedId.includes(member.user.id));
+        const remainingMember = projectMembers.filter((member) => !selectedId.includes(member.user.id));
         const search = query.toLowerCase();
         const suggestionList = remainingMember.filter((member) => 
           (member.user.lname).toLowerCase().includes(search) ||
@@ -157,7 +154,7 @@ export function CreateTask({ columnIndex } : { columnIndex: number }){
         for(const { user } of selectedUsers){
           const newTaskAssignee: NewTaskAssignee = {
             taskId: id,
-            userId: user.id,
+            userId: user.id
           };
           await createTaskAssigneeMutation.mutateAsync(newTaskAssignee);
         }
@@ -174,6 +171,7 @@ export function CreateTask({ columnIndex } : { columnIndex: number }){
           toast.success("Task created successfully.");
         },
         onError: () => {
+          closeModal();
           toast.error("Error occured.");
         }
       });
@@ -186,7 +184,7 @@ export function CreateTask({ columnIndex } : { columnIndex: number }){
       <div className="max-w-md h-[90vh] overflow-y-auto modal-form">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
-            Create New Task
+            Create Task
           </h3>
           <button onClick={closeModal} className="modal-sub-btn">
             <X size={20}/>

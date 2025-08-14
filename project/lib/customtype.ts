@@ -27,3 +27,7 @@ export interface UserProjects extends Project{
 export interface ProjectsWithTasks extends Project{
   tasks: Task[];
 }
+
+export interface MembersWithData extends ProjectMember{
+  user: User;
+}

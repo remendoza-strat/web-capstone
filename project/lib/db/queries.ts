@@ -102,6 +102,15 @@ export const queries = {
       const result = query2.filter((q) => !addedIds.includes(q.id))
       return result;
     },
+    getProjectMembers: async (projectId: string) => {
+      const query = await db.query.projectMembers.findMany({
+        where: (pm, {eq}) => eq(pm.projectId, projectId),
+        with: {user: true}
+      })
+
+      const result = query.filter((member) => member.approved);
+      return result;
+    }
   },
 
   // Tasks queries

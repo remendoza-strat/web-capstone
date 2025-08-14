@@ -85,6 +85,12 @@ export async function getProjectAction(projectId: string){
   return await queries.projects.getProject(projectId);
 }
 
+// Require: project id
+// Return: project members
+export async function getProjectMembersAction(projectId: string){
+  return await queries.projectMembers.getProjectMembers(projectId);
+}
+
 // CREATE ACTIONS-----------------------------------------------------------------
 
 // Create task

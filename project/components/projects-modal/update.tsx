@@ -23,7 +23,7 @@ export function UpdateProject({ project, tasks } : { project: Project; tasks: Ta
     try{
       // Check if there are tasks due beyond new project due date
       var isOverlap;
-      if(tasks.length){
+      if(tasks.length === 0){
         isOverlap = false;
       }
       else{

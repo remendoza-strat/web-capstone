@@ -11,6 +11,9 @@ import { DeleteColumn } from "@/components/columns-modal/delete"
 import { getProjectWithTasks } from "@/lib/hooks/projects"
 import ErrorPage from "./pages/error"
 import LoadingPage from "./pages/loading"
+import { getProjectMembers } from "@/lib/hooks/projectMembers"
+import { CreateTask } from "./tasks-modal/create"
+import { projectMembers } from '../lib/db/schema';
 
 export function KanbanBoard({ editProject, projectId } : { editProject: boolean; projectId: string }){
 
@@ -18,6 +21,9 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
   const { data: projectData, isLoading: projectDataLoading, error: projectDataError } =
     getProjectWithTasks(projectId, { enabled: Boolean(projectId) });
 
+
+    const { data: projectMembers, isLoading: projectMembersLoading, error: projectMembersError } =
+    getProjectMembers(projectId, { enabled: Boolean(projectId) });
 
   // All Hooks must be called unconditionally
   const [boardData, setBoardData] = useState({
@@ -42,8 +48,8 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
   }, [projectData]);
 
   // Early returns
-  if (projectDataLoading) return <LoadingPage />;
-  if (projectDataError || !projectData) return <ErrorPage code={404} message="Project not found." />;
+  if (projectDataLoading || projectMembersLoading) return <LoadingPage />;
+  if (projectDataError || !projectData || projectMembersError || !projectMembers) return <ErrorPage code={404} message="Project not found." />;
 
   
   // Handle task movements
@@ -223,6 +229,13 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
         columnIndex={deleteColumnIndex} 
         projectData={projectData}/>
       }
+
+      {isOpen && modalType === "createTask" && createTaskIndex !== null && <CreateTask 
+        columnIndex={createTaskIndex} 
+        projectData={projectData}
+        projectMembers={projectMembers}/>
+      }
+
   
 
     <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
@@ -266,3 +279,7 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
 
   );
 }
+
+
+// {isOpen && modalType === "createTask" && createTaskIndex !== null && <CreateTask columnIndex={createTaskIndex} projectData={projectData}/>}
+// create task        project + members + tasks     project + task + task assignee
