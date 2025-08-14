@@ -13,9 +13,37 @@ import ErrorPage from "./pages/error"
 import LoadingPage from "./pages/loading"
 import { getProjectMembers } from "@/lib/hooks/projectMembers"
 import { CreateTask } from "./tasks-modal/create"
-import { projectMembers } from '../lib/db/schema';
+import { Task } from '../lib/db/schema';
+import { pusherClient } from "@/lib/pusher/client"
 
 export function KanbanBoard({ editProject, projectId } : { editProject: boolean; projectId: string }){
+
+    useEffect(() => {
+    // Subscribe to Pusher
+
+    const channel = pusherClient.subscribe("kanban-channel");
+
+    // Listen for updates
+    channel.bind("task-update", (data: { task: Task }) => {
+      setBoardData((prev) => {
+        const updatedTasks = prev.tasks.map((t) =>
+          t.id === data.task.id ? data.task : t
+        );
+
+        // If task wasn't in list (newly moved from another column), add it
+        if (!updatedTasks.find((t) => t.id === data.task.id)) {
+          updatedTasks.push(data.task);
+        }
+
+        return { ...prev, tasks: updatedTasks };
+      });
+    });
+
+    return () => {
+      channel.unbind_all();
+      pusherClient.unsubscribe("kanban-channel");
+    };
+  }, []);
 
   // Query
   const { data: projectData, isLoading: projectDataLoading, error: projectDataError } =
@@ -279,7 +307,3 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
 
   );
 }
-
-
-// {isOpen && modalType === "createTask" && createTaskIndex !== null && <CreateTask columnIndex={createTaskIndex} projectData={projectData}/>}
-// create task        project + members + tasks     project + task + task assignee

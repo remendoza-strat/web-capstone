@@ -2,6 +2,9 @@
 import { queries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 import { projects, tasks } from "@/lib/db/schema"
+import { db } from "@/lib/db/connection"
+import { pusherServer } from "../pusher/server"
+import { eq } from "drizzle-orm"
 
 
 
@@ -93,12 +96,6 @@ export async function getProjectMembersAction(projectId: string){
 
 // CREATE ACTIONS-----------------------------------------------------------------
 
-// Create task
-// Return: id
-export async function createTaskAction(newTask: NewTask){
-  return await queries.tasks.createTask(newTask);
-}
-
 // Create task assignee
 // Return: none
 export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){
@@ -112,11 +109,6 @@ export async function updateProjectAction(projectId: string, updProject: Partial
   await queries.projects.updateProject(projectId, updProject);
 }
 
-// Update task
-export async function updateTaskAction(taskId: string, updTask: Partial<typeof tasks.$inferInsert>){
-  await queries.tasks.updateTask(taskId, updTask);
-}
-
 // DELETE ACTIONS-----------------------------------------------------------------
 
 // Delete project
@@ -127,5 +119,48 @@ export async function deleteProjectAction(projectId: string){
 // Delete task
 export async function deleteTaskAction(taskId: string){
   await queries.tasks.deleteTask(taskId);
+}
+//-----------------------------------------------DONE SECTION-----------------------------------------------/
+
+
+
+
+
+
+
+
+
+//-----------------------------------------------DONE SECTION-----------------------------------------------/
+// PUSHER ACTIONS-----------------------------------------------------------------
+
+// Create task
+export async function createTaskAction(newTask: NewTask, socketId?: string){
+  const [result] = await db
+    .insert(tasks)
+    .values(newTask)
+    .returning({ id: tasks.id });
+
+  if(result.id){
+    await pusherServer.trigger("kanban-channel", "task-update", { task: { ...newTask, id: result.id } },
+      socketId ? { socket_id: socketId } : undefined
+    );
+  }
+
+  return result.id;
+}
+
+// Update task
+export async function updateTaskAction(taskId: string, updTask: Partial<typeof tasks.$inferInsert>, socketId?: string){
+  const [result] = await db
+    .update(tasks)
+    .set(updTask)
+    .where(eq(tasks.id, taskId))
+    .returning();
+
+  if(result){
+    await pusherServer.trigger("kanban-channel", "task-update", { task: result },
+      socketId ? { socket_id: socketId } : undefined
+    );
+  }
 }
 //-----------------------------------------------DONE SECTION-----------------------------------------------/

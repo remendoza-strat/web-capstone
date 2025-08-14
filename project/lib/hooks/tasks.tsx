@@ -1,19 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createTaskAction, deleteTaskAction, updateTaskAction } from "@/lib/db/actions"
 import { NewTask, tasks } from "@/lib/db/schema"
-
-// Uses updateTaskAction()
-export function updateTask(){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ taskId, updTask } : { taskId: string; updTask: Partial<typeof tasks.$inferInsert> }) => {
-      await updateTaskAction(taskId, updTask);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["kanban-display"] }) 
-    }
-  });
-}
+import { getSocketId } from "../pusher/client";
 
 // Uses deleteTaskAction()
 export function deleteTask(){
@@ -28,16 +16,37 @@ export function deleteTask(){
   });
 }
 
-// Uses createTaskAction()
+
+
+
+
+
+
+
+// Create task
 export function createTask(){
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (newTask: NewTask) => {
-      const data = await createTaskAction(newTask);
-      return data;
+      const socketId = getSocketId();
+      return await createTaskAction(newTask, socketId || undefined);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+    }
+  });
+}
+
+// Update task
+export function updateTask(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ taskId, updTask } : { taskId: string; updTask: Partial<typeof tasks.$inferInsert> }) => {
+      const socketId = getSocketId(); 
+      return await updateTaskAction(taskId, updTask, socketId || undefined)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["kanban-display"] }) 
     }
   });
 }
