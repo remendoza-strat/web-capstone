@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs"
 import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 import Link from "next/link";
-import { ArrowLeft, Calendar, Users, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, DoorOpen, Pencil, Trash2 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { UpdateProject } from "@/components/projects-modal/update";
 import { DeleteProject } from "@/components/projects-modal/delete";
@@ -17,6 +17,7 @@ import { getProjectData, getProject } from "@/lib/hooks/projects"
 import { getUserId } from "@/lib/hooks/users"
 import { KanbanBoard } from "@/components/kanban-board";
 import { Task } from "@/lib/db/schema";
+import { LeaveProject } from "@/components/projects-modal/leave";
 
 
 
@@ -99,6 +100,7 @@ export default function ProjectPage(){
       <DashboardLayout>
         {isOpen && modalType === "updateProject" && <UpdateProject project={project} tasks={tasks}/>}
         {isOpen && modalType === "deleteProject" && <DeleteProject projectId={projectId}/>}
+        {isOpen && modalType === "leaveProject" && <LeaveProject projectId={projectId} userId={userId} projectName={project.name}/>}
   
         <div className="space-y-6">
 
@@ -125,12 +127,7 @@ export default function ProjectPage(){
             </div>
   
             <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors">
-                <Calendar size={20} />
-              </button>
-              <button className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors">
-                <Users size={20} />
-              </button>
+  
               {editProject && (
                 <>
                   <button
@@ -147,6 +144,13 @@ export default function ProjectPage(){
                   </button>
                 </>
               )}
+
+              <button 
+                className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
+                onClick={() => openModal("leaveProject")}>
+                <DoorOpen size={20} />
+              </button>
+              
             </div>
   
           </div>
