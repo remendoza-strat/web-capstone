@@ -148,7 +148,7 @@ export function CreateTask({ columnIndex, projectData, projectMembers } : { colu
 
       try{
         // Create task
-        const id = await createTaskMutation.mutateAsync(newTask);
+        const id = await createTaskMutation.mutateAsync({ projectId: projectData.id, newTask });
         
         // Assign task
         for(const { user } of selectedUsers){
@@ -165,7 +165,7 @@ export function CreateTask({ columnIndex, projectData, projectMembers } : { colu
       }
 
       // Update project  
-      updateProjectMutation.mutate({ projectId: projectData.id, updProject: {updatedAt: new Date()} }, {
+      updateProjectMutation.mutate({ projectId: projectData.id, updProject: { updatedAt: new Date() } }, {
         onSuccess: () => {
           closeModal();
           toast.success("Task created successfully.");

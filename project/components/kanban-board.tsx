@@ -13,24 +13,21 @@ import ErrorPage from "./pages/error"
 import LoadingPage from "./pages/loading"
 import { getProjectMembers } from "@/lib/hooks/projectMembers"
 import { CreateTask } from "./tasks-modal/create"
-import { Task } from '../lib/db/schema';
+import { Project, Task } from '../lib/db/schema';
 import { pusherClient } from "@/lib/pusher/client"
 
 export function KanbanBoard({ editProject, projectId } : { editProject: boolean; projectId: string }){
 
     useEffect(() => {
-    // Subscribe to Pusher
-
-    const channel = pusherClient.subscribe("kanban-channel");
-
-    // Listen for updates
+    const channel = pusherClient.subscribe(`kanban-channel-${projectId}`);
+    
     channel.bind("task-update", (data: { task: Task }) => {
       setBoardData((prev) => {
         const updatedTasks = prev.tasks.map((t) =>
           t.id === data.task.id ? data.task : t
         );
 
-        // If task wasn't in list (newly moved from another column), add it
+        
         if (!updatedTasks.find((t) => t.id === data.task.id)) {
           updatedTasks.push(data.task);
         }
@@ -39,13 +36,21 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
       });
     });
 
-    return () => {
-      channel.unbind_all();
-      pusherClient.unsubscribe("kanban-channel");
-    };
+    channel.bind("project-update", (data: { project: Project }) => {
+    setBoardData((prev) => ({
+      ...prev,
+      columnNames: data.project.columnNames
+    }));
+  });
+
+return () => {
+  channel.unbind_all();
+  pusherClient.unsubscribe(`kanban-channel-${projectId}`);
+};
+
   }, []);
 
-  // Query
+
   const { data: projectData, isLoading: projectDataLoading, error: projectDataError } =
     getProjectWithTasks(projectId, { enabled: Boolean(projectId) });
 
@@ -53,7 +58,7 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
     const { data: projectMembers, isLoading: projectMembersLoading, error: projectMembersError } =
     getProjectMembers(projectId, { enabled: Boolean(projectId) });
 
-  // All Hooks must be called unconditionally
+
   const [boardData, setBoardData] = useState({
     columnNames: projectData?.columnNames || [],
     tasks: projectData?.tasks || [],
@@ -136,7 +141,7 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
         // Update database
         colTasks.forEach((task, index) => {
           task.order = index;
-          updateTaskMutation.mutate({ taskId: task.id, updTask: { order: index } });
+          updateTaskMutation.mutate({ projectId: projectId, taskId: task.id, updTask: { order: index } });
         });
 
         // Update display
@@ -164,7 +169,7 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
         // Update database
         reordered.forEach((task, index) => {
           task.order = index;
-          updateTaskMutation.mutate({ taskId: task.id, updTask: { order: index } });
+          updateTaskMutation.mutate({ projectId: projectId, taskId: task.id, updTask: { order: index } });
         });
 
         // Update display
@@ -199,14 +204,14 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
       // Update order for database of original column
       sourceCol.forEach((task, index) => {
         task.order = index;
-        updateTaskMutation.mutate({ taskId: task.id, updTask: { order: index } });
+        updateTaskMutation.mutate({ projectId: projectId, taskId: task.id, updTask: { order: index } });
       });
 
       // Update order for database of destination column
       destCol.forEach((task, index) => {
         task.order = index;
         task.position = destColumn;
-        updateTaskMutation.mutate({ taskId: task.id, updTask: { position: task.position, order: index } });
+        updateTaskMutation.mutate({projectId: projectId,  taskId: task.id, updTask: { position: task.position, order: index } });
       });
 
       // Update the list
@@ -234,6 +239,7 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
   }
 
 
+  
 
 
 
@@ -242,18 +248,20 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
    
     <div>
       {isOpen && modalType === "createColumn" &&  <CreateColumn 
-        columnNames={projectData.columnNames} 
-        columnCount={projectData.columnCount} 
+        columnNames={boardData.columnNames} 
+        columnCount={boardData.columnNames.length} 
         projectId={projectData.id}/>
       }
 
       {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && <UpdateColumn
         columnIndex={updateColumnIndex} 
-        columnNames={projectData.columnNames} 
+        columnNames={boardData.columnNames} 
         projectId={projectData.id}/>
       }
 
       {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && <DeleteColumn 
+        columnNames={boardData.columnNames} 
+        columnCount={boardData.columnNames.length} 
         columnIndex={deleteColumnIndex} 
         projectData={projectData}/>
       }
@@ -274,6 +282,7 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
               .filter((task) => task.position === columnIndex)
               .sort((a, b) => a.order - b.order);
 
+            
             return (
               <SortableContext
                 key={columnIndex}

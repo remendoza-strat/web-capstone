@@ -1,26 +1,13 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import  { getProjectDataAction, deleteProjectAction, updateProjectAction, getProjectAction, getProjectWithTasksAction } from "@/lib/db/actions"
 import { projects } from "@/lib/db/schema"
+import { getSocketId } from "../pusher/client";
 
 // Uses deleteProjectAction()
 export function deleteProject(){
   return useMutation({
     mutationFn: async (projectId: string) => {
       await deleteProjectAction(projectId);
-    }
-  });
-}
-
-// Uses updateProjectAction()
-export function updateProject(){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ projectId, updProject } : { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
-      await updateProjectAction(projectId, updProject);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["project"] });
-      queryClient.invalidateQueries({ queryKey: ["kanban-display"] });
     }
   });
 }
@@ -60,3 +47,22 @@ export function getProjectWithTasks(projectId: string, options? : { enabled?: bo
     enabled: options?.enabled ?? !!projectId
   });
 }
+
+
+
+//-----------------------------------------------DONE SECTION-----------------------------------------------/
+// Update project
+export function updateProject(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ projectId, updProject } : { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
+      const socketId = getSocketId(); 
+      return await updateProjectAction(projectId, updProject, socketId || undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project"] });
+      queryClient.invalidateQueries({ queryKey: ["kanban-display"] });
+    }
+  });
+}
+//-----------------------------------------------DONE SECTION-----------------------------------------------/

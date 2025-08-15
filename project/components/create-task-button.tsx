@@ -165,20 +165,20 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
         label: label
       };
       
-      // Add and get the task id of the created task
-      const taskId = await createTaskAction(newTask);
+      // // Add and get the task id of the created task
+      // const taskId = await createTaskAction(newTask);
 
-      // Iterate the array and add user content to database
-      for(const { user } of selectedUsers){
-        const newTaskAssignee: NewTaskAssignee = {
-          taskId: taskId,
-          userId: user.id
-        };
-        await createTaskAssigneeAction(newTaskAssignee);
-      }
+      // // Iterate the array and add user content to database
+      // for(const { user } of selectedUsers){
+      //   const newTaskAssignee: NewTaskAssignee = {
+      //     taskId: taskId,
+      //     userId: user.id
+      //   };
+      //   await createTaskAssigneeAction(newTaskAssignee);
+      // }
 
-      // Update project for activity
-      await updateProjectTimeAction(selectedProjectId);
+      // // Update project for activity
+      // await updateProjectTimeAction(selectedProjectId);
 
       // Display success and close modal
       toast.success("All members assigned to task.");

@@ -102,24 +102,12 @@ export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee)
   await queries.taskAssignees.createTaskAssignee(newTaskAssignee);
 }
 
-// UPDATE ACTIONS-----------------------------------------------------------------
-
-// Update project
-export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
-  await queries.projects.updateProject(projectId, updProject);
-}
-
 // DELETE ACTIONS-----------------------------------------------------------------
 
 // Delete project
 export async function deleteProjectAction(projectId: string){
   await queries.projects.deleteProject(projectId);
 }
-
-// Delete task
-export async function deleteTaskAction(taskId: string){
-  await queries.tasks.deleteTask(taskId);
-}
 //-----------------------------------------------DONE SECTION-----------------------------------------------/
 
 
@@ -131,17 +119,15 @@ export async function deleteTaskAction(taskId: string){
 
 
 //-----------------------------------------------DONE SECTION-----------------------------------------------/
-// PUSHER ACTIONS-----------------------------------------------------------------
-
 // Create task
-export async function createTaskAction(newTask: NewTask, socketId?: string){
+export async function createTaskAction(projectId: string, newTask: NewTask, socketId?: string){
   const [result] = await db
     .insert(tasks)
     .values(newTask)
     .returning({ id: tasks.id });
 
   if(result.id){
-    await pusherServer.trigger("kanban-channel", "task-update", { task: { ...newTask, id: result.id } },
+    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: { ...newTask, id: result.id } },
       socketId ? { socket_id: socketId } : undefined
     );
   }
@@ -150,15 +136,44 @@ export async function createTaskAction(newTask: NewTask, socketId?: string){
 }
 
 // Update task
-export async function updateTaskAction(taskId: string, updTask: Partial<typeof tasks.$inferInsert>, socketId?: string){
+export async function updateTaskAction(projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>, socketId?: string){
   const [result] = await db
     .update(tasks)
-    .set(updTask)
+    .set({...updTask})
     .where(eq(tasks.id, taskId))
     .returning();
 
   if(result){
-    await pusherServer.trigger("kanban-channel", "task-update", { task: result },
+    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: result },
+      socketId ? { socket_id: socketId } : undefined
+    );
+  }
+}
+
+// Delete task
+export async function deleteTaskAction(projectId: string, taskId: string, socketId?: string){
+  const [result] = await db
+    .delete(tasks)
+    .where(eq(tasks.id, taskId))
+    .returning();
+
+  if(result){
+    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: result },
+      socketId ? { socket_id: socketId } : undefined
+    );
+  }
+}
+
+// Update project
+export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, socketId?: string){
+  const [result] = await db
+    .update(projects)
+    .set({...updProject})
+    .where(eq(projects.id, projectId))
+    .returning();
+  
+  if(result){
+    await pusherServer.trigger(`kanban-channel-${projectId}`, "project-update", { project: result },
       socketId ? { socket_id: socketId } : undefined
     );
   }

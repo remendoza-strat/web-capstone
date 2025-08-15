@@ -41,7 +41,7 @@ export function UpdateColumn({columnIndex, columnNames, projectId } : { columnIn
       }
           
       // Update project  
-      updateMutation.mutate({projectId: projectId, updProject}, {
+      updateMutation.mutate({ projectId: projectId, updProject }, {
         onSuccess: () => {
           closeModal();
           toast.success("Column updated successfully.");

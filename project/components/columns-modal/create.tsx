@@ -38,7 +38,7 @@ export function CreateColumn({ columnNames, columnCount, projectId } : { columnN
       }
           
       // Update project  
-      createMutation.mutate({projectId: projectId, updProject}, {
+      createMutation.mutate({ projectId: projectId, updProject }, {
         onSuccess: () => {
           closeModal();
           toast.success("Column created successfully.");

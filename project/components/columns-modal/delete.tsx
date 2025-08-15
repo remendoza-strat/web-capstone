@@ -10,7 +10,7 @@ import { projects, tasks } from "@/lib/db/schema"
 import { deleteTask, updateTask } from "@/lib/hooks/tasks"
 import { ProjectsWithTasks } from "@/lib/customtype"
 
-export function DeleteColumn({ columnIndex, projectData } : { columnIndex: number; projectData: ProjectsWithTasks}){
+export function DeleteColumn({ columnIndex, columnCount, columnNames, projectData } : { columnIndex: number; columnCount: number; columnNames: string[]; projectData: ProjectsWithTasks }){
   const { closeModal } = useModal();
   const [code, setCode] = useState("");
   const deleteColumnMutation = updateProject();
@@ -23,7 +23,7 @@ export function DeleteColumn({ columnIndex, projectData } : { columnIndex: numbe
 
     try{
 			// Check count of column
-			if(projectData.columnCount <= 3){
+			if(columnCount <= 3){
 				toast.error("Column: Minimum kanban column is 3.");
 				return;
 			}
@@ -45,7 +45,7 @@ export function DeleteColumn({ columnIndex, projectData } : { columnIndex: numbe
 				const deleteTasks = projectData.tasks.filter((task) => task.position === columnIndex);
         try{
           for(const task of deleteTasks){
-            await deleteTaskMutation.mutateAsync(task.id);
+            await deleteTaskMutation.mutateAsync({ projectId: projectData.id, taskId: task.id });
           }
         } 
         catch{
@@ -54,7 +54,7 @@ export function DeleteColumn({ columnIndex, projectData } : { columnIndex: numbe
         }
 
 				// Adjust column position of affected tasks
-				if((columnIndex + 1) !== projectData.columnCount){
+				if((columnIndex + 1) !== columnCount){
 					const updateTasks = projectData.tasks.map((task) => {
 						if(task.position > columnIndex){
 							return {...task, position: task.position - 1}
@@ -67,7 +67,7 @@ export function DeleteColumn({ columnIndex, projectData } : { columnIndex: numbe
                 position: task.position,
                 updatedAt: new Date()
 						  }
-              await updateTaskMutation.mutateAsync({taskId: task.id, updTask});
+              await updateTaskMutation.mutateAsync({ projectId: projectData.id, taskId: task.id, updTask });
             }
           } 
           catch{
@@ -78,13 +78,13 @@ export function DeleteColumn({ columnIndex, projectData } : { columnIndex: numbe
 			}
         
       // Update list of column names
-      const columnNames = projectData.columnNames.filter((_, index) => index !== columnIndex);
-      const columnCount = projectData.columnCount - 1;
+      const columnNamesUpd = columnNames.filter((_, index) => index !== columnIndex);
+      const columnCountUpd = columnCount - 1;
       
       // Setup project data to update
       const updProject: Partial<typeof projects.$inferInsert> = {
-        columnCount: columnCount,
-        columnNames: columnNames,
+        columnCount: columnCountUpd,
+        columnNames: columnNamesUpd,
         updatedAt: new Date()
       }
 
