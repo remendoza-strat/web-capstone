@@ -14,7 +14,7 @@ export type Role = "Project Manager" | "Frontend Developer" | "Backend Developer
 export const RoleArr: Role[] = ["Project Manager", "Frontend Developer", "Backend Developer", "Fullstack Developer", "UI/UX Designer", 
   "QA Engineer", "DevOps Engineer", "Product Manager", "Team Lead"];
 
-// Getting user projects info
+// Custom Types
 export interface ProjectMemberUser extends ProjectMember{
   user: User;
 }
@@ -22,12 +22,12 @@ export interface UserProjects extends Project{
   members: ProjectMemberUser[];
   tasks: Task[];
 }
-
-// Getting projects with tasks
 export interface ProjectsWithTasks extends Project{
   tasks: Task[];
 }
-
 export interface MembersWithData extends ProjectMember{
   user: User;
+}
+export interface ProjectsWithMembers extends Project{
+  members: ProjectMemberUser[];
 }

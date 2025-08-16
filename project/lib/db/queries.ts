@@ -148,3 +148,31 @@ export const queries = {
   },
 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// TOD: CHECK
+export const getQueries = {
+
+  getUserProjectsWithMembers: async (userId: string) => {
+    const result = await db.query.projectMembers.findMany({
+      where: (pm, {and, eq}) => and(eq(pm.approved, true), eq(pm.userId, userId)),
+      with: {project: {with: {members: {with: {user: true}}}}}
+    });
+    return result;
+  },
+  
+}

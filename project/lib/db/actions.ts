@@ -1,5 +1,5 @@
 "use server"
-import { queries } from "@/lib/db/queries"
+import { getQueries, queries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 import { projects, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
@@ -179,3 +179,21 @@ export async function updateProjectAction(projectId: string, updProject: Partial
   }
 }
 //-----------------------------------------------DONE SECTION-----------------------------------------------/
+
+
+
+
+
+
+
+
+
+
+
+// TOD: CHECK
+// Used in: team page
+// Require: userId
+// Result: user projects with its members (approved && not)
+export async function getUserProjectsWithMembersAction(userId: string){
+  return await getQueries.getUserProjectsWithMembers(userId);
+}
