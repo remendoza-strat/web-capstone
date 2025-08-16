@@ -16,7 +16,19 @@ export function getProjectMembers(projectId: string, options? : { enabled?: bool
 
 
 
-// TOD: CHECK
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["all-project-members"],
@@ -27,9 +39,10 @@ export function getUserProjectsWithMembers(userId: string, options? : { enabled?
     enabled: options?.enabled ?? !!userId
   });
 }
+
 export function useUserImage(clerkId: string, enabled = true) {
   return useQuery({
-    queryKey: ["member-icon", clerkId],
+    queryKey: ["member-icon"],
     queryFn: async () => {
       const data = await getUserImageAction(clerkId);
       return data ?? null;

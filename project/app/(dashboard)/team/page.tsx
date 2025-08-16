@@ -105,7 +105,7 @@ export default function TeamPage(){
       {isLoading ? (<LoadingPage/>) : 
         (
           <>
-            {isOpen && modalType === "addMember" && <AddMember/>}
+            {isOpen && modalType === "addMember" && userId && <AddMember userId={userId} projectData={projectsData}/>}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
