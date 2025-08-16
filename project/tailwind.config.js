@@ -117,7 +117,7 @@ module.exports = {
 
 
 
-        // MODAL COLORS USED
+
         modal_light: {
           DEFAULT: "#e8e7e8",
           100: "#f8f8f8"
@@ -130,16 +130,7 @@ module.exports = {
           DEFAULT: "#146a7f",
           100: "#0f4f5f"
         },
-        // MODAL COLORS USED
 
-        /*
-        MODAL TAILWIND COLORS USED
-        black
-        white
-        gray-300
-        red-500
-        red-700 
-        */
         page_light: {
           DEFAULT: "#f4f4f4", // page
           100: "#ffffff"      // card

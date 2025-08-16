@@ -29,6 +29,20 @@
       "when": 1754457404465,
       "tag": "0003_illegal_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1754621817159,
+      "tag": "0004_overrated_solo",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1754888405902,
+      "tag": "0005_smart_morg",
+      "breakpoints": true
     }
   ]
 }

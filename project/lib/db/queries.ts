@@ -35,6 +35,14 @@ export const queries = {
 
       return result.id;
     },
+    deleteProject: async (projectId: string) => {
+      await db.delete(projects).where(eq(projects.id, projectId));
+    },
+    updateProject: async (projectId: string, updProject: Partial<typeof projects.$inferInsert>) => {
+      await db.update(projects)
+      .set({...updProject})
+      .where(eq(projects.id, projectId));
+    },
     getUserProjects: async (userId: string) => {
       const query = await db.query.projectMembers.findMany({
         where: (pm, {and, eq}) => and(eq(pm.approved, true), eq(pm.userId, userId)),
@@ -49,6 +57,29 @@ export const queries = {
         .set({ updatedAt: new Date() })
         .where(eq(projects.id, projectId));
     },
+    getProjectData: async (projectId: string) => {
+      const query = await db.query.projects.findFirst({
+        where: (p, {eq}) => eq(p.id, projectId),
+        with: {members: {with: {user: true}}, tasks: true}
+      });
+
+      const result = query? {...query, members: query.members.filter(member => member.approved === true)} : null
+      return result;
+    },
+    getProjectWithTasks: async (projectId: string) => {
+      const result = await db.query.projects.findFirst({
+        where: (p, {eq}) => eq(p.id, projectId),
+        with: {tasks: true}
+      });
+      
+      return result;
+    },
+    getProject: async (projectId: string) => {
+      const result = await db.query.projects.findFirst({
+        where: eq(projects.id, projectId)
+      })
+      return result;
+    }
   },
 
   // Project members queries
@@ -71,6 +102,15 @@ export const queries = {
       const result = query2.filter((q) => !addedIds.includes(q.id))
       return result;
     },
+    getProjectMembers: async (projectId: string) => {
+      const query = await db.query.projectMembers.findMany({
+        where: (pm, {eq}) => eq(pm.projectId, projectId),
+        with: {user: true}
+      })
+
+      const result = query.filter((member) => member.approved);
+      return result;
+    }
   },
 
   // Tasks queries
@@ -80,6 +120,14 @@ export const queries = {
         .returning({ id: tasks.id });
 
       return result.id;
+    },
+    deleteTask: async (taskId: string) => {
+      await db.delete(tasks).where(eq(tasks.id, taskId));
+    },
+    updateTask: async (taskId: string, updTask: Partial<typeof tasks.$inferInsert>) => {
+      await db.update(tasks)
+      .set({...updTask})
+      .where(eq(tasks.id, taskId));
     },
     getUserTasks: async (userId: string) => {
       const query = await db.query.taskAssignees.findMany({

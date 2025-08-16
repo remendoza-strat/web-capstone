@@ -1,5 +1,5 @@
 "use client"
-import "./globals.css"
+import "../globals.css"
 import "react-quill-new/dist/quill.snow.css"
 import dynamic from "next/dynamic"
 import { X, Trash } from "lucide-react"
@@ -7,22 +7,21 @@ import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import { TaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
-import { Priority, PriorityArr } from "@/lib/customtype"
-import { createTaskAction, createTaskAssigneeAction, updateProjectTimeAction } from "@/lib/db/actions"
-import type { NewTask, NewTaskAssignee, Project, User} from "@/lib/db/schema"
-import type { UserProjects } from "@/lib/customtype"
+import { MembersWithData, Priority, PriorityArr, ProjectsWithTasks } from "@/lib/customtype"
+import type { NewTask, NewTaskAssignee, User } from "@/lib/db/schema"
+import { useModal } from "@/lib/states"
+import { createTask } from "@/lib/hooks/tasks"
+import { createTaskAssignee } from "@/lib/hooks/taskAssignees"
+import { updateProject } from "@/lib/hooks/projects"
 
 // Dynamic import of react quill
-const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
-export function CreateTaskButton({ close, success, userId, userProjs, column, order } : { close: () => void; success: () => void; userId: string; userProjs: UserProjects[]; column: number; order: number }){
-  // Get all projects from prop
-  const projects: Project[] = userProjs
-    .filter((project) => project.members.some((member) => member.userId === userId && member.role === "Project Manager"))
-    .map(({ members, tasks, ...project }) => project);
-
-  // Hook for project
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+export function CreateTask({ columnIndex, projectData, projectMembers } : { columnIndex: number; projectData: ProjectsWithTasks; projectMembers: MembersWithData[] }){
+  const { closeModal } = useModal();
+  const createTaskMutation = createTask();
+  const createTaskAssigneeMutation = createTaskAssignee();
+  const updateProjectMutation = updateProject();
 
   // Hook for user
   const [query, setQuery] = useState("");
@@ -36,39 +35,24 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
   const [priority, setPriority] = useState<Priority>("Low");
   const [label, setLabel] = useState("");
 
-  // Set initial selected project
-  useEffect(() =>{
-    if(projects.length > 0){
-      setSelectedProjectId(projects[0].id);
-    }
-  }, []);
-
-  // Remove selected and suggestion when project is changed
-  useEffect(() =>{
-    setSuggestions([]);
-    setSelectedUsers([]);
-  }, [selectedProjectId]);
-
   // Getting suggested user and removing already selected user
   useEffect(() => {
     const timeout = setTimeout(async () => {
       try{
-        if(!query || !selectedProjectId){
+        if(!query){
           setSuggestions([]);
           return;
         }
-        const project = userProjs.find((up) => up.id === selectedProjectId)
-        const members = project?.members || [];
-        const selectedIds = selectedUsers.map((u) => u.user.id);
-        const remainingMembers = members.filter((m) => !selectedIds.includes(m.user.id));
+        const selectedId = selectedUsers.map((user) => user.user.id);
+        const remainingMember = projectMembers.filter((member) => !selectedId.includes(member.user.id));
         const search = query.toLowerCase();
-        const userList = remainingMembers.filter((u) => 
-          (u.user.lname).toLowerCase().includes(search) ||
-          (u.user.fname).toLowerCase().includes(search) ||
-          (u.user.email).toLowerCase().includes(search) ||
-          (u.role).toLowerCase().includes(search)
+        const suggestionList = remainingMember.filter((member) => 
+          (member.user.lname).toLowerCase().includes(search) ||
+          (member.user.fname).toLowerCase().includes(search) ||
+          (member.user.email).toLowerCase().includes(search) ||
+          (member.role).toLowerCase().includes(search)
         )
-        setSuggestions(userList);
+        setSuggestions(suggestionList);
       }
       catch{return}
     }, 200);
@@ -94,26 +78,21 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
     e.preventDefault();
 
     try{
-      // Validate project id
-      const projectValidation = TaskSchema.safeParse({
-        projectId: selectedProjectId
-      });
+      // Get due dates
+      const projDue = new Date(projectData.dueDate);
+      const taskDue = new Date(dueDate);
 
-      // Display project id error
-      if(!projectValidation.success){
-        const errors = projectValidation.error.flatten().fieldErrors;
-        if(errors.projectId?.[0]){
-          toast.error(errors.projectId[0]);
-          return;
-        }
+      // Task due is beyond project due
+      if(taskDue > projDue){
+        toast.error("Due Date: Must be on or before the project deadline.");
+        return;
       }
 
-      // Get selected project due date
-      const project = projects.find(p => p.id === selectedProjectId);
-      const deadline = project?.dueDate;
-
-      // Return if deadline is null
-      if (!deadline) return;
+      // No seleted user to assign task
+      if(selectedUsers.length === 0){
+        toast.error("User: Must select at least 1 user to assign task to.");
+        return;
+      }
 
       // Get raw text of description
       const descriptionRaw = StripHTML(String(description).trim());
@@ -123,9 +102,7 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
         title: title,
         description: descriptionRaw,
         label: label,
-        members: selectedUsers,
-        dueDate: new Date(dueDate),
-        deadline: new Date(deadline)
+        dueDate: new Date(dueDate)
       })
 
       // Display errors
@@ -143,47 +120,61 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
           toast.error(errors.label[0]);
           return;
         }
-        if(errors.members?.[0]){
-          toast.error(errors.members[0]);
-          return;
-        } 
         if(errors.dueDate?.[0]){
           toast.error(errors.dueDate[0]);
           return;
         } 
       }
 
+      // Get the last order number in column
+      let lastOrder = 0;
+      const columnTasks = (projectData.tasks.filter((task) => task.position === columnIndex)).length;
+      if(columnTasks !== 0){
+        lastOrder = Math.max(...projectData.tasks.filter(t => t.position === columnIndex).map(t => t.order), 0);
+        lastOrder = lastOrder + 1;
+      }
+
       // Create object of new task
       const newTask: NewTask = {
-        projectId: selectedProjectId,
+        projectId: projectData.id,
         title: title,
         description: description,
         dueDate: new Date(dueDate),
         priority: priority,
-        position: column,
-        order: order,
+        position: columnIndex,
+        order: lastOrder,
         label: label
       };
-      
-      // // Add and get the task id of the created task
-      // const taskId = await createTaskAction(newTask);
 
-      // // Iterate the array and add user content to database
-      // for(const { user } of selectedUsers){
-      //   const newTaskAssignee: NewTaskAssignee = {
-      //     taskId: taskId,
-      //     userId: user.id
-      //   };
-      //   await createTaskAssigneeAction(newTaskAssignee);
-      // }
+      try{
+        // Create task
+        const id = await createTaskMutation.mutateAsync({ projectId: projectData.id, newTask });
+        
+        // Assign task
+        for(const { user } of selectedUsers){
+          const newTaskAssignee: NewTaskAssignee = {
+            taskId: id,
+            userId: user.id
+          };
+          await createTaskAssigneeMutation.mutateAsync(newTaskAssignee);
+        }
+      } 
+      catch{
+        toast.error("Error occurred.");
+        return;
+      }
 
-      // // Update project for activity
-      // await updateProjectTimeAction(selectedProjectId);
-
-      // Display success and close modal
-      toast.success("All members assigned to task.");
-      success();
-      close();
+      // Update project  
+      updateProjectMutation.mutate({ projectId: projectData.id, updProject: { updatedAt: new Date() } }, {
+        onSuccess: () => {
+          closeModal();
+          toast.success("Task created successfully.");
+        },
+        onError: () => {
+          closeModal();
+          toast.error("Error occured.");
+        }
+      });
     }
     catch{return}
   };
@@ -193,32 +184,13 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
       <div className="max-w-md h-[90vh] overflow-y-auto modal-form">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
-            Create New Task
+            Create Task
           </h3>
-          <button onClick={close} className="modal-sub-btn">
+          <button onClick={closeModal} className="modal-sub-btn">
             <X size={20}/>
           </button>
         </div>
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="modal-form-label">
-              Project
-            </label>
-            <select
-              className="cursor-pointer modal-form-input"
-              value={selectedProjectId} onChange={(e) => setSelectedProjectId(e.target.value)}>
-                {projects.length === 0 ? (
-                  <option disabled>No projects available</option>
-                ) : 
-                (
-                  projects.map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.name}
-                    </option>
-                  ))
-                )}
-            </select>
-          </div>
           <div>
             <label className="modal-form-label">
               Title
@@ -233,7 +205,7 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
             <label className="modal-form-label">
               Description
             </label>
-						<ReactQuill 
+            <ReactQuill 
               theme="snow"
               className="modal-form-input"
               value={description} onChange={setDescription}
@@ -280,7 +252,7 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
             <div className="relative">
               <input
                 className="modal-form-input"
-                type="text" placeholder="Search by name or email"
+                type="text" placeholder="Search project members"
                 value={query} onChange={(e) => setQuery(e.target.value)}/>
                   {query && suggestions.length > 0 && (
                     <ul className="modal-form-suggestion-ul">
@@ -322,11 +294,11 @@ export function CreateTaskButton({ close, success, userId, userProjs, column, or
             </div>
           )}
           <div className="modal-btn-div">
-            <button onClick={close} type="button" className="modal-sub-btn">
+            <button onClick={closeModal} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn">
-              Create Task
+            <button type="submit" className="modal-main-btn" disabled={createTaskMutation.isPending || createTaskAssigneeMutation.isPending || updateProjectMutation.isPending}>
+              {createTaskMutation.isPending || createTaskAssigneeMutation.isPending || updateProjectMutation.isPending? "Creating..." : "Create Task"}
             </button>
           </div>
         </form>

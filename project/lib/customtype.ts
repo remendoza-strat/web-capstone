@@ -22,3 +22,12 @@ export interface UserProjects extends Project{
   members: ProjectMemberUser[];
   tasks: Task[];
 }
+
+// Getting projects with tasks
+export interface ProjectsWithTasks extends Project{
+  tasks: Task[];
+}
+
+export interface MembersWithData extends ProjectMember{
+  user: User;
+}

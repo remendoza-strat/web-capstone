@@ -15,7 +15,7 @@ export function LimitChar(paragraph: string, limit: number){
 }
 
 // Calculate progress per project tasks
-export function ComputeProgress(tasks: Task[]){
+export function ComputeProgress(tasks: Task[], columnCount: number){
   if (tasks.length === 0) return 0;
 
   var total = 0;
@@ -23,9 +23,9 @@ export function ComputeProgress(tasks: Task[]){
 
   for(const t of tasks){
     const position = t.position;
-    const column = t.columnCount;
+    const column = columnCount;
 
-    if(position === 100){
+    if(position === (columnCount - 1)){
       total += 100;
     }
     else{
@@ -37,8 +37,8 @@ export function ComputeProgress(tasks: Task[]){
 }
 
 // Get status of the project
-export function ProjectStatus(tasks: Task[], date: Date){
-  const done = tasks.every((task) => task.position === 100);
+export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
+  const done = tasks.every((task) => task.position === (columnCount - 1));
   if (done && tasks.length !== 0) return ["done", "Project done"];
   
   const now = new Date();
@@ -94,7 +94,7 @@ export function DateTimeFormatter(date: Date){
 export function ProjectsByStatus(status: string, result: UserProjects[]){
   if(status === "done"){
     result = result.filter((p) => 
-      p.tasks.length !== 0 && p.tasks.every((t) => t.position === 100)
+      p.tasks.length !== 0 && p.tasks.every((t) => t.position === (p.columnCount - 1))
     );
   }
   else if(status === "active"){
@@ -106,7 +106,7 @@ export function ProjectsByStatus(status: string, result: UserProjects[]){
   else if(status === "overdue"){
     result = result.filter((p) => {
       const milliDiff = p.dueDate.getTime() - (new Date()).getTime();
-      return milliDiff < 0 && p.tasks.every((t) => t.position !== 100);
+      return milliDiff < 0 && p.tasks.every((t) => t.position !== (p.columnCount - 1));
     });
   }
   return result;
@@ -166,3 +166,13 @@ export function ByRecentProjects(projects: UserProjects[]){
   );
   return recent;
 }
+
+// Convert date to PH timezone for display
+export const FormatDateDisplay = (date: Date) => {
+  const display = new Date(date);
+
+  const phOffset = 8 * 60;
+  const localDate = new Date(display.getTime() + phOffset * 60 * 1000);
+
+  return localDate.toISOString().slice(0, 16);
+};

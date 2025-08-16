@@ -3,22 +3,20 @@ import { FolderCheck, FolderX, Clock, AlarmClockOff } from "lucide-react"
 import type { Task } from "@/lib/db/schema"
 import type { UserProjects } from "@/lib/customtype"
 
-export function DashboardStats({ userProjs, userTasks } : { userProjs: UserProjects[]; userTasks: Task[] }){
+export function DashboardStats({ userProjs } : { userProjs: UserProjects[] }){
   // Active and overdue project computation
   const activeProjs = (userProjs.filter((p) => 
     p.dueDate > new Date() && 
-    p.tasks.some((t) => t.position < 100))).length;
+    p.tasks.some((t) => t.position < (p.columnCount - 1)))).length;
   const overdueProjs = (userProjs.filter((p) => 
     p.dueDate < new Date() &&
-    p.tasks.some((t) => t.position < 100))).length;
+    p.tasks.some((t) => t.position < (p.columnCount - 1)))).length;
 
   // Active and overdue task computation
-  const activeTasks = (userTasks.filter((t) => 
-    t.dueDate > new Date() && 
-    t.position < 100)).length;
-  const overdueTasks = (userTasks.filter((t) => 
-    t.dueDate < new Date() &&
-    t.position < 100)).length;
+  const activeTasks = userProjs.flatMap(p => p.tasks.filter (t =>
+    t.dueDate > new Date() && t.position < (p.columnCount - 1))).length;
+  const overdueTasks = userProjs.flatMap(p => p.tasks.filter (t =>
+    t.dueDate < new Date() && t.position < (p.columnCount - 1))).length;
 
   // Put values together
   const values = [

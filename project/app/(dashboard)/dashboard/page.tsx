@@ -6,10 +6,9 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { CreateProjectButton } from "@/components/create-project-button"
 import { AddMemberButton } from "@/components/add-member-button"
 import { CreateTaskButton } from "@/components/create-task-button"
-import { getUserIdAction, getUserTasksAction, getUserProjectsAction } from "@/lib/db/actions"
+import { getUserIdAction, getUserProjectsAction } from "@/lib/db/actions"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { RecentProjects } from "@/components/recent-projects"
-import type { Task } from "@/lib/db/schema"
 import type { UserProjects } from "@/lib/customtype"
 
 export default function DashboardPage(){
@@ -22,50 +21,56 @@ export default function DashboardPage(){
 
   // Hook for data to send to components
   const [userId, setUserId] = useState("");
-  const [userTasks, setUserTasks] = useState<Task[]>([]);
   const [userProjs, setUserProjs] = useState<UserProjects[]>([]);
-  
+
+  // Get user id
   useEffect(() => {
-    const fetchData = async () => {
-      try{
-        // Return if user is null
-        if (!user) return;
-        
-        // Get clerk id
-        const clerkId = user.id;
-        if (!clerkId) return;
-        
-        // Get user id with clerk id
-        const userId = await getUserIdAction(clerkId);
-        if (!userId) return;
-        setUserId(userId);
+    getUserId();
+  }, [user]);
 
-        // Get user tasks
-        const userTasks = await getUserTasksAction(userId);
-        setUserTasks(userTasks);
+  const getUserId = async () => {
+    try{
+      // Return if user is null
+      if (!user) return;
+      
+      // Get clerk id
+      const clerkId = user.id;
+      if (!clerkId) return;
+      
+      // Get user id with clerk id
+      const userId = await getUserIdAction(clerkId);
+      if (!userId) return;
 
-        // Get user projects
-        const userProjs = await getUserProjectsAction(userId);
-        setUserProjs(userProjs);
-      }
-      catch{return}
-    };
-    fetchData();
-  }, [user, isOpen]);
+      // Set user id
+      setUserId(userId);
+
+      // Get data needed
+      getData(userId);
+    }
+    catch{return}
+  };
+
+  const getData = async (userId: string) => {
+    try{
+      // Get user projects
+      setUserProjs(await getUserProjectsAction(userId));
+    }
+    catch{return}
+  }
 
   return(
     <DashboardLayout>
       {isOpen && modalType === "project" && (
-        <CreateProjectButton close={() => setIsOpen(false)} userId={userId}/>
+        <CreateProjectButton close={() => setIsOpen(false)} success={() => getData(userId)} userId={userId}/>
       )}
       {isOpen && modalType === "member" && (
         <AddMemberButton close={() => setIsOpen(false)} userId={userId} userProjs={userProjs}/>
       )}
       {isOpen && modalType === "task" && (
-        <CreateTaskButton close={() => setIsOpen(false)} userId={userId} userProjs={userProjs}/>
+        <CreateTaskButton close={() => setIsOpen(false)} success={() => getData(userId)} userId={userId} userProjs={userProjs} column={0} order={0}/>
       )}
       <div className="space-y-6 ">
-        <DashboardStats userProjs={userProjs} userTasks={userTasks}/>
+        <DashboardStats userProjs={userProjs}/>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-12 lg:items-start">
           <div className="xl:col-span-7">
             <RecentProjects userProjs={userProjs}/>

@@ -1,30 +1,49 @@
 "use client"
-import "./globals.css"
+import "../globals.css"
+import { toast } from "sonner"
 import { useState } from "react"
 import { X } from "lucide-react"
-import { toast } from "sonner"
-import { createProjectAction, createProjectMemberAction } from "@/lib/db/actions"
-import type { NewProject, NewProjectMember } from "@/lib/db/schema"
+import { useModal } from "@/lib/states"
 import { ProjectSchema } from "@/lib/validations"
+import { updateProject } from "@/lib/hooks/projects"
+import { projects, Task, Project } from "@/lib/db/schema"
+import { FormatDateDisplay } from "@/lib/utils"
 
-export function CreateProjectButton({ close, success, userId } : { close : () => void; success: () => void; userId: string }){
-  // Hooks for input
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
+export function UpdateProject({ project, tasks } : { project: Project; tasks: Task[] }){
+  const { closeModal } = useModal();
+  const [name, setName] = useState(project.name);
+  const [description, setDescription] = useState(project.description);
+  const [dueDate, setDueDate] = useState(FormatDateDisplay(project.dueDate));
+  const updateMutation = updateProject();
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try{
+      // Check if there are tasks due beyond new project due date
+      var isOverlap;
+      if(tasks.length === 0){
+        isOverlap = false;
+      }
+      else{
+        const taskDue = tasks.map((task) => new Date(task.dueDate)).reduce((max, date) => (date > max ? date : max));
+        isOverlap = new Date(taskDue) > new Date(dueDate);
+      }
+
+      // Show error if task due overlap
+      if(isOverlap){
+        toast.error("Due Date: Tasks due date is beyond the new project due.");
+        return;
+      }
+
       // Validate input
       const result = ProjectSchema.safeParse({
         name,
         description,
         dueDate
       });
-
+    
       // Display error from validation
       if(!result.success){
         const errors = result.error.flatten().fieldErrors;
@@ -42,45 +61,37 @@ export function CreateProjectButton({ close, success, userId } : { close : () =>
         }
       }
 
-      // Create object of new project
-      const newProject: NewProject = {
+      // Setup project data to update
+      const updProject: Partial<typeof projects.$inferInsert> = {
         name: name,
         description: description,
         dueDate: new Date(dueDate),
-        columnCount: 5,
-        columnNames: ["Backlog", "This Week", "In Progress", "To Review", "Done"]
-      };
-      
-      // Add and get the project id of the created project
-      const projectId = await createProjectAction(newProject);
-
-      // Create object of new project member
-      const newProjectMember: NewProjectMember = {
-        projectId: projectId,
-        userId: userId,
-        role: "Project Manager",
-        approved: true
+        updatedAt: new Date()
       }
-
-      // Add member to the project
-      createProjectMemberAction(newProjectMember);
-      
-      // Display success and close the modal
-      toast.success("Project created.");
-      success();
-      close();
+          
+      // Update project  
+      updateMutation.mutate({ projectId: project.id, updProject }, {
+        onSuccess: () => {
+          closeModal();
+          toast.success("Project updated successfully.");
+        },
+        onError: () => {
+          closeModal();
+          toast.error("Error occured.");
+        }
+      });
     }
     catch{return}
-  };
+  }
 
   return(
     <div className="modal-background">
       <div className="max-w-md modal-form">
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
-            Create New Project
+            Update Project
           </h3>
-          <button onClick={close} className="modal-sub-btn">
+          <button onClick={closeModal} className="modal-sub-btn">
             <X size={20}/>
           </button>
         </div>
@@ -116,11 +127,11 @@ export function CreateProjectButton({ close, success, userId } : { close : () =>
             />
           </div>
           <div className="modal-btn-div">
-            <button onClick={close} type="button" className="modal-sub-btn">
+            <button onClick={closeModal} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn">
-              Create Project
+            <button type="submit" className="modal-main-btn" disabled={updateMutation.isPending}>
+              {updateMutation.isPending? "Updating..." : "Update Project"}
             </button>
           </div>
         </form>
