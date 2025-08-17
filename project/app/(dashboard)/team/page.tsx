@@ -33,6 +33,9 @@ export default function TeamPage(){
   const [projectsData, setProjectsData] = useState<ProjectsWithMembers[]>([]);
   const [members, setMembers] = useState<ProjectMemberUser[]>([]);
 
+  // Hook for project that user added member in
+  const [createdAt, setCreatedAt] = useState("");
+
   // Get user id
   const { 
           data: userId, 
@@ -57,8 +60,13 @@ export default function TeamPage(){
   // Initial selected project
   useEffect(() => {
     if(projectWithMembers && projectWithMembers.length > 0){
-      setSelectedProject(projectWithMembers[0].project.id);
-      setProjectsData(projectWithMembers?.map((p) => p.project) ?? [])
+      if(createdAt){
+        setSelectedProject(createdAt);
+      }
+      else{
+        setSelectedProject(projectWithMembers[0].project.id);
+      }
+      setProjectsData(projectWithMembers?.map((p) => p.project) ?? []);
     }
   }, [projectWithMembers]);
 
@@ -68,7 +76,7 @@ export default function TeamPage(){
       (pwm) => pwm.project.id === selectedProject);
       const membersData = selectedProjectData?.project.members ?? [];
       setMembers(membersData);
-  }, [selectedProject]);
+  }, [selectedProject, projectWithMembers]);
 
   // Filtering of which members to display
   useEffect(() => {
@@ -105,7 +113,7 @@ export default function TeamPage(){
       {isLoading ? (<LoadingPage/>) : 
         (
           <>
-            {isOpen && modalType === "addMember" && userId && <CreateProjectMember userId={userId} projectData={projectsData}/>}
+            {isOpen && modalType === "addMember" && userId && <CreateProjectMember userId={userId} projectData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>

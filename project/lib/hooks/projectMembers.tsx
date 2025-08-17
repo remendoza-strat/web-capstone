@@ -65,14 +65,14 @@ export function getAllUsers(){
   });
 }
 
-export function createProjectMember(){
+export function createProjectMember(userId: string){
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ newProjectMember } : { newProjectMember: NewProjectMember }) => {
       return await createProjectMemberAction(newProjectMember);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["all-project-members"] });
+      queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
     }
   });
 }

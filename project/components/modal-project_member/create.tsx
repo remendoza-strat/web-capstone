@@ -8,12 +8,12 @@ import { Role, RoleArr } from "@/lib/customtype"
 import type { ProjectsWithMembers } from "@/lib/customtype"
 import { hasPermission } from "@/lib/permissions"
 import { createProjectMember, getAllUsers } from "@/lib/hooks/projectMembers"
-import {UserAvatar} from "@/components/user-avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import { useModal } from "@/lib/states"
 import ErrorPage from "@/components/pages/error"
 import LoadingCard from "@/components/pages/loading"
 
-export function CreateProjectMember({ userId, projectData } : { userId: string; projectData: ProjectsWithMembers[] }){
+export function CreateProjectMember({ userId, projectData, onProjectSelect } : { userId: string; projectData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
   // Modal closing
   const { closeModal } = useModal();
 
@@ -30,7 +30,7 @@ export function CreateProjectMember({ userId, projectData } : { userId: string; 
     .filter((project) => project.members.some((member) => member.userId === userId && hasPermission(member.role, "addMember")));
 
   // Create project member
-  const createMutation = createProjectMember();
+  const createMutation = createProjectMember(userId);
 
   // Get all users
   const {
@@ -136,11 +136,25 @@ export function CreateProjectMember({ userId, projectData } : { userId: string; 
           role: role,
           approved: false
         }; 
-        await createMutation.mutateAsync({ newProjectMember });
+
+        // Add user to project
+        try{
+          await createMutation.mutateAsync({ newProjectMember });
+        }
+        catch{
+          toast.error("Error occured.");
+          closeModal();
+          return;
+        }
       }
 
       // Display success and close modal
       toast.success("Project membership invitation sent.");
+
+      // Send the project user added member to
+      onProjectSelect?.(selectedProjectId);
+      
+      // Close modal
       closeModal();
     }
     catch{return}
@@ -247,7 +261,7 @@ export function CreateProjectMember({ userId, projectData } : { userId: string; 
                           </div>
                           <div className="flex items-center flex-shrink-0 space-x-2">
                             <select
-                              className="px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg cursor-pointer dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                              className="px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 cursor-pointer rounded-xl dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                               value={selected.role} onChange={(e) => handleRoleChange(index, e.target.value as Role)}
                             >
                               {RoleArr.map((role) => (
