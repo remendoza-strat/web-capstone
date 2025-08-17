@@ -9,6 +9,7 @@ import { getUserId } from "@/lib/hooks/users"
 import { useUser } from "@clerk/nextjs"
 import { useModal } from "@/lib/states"
 import { CreateProjectMember } from "@/components/modal-project_member/create"
+import { hasPermission } from "@/lib/permissions"
 import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 
@@ -35,6 +36,9 @@ export default function TeamPage(){
 
   // Hook for project that user added member in
   const [createdAt, setCreatedAt] = useState("");
+
+  // Get user permission
+  const [canEditMember, setCanEditMember] = useState(false);
 
   // Get user id
   const { 
@@ -76,6 +80,12 @@ export default function TeamPage(){
       (pwm) => pwm.project.id === selectedProject);
       const membersData = selectedProjectData?.project.members ?? [];
       setMembers(membersData);
+
+      // Get user and permission
+      const user = membersData.find((md) => md.user.id === userId);
+      if(user){
+        setCanEditMember(hasPermission(user.role, "editMember"))
+      }
   }, [selectedProject, projectWithMembers]);
 
   // Filtering of which members to display
@@ -240,12 +250,8 @@ export default function TeamPage(){
                   {members.map((member) => (
                     <MemberCard
                       key={member.user.id}
-                      clerkId={member.user.clerkId}
-                      name={member.user.fname + " " + member.user.lname}
-                      position={member.role}
-                      email={member.user.email}
-                      join={member.updatedAt?.toLocaleDateString() || ""}
-                      approved={member.approved}
+                      canEdit={canEditMember}
+                      member={member}
                     />
                   ))}
                 </div>
