@@ -169,6 +169,10 @@ export const queries = {
 
 
 
+
+
+
+
 export const getQueries = {
 
   getUserProjectsWithMembers: async (userId: string) => {
@@ -177,6 +181,19 @@ export const getQueries = {
       with: {project: {with: {members: {with: {user: true}}}}}
     });
     return result;
+  },
+
+  getAllUsers: async () => {
+    const result = await db.select().from(users);
+    return result;
+  },
+  
+}
+
+export const createQueries = {
+
+  createProjectMember: async (newProjectMember: NewProjectMember) => {
+    await db.insert(projectMembers).values(newProjectMember).execute();
   },
   
 }

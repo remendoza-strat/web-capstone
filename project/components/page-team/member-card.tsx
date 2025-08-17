@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { Mail, Calendar, Edit2, UserX  } from 'lucide-react';
-import {  useUserImage } from '@/lib/hooks/projectMembers';
+import {  getUserImage } from '@/lib/hooks/projectMembers';
 import { useUser } from '@clerk/nextjs';
 import LoadingPage from '../pages/loading';
 import ErrorPage from '../pages/error';
@@ -11,7 +11,7 @@ export function MemberCard(
   {clerkId, name, position, email, join, approved} : 
   {clerkId: string; name: string; position: string; email: string; join: string; approved: boolean}){
 
-const { data: imageUrl, isLoading: imageUrlLoading, error: imageUrlError } = useUserImage(clerkId);
+const { data: imageUrl, isLoading: imageUrlLoading, error: imageUrlError } = getUserImage(clerkId);
 
 
 const isLoading = imageUrlLoading;

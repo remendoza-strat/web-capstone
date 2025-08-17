@@ -1,5 +1,5 @@
 "use server"
-import { getQueries, queries } from "@/lib/db/queries"
+import { createQueries, getQueries, queries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 import { projects, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
@@ -41,10 +41,6 @@ export async function createUserAction(newUser: NewUser){
   return await queries.users.createUser(newUser);
 }
 
-// Create project member
-export async function createProjectMemberAction(newProjectMember: NewProjectMember){
-  await queries.projectMembers.createProjectMember(newProjectMember);
-}
 
 // Update = "updatedAt"
 // of given projectId
@@ -201,4 +197,18 @@ export async function updateProjectAction(projectId: string, updProject: Partial
 // Result: user projects with its members (approved && not)
 export async function getUserProjectsWithMembersAction(userId: string){
   return await getQueries.getUserProjectsWithMembers(userId);
+}
+
+// Used in: members-modal/add
+// Require: NONE
+// Result: all users
+export async function getAllUsersAction(){
+  return await getQueries.getAllUsers();
+}
+
+// Used in: members-modal/add
+// Require: newProjectMember
+// Result: NONE
+export async function createProjectMemberAction(newProjectMember: NewProjectMember){
+  await createQueries.createProjectMember(newProjectMember);
 }

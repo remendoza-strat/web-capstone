@@ -2,13 +2,13 @@
 import { useEffect, useState } from "react"
 import { ChevronDown, Filter, Search, Users, FolderOpen, UserPlus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { MemberCard } from "@/components/team-page/member-card"
+import { MemberCard } from "@/components/page-team/member-card"
 import { ProjectMemberUser, ProjectsWithMembers, RoleArr } from "@/lib/customtype"
 import { getUserProjectsWithMembers } from "@/lib/hooks/projectMembers"
 import { getUserId } from "@/lib/hooks/users"
 import { useUser } from "@clerk/nextjs"
 import { useModal } from "@/lib/states"
-import { AddMember } from "@/components/members-modal/add"
+import { CreateProjectMember } from "@/components/modal-project_member/create"
 import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 
@@ -76,7 +76,7 @@ export default function TeamPage(){
 
     const delay = setTimeout(() => {
       const query = search.toLowerCase();
-      const project = projectWithMembers.find(p => p.project.id === selectedProject)?.project;
+      const project = projectWithMembers.find((p) => p.project.id === selectedProject)?.project;
       const members = project?.members ?? [];
 
       const filtered = members.filter((m) => {
@@ -105,7 +105,7 @@ export default function TeamPage(){
       {isLoading ? (<LoadingPage/>) : 
         (
           <>
-            {isOpen && modalType === "addMember" && userId && <AddMember userId={userId} projectData={projectsData}/>}
+            {isOpen && modalType === "addMember" && userId && <CreateProjectMember userId={userId} projectData={projectsData}/>}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>

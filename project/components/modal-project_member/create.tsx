@@ -4,17 +4,47 @@ import { X, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import type { NewProjectMember, Project, User } from "@/lib/db/schema"
-import { getNonProjectMembersAction, createProjectMemberAction } from "@/lib/db/actions"
+import { createProjectMemberAction } from "@/lib/db/actions"
 import { ProjectMemberSchema } from "@/lib/validations"
 import { Role, RoleArr } from "@/lib/customtype"
 import type { ProjectsWithMembers, UserProjects } from "@/lib/customtype"
 import { hasPermission } from "@/lib/permissions"
+import { createProjectMember, getAllUsers } from "@/lib/hooks/projectMembers"
+import LoadingPage from '../pages/loading';
+import ErrorPage from "../pages/error"
+import LoadingCard from "../pages/loading-card"
+import {UserAvatar} from "@/components/user-avatar"
+import { projects } from '../../lib/db/schema';
 
-export function AddMember({ userId, projectData } : { userId: string; projectData: ProjectsWithMembers[] }){
-  // Get all projects from prop
-  const projects: Project[] = projectData
+export function CreateProjectMember({ userId, projectData } : { userId: string; projectData: ProjectsWithMembers[] }){
+
+  const projects: ProjectsWithMembers[] = projectData
     .filter((project) => project.members.some((member) => member.userId === userId && hasPermission(member.role, "addMember")))
-    .map(({ members, ...project }) => project);
+
+  // Create project member
+  const createMutation = createProjectMember();
+
+  // Get all users
+  const {
+          data: allUsers, 
+          isLoading: allUsersLoading, 
+          error: allUsersError
+        }
+  = getAllUsers();
+
+  // Show error
+  if (allUsersError) return <ErrorPage code={404} message="Fetching data error"/>
+  
+
+
+
+
+
+
+
+
+
+
   
   // Hook for project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
@@ -45,16 +75,34 @@ export function AddMember({ userId, projectData } : { userId: string; projectDat
           setSuggestions([]);
           return;
         }
-        const nonmembers = await getNonProjectMembersAction(selectedProjectId);
-        const selectedIds = selectedUsers.map((u) => u.user.id);
-        const remainingUsers = nonmembers.filter((u) => !selectedIds.includes(u.id));
+        
+        // get the selected project
+        const selectedProject = projects.find((p) => p.id === selectedProjectId);
+        
+        if(allUsers){
+    
+          // get the id of all the members of the selected project
+          const projectMembersId = selectedProject?.members.map((m) => m.user.id);
+
+          // remove all users that id is not in project members
+          const freeUsers = allUsers.filter((au) => !projectMembersId?.includes(au.id));
+
+          // get id of selected users
+          const selectedIds = selectedUsers.map((u) => u.user.id);
+
+          // remove selected users from users that is not in project members
+          const nonSeletected = freeUsers.filter((f) => !selectedIds.includes(f.id));
+
+        
+
         const search = query.toLowerCase();
-        const userList = remainingUsers.filter((user) => 
+        const userList = nonSeletected.filter((user) => 
             (user.lname).toLowerCase().includes(search) ||
             (user.fname).toLowerCase().includes(search) ||
             (user.email).toLowerCase().includes(search)
           )
         setSuggestions(userList);
+        }
       }
       catch{return}
     }, 200);
@@ -114,7 +162,7 @@ export function AddMember({ userId, projectData } : { userId: string; projectDat
           role: role,
           approved: false
         }; 
-        await createProjectMemberAction(newProjectMember);
+        await createMutation.mutateAsync({newProjectMember});
       }
 
       // Display success and close modal
@@ -125,8 +173,12 @@ export function AddMember({ userId, projectData } : { userId: string; projectDat
   };
 
   return(
+    <div>
+    
     <div className="modal-background">
+      
       <div className="max-w-lg modal-form">
+        {allUsersLoading? <LoadingCard/> : (<>
         <div className="flex items-center justify-between mb-4">
           <h3 className="modal-form-title">
             Add Team Member
@@ -172,6 +224,7 @@ export function AddMember({ userId, projectData } : { userId: string; projectDat
                           className="modal-form-suggestion-li"
                           onClick={() => handleAddUser(user)}>
                             <div className="modal-form-suggestion-main">
+                              <UserAvatar clerkId={user.clerkId} name={`${user.fname} ${user.lname}`} />
                               {user.fname} {user.lname}
                             </div>
                             <div className="modal-form-suggestion-sec">{user.email}</div>
@@ -191,6 +244,7 @@ export function AddMember({ userId, projectData } : { userId: string; projectDat
                   <li key={user.user.id} className="flex items-center justify-between gap-2 modal-form-input">
                     <div className="flex-1">
                       <div className="modal-form-suggestion-main">
+                        <UserAvatar clerkId={user.user.clerkId} name={`${user.user.fname} ${user.user.lname}`} />
                         {user.user.fname} {user.user.lname}
                       </div>
                       <div className="modal-form-suggestion-sec">{user.user.email}</div>
@@ -216,12 +270,16 @@ export function AddMember({ userId, projectData } : { userId: string; projectDat
             <button onClick={close} type="button" className="modal-sub-btn">
               Cancel
             </button>
-            <button type="submit" className="modal-main-btn">
-              Add Member
+            <button type="submit" className="modal-main-btn" disabled={createMutation.isPending}>
+              {createMutation.isPending? "Adding...": "Add Member"}
             </button>
           </div>
         </form>
-      </div>
+      </>)}</div>
+    
     </div>
+    
+    </div>
+    
   );
 }
