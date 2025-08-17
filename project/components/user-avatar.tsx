@@ -1,7 +1,7 @@
 import { getUserImage } from "@/lib/hooks/projectMembers"
-import { Loader2 } from "lucide-react" // spinner icon
+import { Loader2 } from "lucide-react"
 
-export function UserAvatar({ clerkId, name }: { clerkId: string; name: string }) {
+export function UserAvatar({ clerkId }: { clerkId: string}) {
   const { data: imageUrl, isLoading } = getUserImage(clerkId)
 
   if (isLoading) {
@@ -15,7 +15,7 @@ export function UserAvatar({ clerkId, name }: { clerkId: string; name: string })
   return (
     <img
       src={imageUrl ?? "/default-avatar.png"}
-      alt={name}
+      alt="icon"
       className="object-cover w-8 h-8 rounded-full"
     />
   )
