@@ -66,7 +66,7 @@ export default function TeamPage(){
   const isLoading = !userLoaded || userIdLoading || projectWithMembersLoading;
 
   // Show error
-  if (userIdError || projectWithMembersError) return <ErrorPage code={404} message="Fetching data error"/>
+  const isError = userIdError || projectWithMembersError;
 
   // Initial selected project
   useEffect(() => {
@@ -127,11 +127,10 @@ export default function TeamPage(){
 
   return(
     <DashboardLayout>
-      {isLoading ? (<LoadingPage/>) : 
-        (
+      {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
           <>
             {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
-            {isOpen && modalType === "updateMember" && selectedUpdateMember && (<UpdateProjectMember member={selectedUpdateMember} image={selectedImage} members={members}/>)}
+            {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} image={selectedImage} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
             {isOpen && modalType === "deleteMember" && selectedDeleteMember && (<DeleteProjecMember member={selectedDeleteMember} image={selectedImage} members={members}/>)}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">

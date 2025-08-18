@@ -1,5 +1,4 @@
 "use client"
-import "../globals.css"
 import { X, Search, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
@@ -39,9 +38,6 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
           error: allUsersError
         }
   = getAllUsers();
-
-  // Show error
-  if (allUsersError) return <ErrorPage code={404} message="Fetching data error"/>
 
   // Set initial selected project
   useEffect(() => {
@@ -163,7 +159,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
-        {allUsersLoading? (<LoadingCard/>) : 
+        {allUsersLoading? (<LoadingCard/>) : allUsersError? (<ErrorPage code={404} message="Fetching data error"/>) :
           (
             <>
               <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">

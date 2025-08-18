@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createProjectMemberAction, getAllUsersAction, getProjectMembersAction, getUserProjectsWithMembersAction } from "../db/actions";
-import { NewProjectMember } from "../db/schema";
+import { createProjectMemberAction, getAllUsersAction, getProjectMembersAction, getUserProjectsWithMembersAction, updateProjectMemberAction } from "../db/actions";
+import { NewProjectMember, projectMembers } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 
 // Uses getProjectMembers()
@@ -41,17 +41,14 @@ export function getProjectMembers(projectId: string, options? : { enabled?: bool
 
 
 
-
-
-
-export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
+export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
   return useQuery({
-    queryKey: ["all-project-members", userId],
+    queryKey: ["member-icon", clerkId],
     queryFn: async () => {
-      const data = await getUserProjectsWithMembersAction(userId);
+      const data = await getUserImageAction(clerkId);
       return data ?? null;
     },
-    enabled: options?.enabled ?? !!userId
+    enabled: options?.enabled ?? !!clerkId
   });
 }
 
@@ -62,6 +59,17 @@ export function getAllUsers(){
       const data = await getAllUsersAction();
       return data ?? null;
     }
+  });
+}
+
+export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["all-project-members", userId],
+    queryFn: async () => {
+      const data = await getUserProjectsWithMembersAction(userId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!userId
   });
 }
 
@@ -77,13 +85,14 @@ export function createProjectMember(userId: string){
   });
 }
 
-export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["member-icon", clerkId],
-    queryFn: async () => {
-      const data = await getUserImageAction(clerkId);
-      return data ?? null;
+export function updateProjectMember(userId: string){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ pmId, updPm } : { pmId: string, updPm: Partial<typeof projectMembers.$inferInsert> }) => {
+      return await updateProjectMemberAction(pmId, updPm);
     },
-    enabled: options?.enabled ?? !!clerkId
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
+    }
   });
 }

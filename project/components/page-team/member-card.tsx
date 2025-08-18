@@ -40,7 +40,9 @@ export function MemberCard(
                   className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full"
                 />
               ) : (
-                <div className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-blue-500 to-purple-600"/>
+                <div className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+                  {member.user.fname[0]}
+                </div>
               )}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

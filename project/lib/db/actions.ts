@@ -1,10 +1,11 @@
 "use server"
-import { createQueries, getQueries, queries } from "@/lib/db/queries"
+import { createQueries, getQueries, queries, updateQueries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 import { projects, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
 import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
+import { projectMembers } from './schema';
 
 
 
@@ -193,22 +194,29 @@ export async function updateProjectAction(projectId: string, updProject: Partial
 
 
 // Used in: team page
-// Require: userId
+// Require: user id
 // Result: user projects with its members (approved && not)
 export async function getUserProjectsWithMembersAction(userId: string){
   return await getQueries.getUserProjectsWithMembers(userId);
 }
 
-// Used in: members-modal/add
+// Used in: modal-project_member/create
 // Require: NONE
 // Result: all users
 export async function getAllUsersAction(){
   return await getQueries.getAllUsers();
 }
 
-// Used in: members-modal/add
-// Require: newProjectMember
+// Used in: modal-project_member/create
+// Require: project member
 // Result: NONE
 export async function createProjectMemberAction(newProjectMember: NewProjectMember){
   await createQueries.createProjectMember(newProjectMember);
+}
+
+// Used in: modal-project_member/update
+// Require: project member id & project member
+// Result: NONE
+export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
+  await updateQueries.updateProjectMember(pmId, updPm);
 }
