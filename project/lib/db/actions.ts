@@ -1,10 +1,11 @@
 "use server"
-import { queries } from "@/lib/db/queries"
+import { createQueries, deleteQueries, getQueries, queries, updateQueries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 import { projects, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
 import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
+import { projectMembers } from './schema';
 
 
 
@@ -41,10 +42,6 @@ export async function createUserAction(newUser: NewUser){
   return await queries.users.createUser(newUser);
 }
 
-// Create project member
-export async function createProjectMemberAction(newProjectMember: NewProjectMember){
-  await queries.projectMembers.createProjectMember(newProjectMember);
-}
 
 // Update = "updatedAt"
 // of given projectId
@@ -103,12 +100,6 @@ export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee)
 }
 
 // DELETE ACTIONS-----------------------------------------------------------------
-
-// Delete project
-export async function deleteProjectAction(projectId: string){
-  await queries.projects.deleteProject(projectId);
-}
-//-----------------------------------------------DONE SECTION-----------------------------------------------/
 
 
 
@@ -179,3 +170,75 @@ export async function updateProjectAction(projectId: string, updProject: Partial
   }
 }
 //-----------------------------------------------DONE SECTION-----------------------------------------------/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Used in: team page
+// Require: user id
+// Result: user projects with its members (approved && not)
+export async function getUserProjectsWithMembersAction(userId: string){
+  return await getQueries.getUserProjectsWithMembers(userId);
+}
+
+// Used in: modal-project_member/create
+// Require: NONE
+// Result: all users
+export async function getAllUsersAction(){
+  return await getQueries.getAllUsers();
+}
+
+// Used in: modal-project_member/create
+// Require: project member
+// Result: NONE
+export async function createProjectMemberAction(newProjectMember: NewProjectMember){
+  await createQueries.createProjectMember(newProjectMember);
+}
+
+// Used in: modal-project_member/update
+// Require: project member id & project member
+// Result: NONE
+export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
+  await updateQueries.updateProjectMember(pmId, updPm);
+}
+
+// Used in: modal-project_member/delete
+// Require: project id
+// Result: NONE
+export async function deleteProjectAction(projectId: string){
+  await deleteQueries.deleteProject(projectId);
+}
+
+// Used in: modal-project_member/delete
+// Require: project member id
+// Result: NONE
+export async function deleteProjectMemberAction(pmId: string){
+  await deleteQueries.deleteProjectMember(pmId);
+}
+
+// Used in: modal-project_member/delete
+// Require: project id & user id
+// Result: NONE
+export async function deleteTaskAssigneeAction(projectId: string, userId: string){
+  await deleteQueries.deleteTaskAssignee(projectId, userId);
+}
+
+// Used in: modal-project_member/delete
+// Require: project id & user id
+// Result: NONE
+export async function deleteCommentAction(projectId: string, userId: string){
+  await deleteQueries.deleteComment(projectId, userId);
+}

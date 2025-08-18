@@ -3,36 +3,56 @@ import { Role } from "@/lib/customtype"
 // Permissions
 export interface Permissions {
   editProject: boolean;
+  addMember: boolean;
+  editMember: boolean;
 }
 
 // Permission per role
 export const RolePermissions: Record<Role, Permissions> = {
   "Project Manager": {
-    editProject: true
+    editProject: true,
+    addMember: true,
+    editMember: true
   },
   "Frontend Developer": {
-    editProject: false
+    editProject: false,
+    addMember: false,
+    editMember: false
   },
   "Backend Developer": {
-    editProject: false
+    editProject: false,
+    addMember: false,
+    editMember: false
   },
   "Fullstack Developer": {
-    editProject: false
+    editProject: false,
+    addMember: false,
+    editMember: false
   },
   "UI/UX Designer": {
-    editProject: false
+    editProject: false,
+    addMember: false,
+    editMember: false
   },
   "QA Engineer": {
-    editProject: false
+    editProject: false,
+    addMember: false,
+    editMember: false
   },
   "DevOps Engineer": {
-    editProject: false
+    editProject: false,
+    addMember: false,
+    editMember: false
   },
   "Product Manager": {
-    editProject: true
+    editProject: true,
+    addMember: true,
+    editMember: true
   },
   "Team Lead": {
-    editProject: true
+    editProject: true,
+    addMember: true,
+    editMember: true
   }
 };
 

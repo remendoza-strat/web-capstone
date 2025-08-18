@@ -1,78 +1,286 @@
-import { UserPlus, Mail, MoreHorizontal } from "lucide-react"
+"use client"
+import { useEffect, useState } from "react"
+import { ChevronDown, Filter, Search, Users, FolderOpen, UserPlus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
+import { MemberCard } from "@/components/page-team/member-card"
+import { ProjectMemberUser, ProjectsWithMembers, RoleArr } from "@/lib/customtype"
+import { getUserProjectsWithMembers } from "@/lib/hooks/projectMembers"
+import { getUserId } from "@/lib/hooks/users"
+import { useUser } from "@clerk/nextjs"
+import { useModal } from "@/lib/states"
+import { hasPermission } from "@/lib/permissions"
+import { CreateProjectMember } from "@/components/modal-project_member/create"
+import { UpdateProjectMember } from "@/components/modal-project_member/update"
+import { DeleteProjecMember } from "@/components/modal-project_member/delete"
+import ErrorPage from "@/components/pages/error"
+import LoadingPage from "@/components/pages/loading"
 
-export default function TeamPage() {
-  return (
+export default function TeamPage(){
+  // Add member modal
+  const { isOpen, modalType, openModal } = useModal();
+  
+  // Get current user
+  const { user, isLoaded: userLoaded } = useUser();
+
+  // Hooks for UI
+  const [showProjectDropdown, setShowProjectDropdown] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Hooks for search and filter
+  const [search, setSearch] = useState("");
+  const [rolesFilter, setRolesFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  // Hooks for data displat
+  const [selectedProject, setSelectedProject] = useState("");
+  const [projectsData, setProjectsData] = useState<ProjectsWithMembers[]>([]);
+  const [members, setMembers] = useState<ProjectMemberUser[]>([]);
+
+  // Hook for project that user added member in
+  const [createdAt, setCreatedAt] = useState("");
+
+  // Get user permission
+  const [canEditMember, setCanEditMember] = useState(false);
+
+  // For update and delete member
+  const [selectedUpdateMember, setSelectedUpdateMember] = useState<ProjectMemberUser | null>(null);
+  const [selectedDeleteMember, setSelectedDeleteMember] = useState<ProjectMemberUser | null>(null);
+  const [selectedImage, setSelectedImage] = useState("")
+
+  // Get user id
+  const { 
+          data: userId, 
+          isLoading: userIdLoading, 
+          error: userIdError 
+        } 
+  = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
+
+  // Get projects with members
+  const {
+          data: projectWithMembers, 
+          isLoading: projectWithMembersLoading, 
+          error: projectWithMembersError 
+  } = getUserProjectsWithMembers(userId ?? "", { enabled: Boolean(userId) });
+
+  // Show loading
+  const isLoading = !userLoaded || userIdLoading || projectWithMembersLoading;
+
+  // Show error
+  const isError = userIdError || projectWithMembersError;
+
+  // Initial selected project
+  useEffect(() => {
+    if(projectWithMembers && projectWithMembers.length > 0){
+      if(createdAt){
+        setSelectedProject(createdAt);
+      }
+      else{
+        setSelectedProject(projectWithMembers[0].project.id);
+      }
+      setProjectsData(projectWithMembers?.map((p) => p.project) ?? []);
+    }
+    else{
+      setSelectedProject("");
+      setProjectsData([]);
+    }
+  }, [projectWithMembers]);
+
+  // Initial members of selected project
+  useEffect(() => {
+    const selectedProjectData = projectWithMembers?.find(
+      (pwm) => pwm.project.id === selectedProject);
+      const membersData = selectedProjectData?.project.members ?? [];
+      setMembers(membersData);
+
+      // Get user and permission
+      const user = membersData.find((md) => md.user.id === userId);
+      if(user){
+        setCanEditMember(hasPermission(user.role, "editMember"))
+      }
+  }, [selectedProject, projectWithMembers]);
+
+  // Filtering of which members to display
+  useEffect(() => {
+    if (!projectWithMembers || !selectedProject) return;
+
+    const delay = setTimeout(() => {
+      const query = search.toLowerCase();
+      const project = projectWithMembers.find((p) => p.project.id === selectedProject)?.project;
+      const members = project?.members ?? [];
+
+      const filtered = members.filter((m) => {
+        const matchesSearch =
+          m.user.fname.toLowerCase().includes(query) ||
+          m.user.lname.toLowerCase().includes(query) ||
+          m.user.email.toLowerCase().includes(query);
+        
+        if(showFilters){
+          const matchesRole = rolesFilter ? m.role === rolesFilter : true;
+          const matchesStatus = statusFilter ? (m.approved ? "approved" : "pending") === statusFilter: true;
+          return matchesSearch && matchesRole && matchesStatus;
+        }
+        
+        return matchesSearch;
+      });
+
+      setMembers(filtered);
+    }, 300);
+
+    return () => clearTimeout(delay);
+  }, [selectedProject, showFilters, search, rolesFilter, statusFilter]);
+
+  return(
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Team</h1>
-            <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-2">Manage team members and permissions</p>
-          </div>
-          <button className="inline-flex items-center px-4 py-2 text-white transition-colors rounded-lg bg-blue_munsell-500 hover:bg-blue_munsell-600">
-            <UserPlus size={20} className="mr-2" />
-            Invite Member
-          </button>
-        </div>
-
-        {/* Implementation Tasks Banner */}
-        <div className="p-4 border border-yellow-200 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
-          <h3 className="mb-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
-            📋 Team Management Implementation Tasks
-          </h3>
-          <ul className="space-y-1 text-sm text-yellow-700 dark:text-yellow-300">
-            <li>• Task 6.1: Implement task assignment and user collaboration features</li>
-            <li>• Task 6.4: Implement project member management and permissions</li>
-          </ul>
-        </div>
-
-        {/* Team Members Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[
-            { name: "John Doe", role: "Project Manager", email: "john@example.com", avatar: "JD" },
-            { name: "Jane Smith", role: "Developer", email: "jane@example.com", avatar: "JS" },
-            { name: "Mike Johnson", role: "Designer", email: "mike@example.com", avatar: "MJ" },
-            { name: "Sarah Wilson", role: "Developer", email: "sarah@example.com", avatar: "SW" },
-            { name: "Tom Brown", role: "QA Engineer", email: "tom@example.com", avatar: "TB" },
-            { name: "Lisa Davis", role: "Designer", email: "lisa@example.com", avatar: "LD" },
-          ].map((member, index) => (
-            <div
-              key={index}
-              className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center justify-center w-12 h-12 font-semibold text-white rounded-full bg-blue_munsell-500">
-                    {member.avatar}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-outer_space-500 dark:text-platinum-500">{member.name}</h3>
-                    <p className="text-sm text-payne's_gray-500 dark:text-french_gray-400">{member.role}</p>
-                  </div>
+      {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
+          <>
+            {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
+            {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} image={selectedImage} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
+            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjecMember userId={userId} member={selectedDeleteMember} image={selectedImage} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h1 className="flex items-center text-3xl font-bold text-gray-900 dark:text-white">
+                    <Users className="w-8 h-8 mr-3 text-blue-600"/>
+                    Team Members
+                  </h1>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Manage your team and project assignments</p>
                 </div>
-                <button className="p-1 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded">
-                  <MoreHorizontal size={16} />
-                </button>
-              </div>
-
-              <div className="flex items-center text-sm text-payne's_gray-500 dark:text-french_gray-400 mb-4">
-                <Mail size={16} className="mr-2" />
-                {member.email}
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-300">
-                  Active
-                </span>
-                <div className="text-sm text-payne's_gray-500 dark:text-french_gray-400">
-                  {Math.floor(Math.random() * 10) + 1} projects
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={() => openModal("createMember")}
+                    className="flex items-center px-6 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 shadow-md hover:bg-blue-700 rounded-xl"
+                  >
+                    <UserPlus className="w-5 h-5"/>
+                    <span>Invite Member</span>
+                  </button>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="p-6 mb-8 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
+              <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-4">
+                <div className="relative flex-1">
+                  <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500"/>
+                  <input
+                    type="text"
+                    placeholder="Search members..."
+                    value={search} onChange={(e) => setSearch(e.target.value)}
+                    className="w-full py-3 pl-10 pr-4 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowProjectDropdown(!showProjectDropdown)}
+                    className="flex items-center space-x-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-w-[200px] justify-between bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <span className="flex items-center">
+                      <div className="w-3 h-3 mr-2 rounded-full"/>
+                      {projectsData.find((p) => p.id === selectedProject)?.name}
+                    </span>
+                    <ChevronDown className="w-4 h-4"/>
+                  </button>
+                  {showProjectDropdown && (
+                    <div className="absolute left-0 right-0 z-10 mt-1 bg-white border border-gray-200 shadow-lg top-full dark:bg-gray-800 dark:border-gray-700 rounded-xl">
+                      {projectsData.map((project) => (
+                        <button
+                          key={project.id}
+                          onClick={() => {
+                            setSelectedProject(project.id);
+                            setShowProjectDropdown(false);
+                          }}
+                          className="flex items-center w-full px-4 py-3 text-gray-900 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl dark:text-white"
+                        >
+                          {project.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center px-4 py-3 space-x-2 text-gray-900 transition-colors bg-white border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-800 dark:text-white"
+                >
+                  <Filter className="w-5 h-5"/>
+                  <span>Filters</span>
+                </button>
+              </div>
+              {showFilters && (
+                <div className="flex flex-wrap gap-4 pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div>
+                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Roles
+                    </label>
+                    <select
+                      value={rolesFilter} onChange={(e) => setRolesFilter(e.target.value)}
+                      className="px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="">All Roles</option>
+                      {RoleArr.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Status
+                    </label>
+                    <select
+                      value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                      className="px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="approved">Approved</option>
+                      <option value="pending">Pending</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+            {projectWithMembers?.length === 0? 
+            (
+              <div className="py-12 text-center">
+                <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 bg-gray-300 rounded-full dark:bg-gray-800">
+                  <FolderOpen className="w-12 h-12 text-gray-400 dark:text-gray-500"/>
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No project found</h3>
+                <p className="mb-4 text-gray-600 dark:text-gray-300">Create or join projects in dashboard</p>
+              </div>
+            ) : members.length === 0? 
+            (
+              <div className="py-12 text-center">
+                <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 bg-gray-300 rounded-full dark:bg-gray-800">
+                  <Users className="w-12 h-12 text-gray-400 dark:text-gray-500"/>
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">No member found</h3>
+                <p className="mb-4 text-gray-600 dark:text-gray-300">Try adjusting your search or filters</p>
+              </div>
+            ) : 
+            (
+              <div>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {members.map((member) => ( userId &&
+                    <MemberCard 
+                      key={member.user.id}
+                      userId={userId}
+                      canEdit={canEditMember}
+                      member={member}
+                      onUpdateClick={(member, image) => {
+                        setSelectedUpdateMember(member)
+                        setSelectedImage(image) 
+                      }}
+                      onDeleteClick={(member, image) => {
+                        setSelectedDeleteMember(member)
+                        setSelectedImage(image)
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )
+      }
     </DashboardLayout>
-  )
+  );
 }

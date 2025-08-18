@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm"
+import { and, eq, inArray } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
-import { users, projects, projectMembers, tasks, taskAssignees } from "@/lib/db/schema"
+import { users, projects, projectMembers, tasks, taskAssignees, comments } from "@/lib/db/schema"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 
 export const queries = {
@@ -148,3 +148,96 @@ export const queries = {
   },
 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const getQueries = {
+
+  getUserProjectsWithMembers: async (userId: string) => {
+    const result = await db.query.projectMembers.findMany({
+      where: (pm, {and, eq}) => and(eq(pm.approved, true), eq(pm.userId, userId)),
+      with: {project: {with: {members: {with: {user: true}}}}}
+    });
+    return result;
+  },
+
+  getAllUsers: async () => {
+    const result = await db.select().from(users);
+    return result;
+  },
+  
+}
+
+export const createQueries = {
+
+  createProjectMember: async (newProjectMember: NewProjectMember) => {
+    await db.insert(projectMembers).values(newProjectMember).execute();
+  },
+  
+}
+
+export const updateQueries = {
+
+  updateProjectMember: async (pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>) => {
+    await db.update(projectMembers).set({...updPm}).where(eq(projectMembers.id, pmId));
+  },
+
+}
+
+export const deleteQueries = {
+  
+  deleteProject: async (projectId: string) => {
+    await db.delete(projects).where(eq(projects.id, projectId));
+  },
+
+  deleteProjectMember: async (pmId: string) => {
+    await db.delete(projectMembers).where(eq(projectMembers.id, pmId));
+  },
+
+  deleteTaskAssignee: async (projectId: string, userId: string) => {
+    await db.delete(taskAssignees).where(
+      and(
+        eq(taskAssignees.userId, userId),
+        inArray(
+          taskAssignees.taskId,
+          db.select({ id: tasks.id }).from(tasks).where(eq(tasks.projectId, projectId))
+        )
+      )
+    );
+  },
+
+  deleteComment: async (projectId: string, userId: string) => {
+    await db.delete(comments).where(
+      and(
+        eq(comments.userId, userId),
+        inArray(
+          comments.taskId,
+          db.select({ id: tasks.id }).from(tasks).where(eq(tasks.projectId, projectId))
+        )
+      )
+    );
+  },
+
+}
