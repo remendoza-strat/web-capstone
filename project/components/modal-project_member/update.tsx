@@ -33,9 +33,9 @@ export function UpdateProjectMember(
     }
 
     // Get count of pms and prevent having no pm
-    const pmCount = members.filter((m) => m.role === "Project Manager").length;
+    const pmCount = members.filter((m) => m.role === "Project Manager" && m.approved).length;
     if(initialRole === "Project Manager" && pmCount === 1){
-      toast.error("Project needs at least one project manager.");
+      toast.error("Project needs at least one approved project manager.");
       closeModal();
       return;
     }
@@ -57,7 +57,7 @@ export function UpdateProjectMember(
       }
     });
 
-    // Keep display to project where user is in
+    // Send the project user updated member to
     onProjectSelect?.(member.projectId);
   }
     
