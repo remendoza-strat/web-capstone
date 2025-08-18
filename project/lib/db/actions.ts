@@ -1,5 +1,5 @@
 "use server"
-import { createQueries, getQueries, queries, updateQueries } from "@/lib/db/queries"
+import { createQueries, deleteQueries, getQueries, queries, updateQueries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 import { projects, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
@@ -100,12 +100,6 @@ export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee)
 }
 
 // DELETE ACTIONS-----------------------------------------------------------------
-
-// Delete project
-export async function deleteProjectAction(projectId: string){
-  await queries.projects.deleteProject(projectId);
-}
-//-----------------------------------------------DONE SECTION-----------------------------------------------/
 
 
 
@@ -219,4 +213,32 @@ export async function createProjectMemberAction(newProjectMember: NewProjectMemb
 // Result: NONE
 export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
   await updateQueries.updateProjectMember(pmId, updPm);
+}
+
+// Used in: modal-project_member/delete
+// Require: project id
+// Result: NONE
+export async function deleteProjectAction(projectId: string){
+  await deleteQueries.deleteProject(projectId);
+}
+
+// Used in: modal-project_member/delete
+// Require: project member id
+// Result: NONE
+export async function deleteProjectMemberAction(pmId: string){
+  await deleteQueries.deleteProjectMember(pmId);
+}
+
+// Used in: modal-project_member/delete
+// Require: project id & user id
+// Result: NONE
+export async function deleteTaskAssigneeAction(projectId: string, userId: string){
+  await deleteQueries.deleteTaskAssignee(projectId, userId);
+}
+
+// Used in: modal-project_member/delete
+// Require: project id & user id
+// Result: NONE
+export async function deleteCommentAction(projectId: string, userId: string){
+  await deleteQueries.deleteComment(projectId, userId);
 }
