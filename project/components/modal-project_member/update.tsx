@@ -33,8 +33,8 @@ export function UpdateProjectMember(
     }
 
     // Get count of pms and prevent having no pm
-    const pmCount = members.filter((m) => m.role === "Project Manager" && m.approved).length;
-    if(initialRole === "Project Manager" && pmCount === 1){
+    const pmCount = (members.filter((m) => m.role === "Project Manager" && m.approved)).length;
+    if(initialRole === "Project Manager" && member.approved && pmCount === 1){
       toast.error("Project needs at least one approved project manager.");
       closeModal();
       return;

@@ -79,6 +79,10 @@ export default function TeamPage(){
       }
       setProjectsData(projectWithMembers?.map((p) => p.project) ?? []);
     }
+    else{
+      setSelectedProject("");
+      setProjectsData([]);
+    }
   }, [projectWithMembers]);
 
   // Initial members of selected project
@@ -255,9 +259,10 @@ export default function TeamPage(){
             (
               <div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {members.map((member) => (
-                    <MemberCard
+                  {members.map((member) => ( userId &&
+                    <MemberCard 
                       key={member.user.id}
+                      userId={userId}
                       canEdit={canEditMember}
                       member={member}
                       onUpdateClick={(member, image) => {

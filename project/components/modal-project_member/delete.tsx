@@ -36,8 +36,8 @@ export function DeleteProjecMember(
 
     // Prevent project with no project manager
     const pmCount = (members.filter((m) => m.role === "Project Manager" && m.approved)).length;
-    if(member.role === "Project Manager" && pmCount === 1){
-      toast.error("Project needs at least one project manager.");
+    if(member.role === "Project Manager" && member.approved && pmCount === 1){
+      toast.error("Project needs at least one approved project manager.");
       closeModal();
       return;
     }

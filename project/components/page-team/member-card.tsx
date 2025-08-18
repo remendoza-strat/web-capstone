@@ -7,8 +7,8 @@ import LoadingCard  from "@/components/pages/loading-card"
 import ErrorPage from "@/components/pages/error"
 
 export function MemberCard(
-  { canEdit, member, onUpdateClick, onDeleteClick } :
-  { canEdit: boolean, member: ProjectMemberUser; onUpdateClick?: (member: ProjectMemberUser, image: string) => void; onDeleteClick?: (member: ProjectMemberUser, image: string) => void; }){
+  { userId, canEdit, member, onUpdateClick, onDeleteClick } :
+  { userId: string, canEdit: boolean, member: ProjectMemberUser; onUpdateClick?: (member: ProjectMemberUser, image: string) => void; onDeleteClick?: (member: ProjectMemberUser, image: string) => void; }){
  
   // For opening modal
   const { openModal } = useModal();
@@ -20,6 +20,9 @@ export function MemberCard(
           error: imageUrlError
         } 
   = getUserImage(member.user.clerkId);
+
+  // Add identifier
+  const currentUser = userId === member.userId? "(You)" : "";
 
   return(
     <div className="p-6 transition-all duration-200 bg-white border border-gray-200 dark:bg-gray-800 rounded-xl dark:border-gray-700 hover:shadow-md dark:hover:shadow-lg group">
@@ -46,7 +49,7 @@ export function MemberCard(
               )}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {member.user.fname} {member.user.lname}
+                  {member.user.fname} {member.user.lname} {currentUser}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   {member.role}
