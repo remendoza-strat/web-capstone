@@ -8,8 +8,10 @@ import { getUserProjectsWithMembers } from "@/lib/hooks/projectMembers"
 import { getUserId } from "@/lib/hooks/users"
 import { useUser } from "@clerk/nextjs"
 import { useModal } from "@/lib/states"
-import { CreateProjectMember } from "@/components/modal-project_member/create"
 import { hasPermission } from "@/lib/permissions"
+import { CreateProjectMember } from "@/components/modal-project_member/create"
+import { UpdateProjectMember } from "@/components/modal-project_member/update"
+import { DeleteProjecMember } from "@/components/modal-project_member/delete"
 import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 
@@ -39,6 +41,11 @@ export default function TeamPage(){
 
   // Get user permission
   const [canEditMember, setCanEditMember] = useState(false);
+
+  // For update and delete member
+  const [selectedUpdateMember, setSelectedUpdateMember] = useState<ProjectMemberUser | null>(null);
+  const [selectedDeleteMember, setSelectedDeleteMember] = useState<ProjectMemberUser | null>(null);
+  const [selectedImage, setSelectedImage] = useState("")
 
   // Get user id
   const { 
@@ -123,7 +130,9 @@ export default function TeamPage(){
       {isLoading ? (<LoadingPage/>) : 
         (
           <>
-            {isOpen && modalType === "addMember" && userId && <CreateProjectMember userId={userId} projectData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
+            {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
+            {isOpen && modalType === "updateMember" && selectedUpdateMember && (<UpdateProjectMember member={selectedUpdateMember} image={selectedImage} members={members}/>)}
+            {isOpen && modalType === "deleteMember" && selectedDeleteMember && (<DeleteProjecMember member={selectedDeleteMember} image={selectedImage} members={members}/>)}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -135,7 +144,7 @@ export default function TeamPage(){
                 </div>
                 <div className="flex items-center space-x-3">
                   <button
-                    onClick={() => openModal("addMember")}
+                    onClick={() => openModal("createMember")}
                     className="flex items-center px-6 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 shadow-md hover:bg-blue-700 rounded-xl"
                   >
                     <UserPlus className="w-5 h-5"/>
@@ -252,6 +261,14 @@ export default function TeamPage(){
                       key={member.user.id}
                       canEdit={canEditMember}
                       member={member}
+                      onUpdateClick={(member, image) => {
+                        setSelectedUpdateMember(member)
+                        setSelectedImage(image) 
+                      }}
+                      onDeleteClick={(member, image) => {
+                        setSelectedDeleteMember(member)
+                        setSelectedImage(image)
+                      }}
                     />
                   ))}
                 </div>

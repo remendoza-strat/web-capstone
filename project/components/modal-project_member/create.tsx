@@ -13,7 +13,7 @@ import { useModal } from "@/lib/states"
 import ErrorPage from "@/components/pages/error"
 import LoadingCard from "@/components/pages/loading"
 
-export function CreateProjectMember({ userId, projectData, onProjectSelect } : { userId: string; projectData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
+export function CreateProjectMember({ userId, projectsData, onProjectSelect } : { userId: string; projectsData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
   // Modal closing
   const { closeModal } = useModal();
 
@@ -26,7 +26,7 @@ export function CreateProjectMember({ userId, projectData, onProjectSelect } : {
   const [selectedUsers, setSelectedUsers] = useState<{ user: User; role: Role }[]>([]);
 
   // Get projects where user can add member to
-  const projects: ProjectsWithMembers[] = projectData
+  const projects: ProjectsWithMembers[] = projectsData
     .filter((project) => project.members.some((member) => member.userId === userId && hasPermission(member.role, "addMember")));
 
   // Create project member
@@ -274,7 +274,6 @@ export function CreateProjectMember({ userId, projectData, onProjectSelect } : {
                               type="button"
                               onClick={() => handleRemoveUser(index)}
                               className="p-2 transition-colors rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
-                              title="Remove user"
                             >
                               <Trash2 className="w-4 h-4 text-red-500 dark:text-red-400"/>
                             </button>

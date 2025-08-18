@@ -1,11 +1,18 @@
 "use client"
 import { Mail, Calendar, Edit2, UserX  } from "lucide-react"
-import {  getUserImage } from "@/lib/hooks/projectMembers"
+import { getUserImage } from "@/lib/hooks/projectMembers"
 import { ProjectMemberUser } from "@/lib/customtype"
+import { useModal } from "@/lib/states"
 import LoadingCard  from "@/components/pages/loading-card"
 import ErrorPage from "@/components/pages/error"
 
-export function MemberCard({ canEdit, member } : { canEdit: boolean, member: ProjectMemberUser }){
+export function MemberCard(
+  { canEdit, member, onUpdateClick, onDeleteClick } :
+  { canEdit: boolean, member: ProjectMemberUser; onUpdateClick?: (member: ProjectMemberUser, image: string) => void; onDeleteClick?: (member: ProjectMemberUser, image: string) => void; }){
+ 
+  // For opening modal
+  const { openModal } = useModal();
+
   // Get icon of user
   const { 
           data: imageUrl, 
@@ -58,10 +65,15 @@ export function MemberCard({ canEdit, member } : { canEdit: boolean, member: Pro
               <div className="flex space-x-1 transition-opacity duration-200 group-hover:opacity-100">
                 {canEdit && (
                   <>             
-                    <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="Edit member">
+                    <button 
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => {onUpdateClick?.(member, imageUrl ?? ""); openModal("updateMember")}}
+                    >
                       <Edit2 className="w-4 h-4 text-gray-500 dark:text-gray-400"/>
                     </button>
-                    <button className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30" title="Kick member">
+                    <button className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+                      onClick={() => {onDeleteClick?.(member, imageUrl ?? ""); openModal("deleteMember")}}
+                    >
                       <UserX className="w-4 h-4 text-red-500 dark:text-red-400"/>
                     </button>
                   </>
