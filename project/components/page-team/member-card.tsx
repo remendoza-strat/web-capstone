@@ -71,12 +71,15 @@ export function MemberCard(
                 {canEdit && (
                   <>             
                     <button 
+                      type="button"
                       className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                       onClick={() => {onUpdateClick?.(member, imageUrl ?? ""); openModal("updateMember")}}
                     >
                       <Edit2 className="w-4 h-4 text-gray-500 dark:text-gray-400"/>
                     </button>
-                    <button className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+                    <button 
+                      type="button"
+                      className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
                       onClick={() => {onDeleteClick?.(member, imageUrl ?? ""); openModal("deleteMember")}}
                     >
                       <UserX className="w-4 h-4 text-red-500 dark:text-red-400"/>

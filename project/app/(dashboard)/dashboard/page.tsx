@@ -18,6 +18,7 @@ import { StatsCards } from "@/components/page-dashboard/stats-cards"
 import { QuickActions } from "@/components/page-dashboard/quick-actions"
 import { CreateProjectMember } from "@/components/modal-project_member/create"
 import { CreateProject } from "@/components/modal-project/create"
+import { CreateTask } from "@/components/modal-task/create"
 
 export default function DashboardPage(){
   // Opening modal
@@ -57,8 +58,10 @@ export default function DashboardPage(){
         
         
          <> 
-         {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={userProjs ?? []}/>}
          {isOpen && modalType === "createProject" && userId && <CreateProject userId={userId}/>}
+         {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={userProjs ?? []}/>}
+        {isOpen && modalType === "createTask" && userId && <CreateTask userId={userId} projectsData={userProjs ?? []}/>}
+      
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>

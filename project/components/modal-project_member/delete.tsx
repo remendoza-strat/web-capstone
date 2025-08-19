@@ -70,6 +70,7 @@ export function DeleteProjecMember(
             </h2>
           </div>
           <button
+            type="button"
             onClick={closeModal}
             className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
           >

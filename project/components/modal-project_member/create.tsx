@@ -155,6 +155,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                   Add Team Member
                 </h2>
                 <button
+                  type="button"
                   onClick={closeModal}
                   className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 >

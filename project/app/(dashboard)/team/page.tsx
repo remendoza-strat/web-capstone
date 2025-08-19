@@ -187,6 +187,7 @@ export default function TeamPage(){
                     <div className="absolute left-0 right-0 z-10 mt-1 bg-white border border-gray-200 shadow-lg top-full dark:bg-gray-800 dark:border-gray-700 rounded-xl">
                       {projectsData.map((project) => (
                         <button
+                          type="button"
                           key={project.id}
                           onClick={() => {
                             setSelectedProject(project.id);

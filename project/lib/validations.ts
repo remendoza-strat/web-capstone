@@ -85,12 +85,6 @@ export const ProjectMemberSchema = z.object({
 // Task data input validation
 export const TaskSchema = z.object({
 
-  // Project id validation
-  projectId: z
-    .union([z.string(), z.undefined()])
-    .refine((val) => val && val.length > 0, {
-      message: "Project: Must select a project to assign task to."}),
-
   // Title validation
   title: z
     .string().trim()
@@ -108,11 +102,6 @@ export const TaskSchema = z.object({
     .string().trim()
     .min(3, "Label: Must be at least 3 characters.")
     .max(50, "Label: Must not exceed 50 characters."),
-
-  // User validation
-  members: z.array(z
-    .object({}))
-    .min(1, "User: Must select at least one user to assign task to."),
   
   // Due date validation
   dueDate: z.preprocess(
