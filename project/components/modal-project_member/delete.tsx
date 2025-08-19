@@ -8,7 +8,7 @@ export function DeleteProjecMember(
   { userId, member, image, members, onProjectSelect } :
   { userId: string, member: ProjectMemberUser, image: string, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
   
-    // Closing modal
+  // Closing modal
   const {closeModal } = useModal();
   
   // Delete or kick member
@@ -25,6 +25,7 @@ export function DeleteProjecMember(
         onSuccess: () => {
           toast.success("Project left and deleted successfully.");
           closeModal();
+          onProjectSelect?.(member.projectId);
         },
         onError: () => {
           toast.error("Error occured.");
@@ -47,15 +48,13 @@ export function DeleteProjecMember(
       onSuccess: () => {
         toast.success("User kicked successfully.");
         closeModal();
+        onProjectSelect?.(member.projectId);
       },
       onError: () => {
         toast.error("Error occured.");
         closeModal();
       }
     });
-
-    // Send the project user added member to
-    onProjectSelect?.(member.projectId);
   }
 
   return(

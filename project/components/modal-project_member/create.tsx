@@ -123,34 +123,25 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
       return;
     }
 
-    // Iterate the array and add user content to database
-    for(const { user, role } of selectedUsers){
-      const newProjectMember: NewProjectMember = {
-        projectId: selectedProjectId,
-        userId: user.id,
-        role: role,
-        approved: false
-      }; 
-
-      // Add user to project
-      try{
+    // Add user to project
+    try{
+      for(const { user, role } of selectedUsers){
+        const newProjectMember: NewProjectMember = {
+          projectId: selectedProjectId,
+          userId: user.id,
+          role: role,
+          approved: false,
+        };
         await createMutation.mutateAsync({ newProjectMember });
       }
-      catch{
-        toast.error("Error occured.");
-        closeModal();
-        return;
-      }
+      toast.success("Project membership invitation sent.");
+      closeModal();
+      onProjectSelect?.(selectedProjectId);
+    } 
+    catch(error){
+      toast.error("Error occurred.");
+      closeModal();
     }
-
-    // Display success and close modal
-    toast.success("Project membership invitation sent.");
-
-    // Send the project user added member to
-    onProjectSelect?.(selectedProjectId);
-    
-    // Close modal
-    closeModal();
   };
 
   return(

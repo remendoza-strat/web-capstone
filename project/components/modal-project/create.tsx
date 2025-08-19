@@ -8,10 +8,12 @@ import { useModal } from "@/lib/states"
 import { createProject, createProjectMember } from "@/lib/hooks/projectMembers"
 
 export function CreateProject({ userId } : {  userId: string }){
-    const { closeModal } = useModal();
+  // Closing modal
+  const { closeModal } = useModal();
     
-		const createProjectMutation = createProject(userId);
-		const createProjectMemberMutation = createProjectMember(userId);
+  // Create project and member
+  const createProjectMutation = createProject(userId);
+  const createProjectMemberMutation = createProjectMember(userId);
 		
   // Hooks for input
   const [name, setName] = useState("");
@@ -21,63 +23,64 @@ export function CreateProject({ userId } : {  userId: string }){
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-      // Validate input
-      const result = ProjectSchema.safeParse({
-        name,
-        description,
-        dueDate
-      });
 
-      // Display error from validation
-      if(!result.success){
-        const errors = result.error.flatten().fieldErrors;
-        if(errors.name?.[0]){
-          toast.error(errors.name[0]);
-          return;
-        }
-        if(errors.description?.[0]){
-          toast.error(errors.description[0]);
-          return;
-        }
-        if(errors.dueDate?.[0]){
-          toast.error(errors.dueDate[0]);
-          return;
-        }
+    // Validate input
+    const result = ProjectSchema.safeParse({
+      name,
+      description,
+      dueDate
+    });
+
+    // Display error from validation
+    if(!result.success){
+      const errors = result.error.flatten().fieldErrors;
+      if(errors.name?.[0]){
+        toast.error(errors.name[0]);
+        return;
       }
-
-      // Create object of new project
-      const newProject: NewProject = {
-        name: name,
-        description: description,
-        dueDate: new Date(dueDate),
-        columnCount: 5,
-        columnNames: ["Backlog", "This Week", "In Progress", "To Review", "Done"]
-      };
-      
-			// ✅ Await project creation
-    const projectId = await createProjectMutation.mutateAsync({ newProject });
-
-    if (!projectId) {
-      toast.error("Failed to create project.");
-      return;
+      if(errors.description?.[0]){
+        toast.error(errors.description[0]);
+        return;
+      }
+      if(errors.dueDate?.[0]){
+        toast.error(errors.dueDate[0]);
+        return;
+      }
     }
-
-    // ✅ Use the id from created project
-    const newProjectMember: NewProjectMember = {
-      projectId: projectId,
-      userId,
-      role: "Project Manager",
-      approved: true,
+    
+    // Create object of new project
+    const newProject: NewProject = {
+      name: name,
+      description: description,
+      dueDate: new Date(dueDate),
+      columnCount: 5,
+      columnNames: ["Backlog", "This Week", "In Progress", "To Review", "Done"]
     };
 
-    // ✅ Await project member creation
-    await createProjectMemberMutation.mutateAsync({ newProjectMember });
+    try{
+      // Create project
+      const projectId = await createProjectMutation.mutateAsync({ newProject });
 
-		closeModal();
+      // Create object of new project member
+      const newProjectMember: NewProjectMember = {
+        projectId: projectId,
+        userId: userId,
+        role: "Project Manager",
+        approved: true
+      }
+
+      // Create project member
+      await createProjectMemberMutation.mutateAsync({ newProjectMember });
+
+      // Display success
+      toast.success("Project created successfully.");
+      closeModal();
+    } 
+    catch(error){
+      toast.error("Error occured.");
+      closeModal();
+    }
   };
-
- 
 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
@@ -137,9 +140,10 @@ export function CreateProject({ userId } : {  userId: string }){
             </button>
             <button
               type="submit"
+              disabled={createProjectMutation.isPending || createProjectMemberMutation.isPending}
               className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl"
             >
-              Create Project
+              {createProjectMutation.isPending || createProjectMemberMutation.isPending? "Creating Project..." : "Create Project"}
             </button>
           </div>
         </form>

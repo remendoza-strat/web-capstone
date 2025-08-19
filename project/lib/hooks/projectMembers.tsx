@@ -80,6 +80,7 @@ export function createProjectMember(userId: string){
       await createProjectMemberAction(newProjectMember);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
     }
   });

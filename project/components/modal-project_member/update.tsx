@@ -50,18 +50,16 @@ export function UpdateProjectMember(
       onSuccess: () => {
         toast.success("Project member role updated successfully.");
         closeModal();
+        onProjectSelect?.(member.projectId);
       },
       onError: () => {
         toast.error("Error occured.");
         closeModal();
       }
     });
-
-    // Send the project user updated member to
-    onProjectSelect?.(member.projectId);
   }
     
-   return (
+  return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
       <div className="w-full max-w-md bg-white shadow-2xl dark:bg-gray-800 rounded-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">

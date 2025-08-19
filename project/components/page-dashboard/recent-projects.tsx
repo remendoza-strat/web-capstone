@@ -35,7 +35,7 @@ export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Projects</h3>
         <Link href="/projects" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">View all</Link>
       </div>
-      <div className="pr-2 space-y-4 overflow-y-auto max-h-96">
+      <div className="pr-2 space-y-4">
         {projects?.map((project) => (
           <Link href={`projects/${project.id}`} key={project.id}>
             <div className="p-5 my-2 transition-colors border border-gray-200 rounded-xl dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
