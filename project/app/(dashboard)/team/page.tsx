@@ -71,7 +71,10 @@ export default function TeamPage(){
   // Initial selected project
   useEffect(() => {
     if(projectWithMembers && projectWithMembers.length > 0){
-      if(createdAt){
+      const currentExists = projectWithMembers.some(
+        (pwm) => pwm.project.id === createdAt
+      );
+      if(createdAt && currentExists){
         setSelectedProject(createdAt);
       }
       else{
