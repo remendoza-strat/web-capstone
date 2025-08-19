@@ -8,11 +8,6 @@ import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
 
 
-
-
-
-
-
 // Return = users
 // that is not a member of the project or not yet invited
 export async function getNonProjectMembersAction(projectId: string){
@@ -36,18 +31,6 @@ export async function createUserAction(newUser: NewUser){
 export async function updateProjectTimeAction(projectId: string){
   await queries.projects.updateProjectTime(projectId);
 }
-//----------------------------------------
-
-
-
-
-
-
-
-
-
-//-----------------------------------------------DONE SECTION-----------------------------------------------/
-// QUERY ACTIONS-----------------------------------------------------------------
 
 // Requires: clerk id
 // Return: user id
@@ -79,41 +62,6 @@ export async function getProjectMembersAction(projectId: string){
   return await queries.projectMembers.getProjectMembers(projectId);
 }
 
-// CREATE ACTIONS-----------------------------------------------------------------
-
-// Create task assignee
-// Return: none
-export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){
-  await queries.taskAssignees.createTaskAssignee(newTaskAssignee);
-}
-
-// DELETE ACTIONS-----------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-//-----------------------------------------------DONE SECTION-----------------------------------------------/
-// Create task
-export async function createTaskAction(projectId: string, newTask: NewTask, socketId?: string){
-  const [result] = await db
-    .insert(tasks)
-    .values(newTask)
-    .returning({ id: tasks.id });
-
-  if(result.id){
-    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: { ...newTask, id: result.id } },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
-
-  return result.id;
-}
-
 // Update task
 export async function updateTaskAction(projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>, socketId?: string){
   const [result] = await db
@@ -142,22 +90,6 @@ export async function deleteTaskAction(projectId: string, taskId: string, socket
     );
   }
 }
-
-// Update project
-export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, socketId?: string){
-  const [result] = await db
-    .update(projects)
-    .set({...updProject})
-    .where(eq(projects.id, projectId))
-    .returning();
-  
-  if(result){
-    await pusherServer.trigger(`kanban-channel-${projectId}`, "project-update", { project: result },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
-}
-//-----------------------------------------------DONE SECTION-----------------------------------------------/
 
 
 
@@ -243,4 +175,34 @@ export async function getUserProjectsAction(userId: string){
 // Result: new project id
 export async function createProjectAction(newProject: NewProject){
   return await createQueries.createProject(newProject);
+}
+
+// Used in: modal-task/create
+// Require: new task
+// Result: NONE
+export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){
+  await createQueries.createTaskAssignee(newTaskAssignee);
+}
+
+// Tanstack - Pusher - Query
+// Create Task
+export async function createTaskAction(projectId: string, newTask: NewTask, socketId?: string){
+  const [result] = await db.insert(tasks).values(newTask).returning({ id: tasks.id });
+  if(result.id){
+    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: { ...newTask, id: result.id } },
+      socketId ? { socket_id: socketId } : undefined
+    );
+  }
+  return result.id;
+}
+
+// Tanstack - Pusher - Query
+// Update Project
+export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, socketId?: string){
+  const [result] = await db.update(projects).set({...updProject}).where(eq(projects.id, projectId)).returning();
+  if(result){
+    await pusherServer.trigger(`kanban-channel-${projectId}`, "project-update", { project: result },
+      socketId ? { socket_id: socketId } : undefined
+    );
+  }
 }

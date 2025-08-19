@@ -205,10 +205,13 @@ export const createQueries = {
     await db.insert(projectMembers).values(newProjectMember).execute();
   },
 
+  createTaskAssignee: async (newTaskAssignee: NewTaskAssignee) => {
+    await db.insert(taskAssignees).values(newTaskAssignee).execute();
+  },
+
   createProject: async (newProject: NewProject) => {
     const [query] = await db.insert(projects).values(newProject)
       .returning({ id: projects.id });
-
     const result = query.id;
     return result;
   },

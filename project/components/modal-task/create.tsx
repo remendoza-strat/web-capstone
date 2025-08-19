@@ -8,25 +8,23 @@ import { useState, useEffect } from "react"
 import { TaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
 import { Priority, PriorityArr } from "@/lib/customtype"
-import { createTaskAction, createTaskAssigneeAction, updateProjectTimeAction } from "@/lib/db/actions"
-import type { NewTask, NewTaskAssignee, Project, User} from "@/lib/db/schema"
+import type { NewTask, NewTaskAssignee, User} from "@/lib/db/schema"
 import type { UserProjects } from "@/lib/customtype"
 import { hasPermission } from "@/lib/permissions"
 import { useModal } from "@/lib/states"
-import { UserAvatar } from "../user-avatar"
-import { createTask } from "@/lib/hooks/tasks"
-import { createTaskAssignee } from "@/lib/hooks/taskAssignees"
-import { updateProject } from "@/lib/hooks/projects"
+import { UserAvatar } from "@/components/user-avatar"
+import { createTask, createTaskAssignee, updateProject } from "@/lib/hooks/projectMembers"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
 
-export function CreateTask({ userId, projectsData } : { userId: string; projectsData: UserProjects[]}){
-	
- const { closeModal } = useModal();
+export function CreateTask({ userId, projectsData } : { userId: string; projectsData: UserProjects[] }){
+  // Closing modal
+  const { closeModal } = useModal();
+
+  // Projects user can make task
 	const projects: UserProjects[] = projectsData
 		.filter((project) => project.members.some((member) => member.userId === userId && hasPermission(member.role, "addTask")));
-
 
 	// Hook for project
 	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
@@ -44,22 +42,11 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
 	const [priority, setPriority] = useState<Priority>("Low");
 	const [label, setLabel] = useState("");
 
-
-
-  const createTaskMutation = createTask();
+  // Mutations to perform
+  const createTaskMutation = createTask(userId);
   const createTaskAssigneeMutation = createTaskAssignee();
-  const updateProjectMutation = updateProject();
+  const updateProjectMutation = updateProject(userId);
 
-
-
-
-
-
-
-
-
-
-	
 	// Set initial selected project
 	useEffect(() =>{
 		if(projects.length > 0){
@@ -177,29 +164,27 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
       }
     }
 
-    if (project){
-
-    
-
-    try{
-      // Create object of new task
-            const newTask: NewTask = {
-              projectId: project.id,
-              title: title,
-              description: description,
-              dueDate: new Date(dueDate),
-              priority: priority,
-              position: selectedColumn,
-              order: lastOrder,
-              label: label
-            };
-        // Create task
-        const id = await createTaskMutation.mutateAsync({ projectId: project.id, newTask });
+    if(project){
+      try{
+        // Create object of new task
+        const newTask: NewTask = {
+          projectId: project.id,
+          title: title,
+          description: description,
+          dueDate: new Date(dueDate),
+          priority: priority,
+          position: selectedColumn,
+          order: lastOrder,
+          label: label
+        };
         
+        // Create task
+        const taskId = await createTaskMutation.mutateAsync({ projectId: project.id, newTask });
+          
         // Assign task
         for(const { user } of selectedUsers){
           const newTaskAssignee: NewTaskAssignee = {
-            taskId: id,
+            taskId: taskId,
             userId: user.id
           };
           await createTaskAssigneeMutation.mutateAsync(newTaskAssignee);
@@ -207,21 +192,22 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
       } 
       catch{
         toast.error("Error occurred.");
+        closeModal();
         return;
       }
 
       // Update project  
       updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() } }, {
         onSuccess: () => {
-          closeModal();
           toast.success("Task created successfully.");
+          closeModal();
         },
         onError: () => {
-          closeModal();
           toast.error("Error occured.");
+          closeModal();
         }
       });
-}
+    }
 	};
 
   return(
@@ -350,7 +336,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              User
+              Task Assignees
             </label>
             <div className="relative">
               <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500" />
