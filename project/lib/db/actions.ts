@@ -31,12 +31,6 @@ export async function getUserTasksAction(userId: string){
   return await queries.tasks.getUserTasks(userId);
 }
 
-// Return = projects with its approved project members and tasks
-// of the given userId
-export async function getUserProjectsAction(userId: string){
-  return await queries.projects.getUserProjects(userId);
-}
-
 // Create user
 export async function createUserAction(newUser: NewUser){
   return await queries.users.createUser(newUser);
@@ -241,4 +235,11 @@ export async function deleteTaskAssigneeAction(projectId: string, userId: string
 // Result: NONE
 export async function deleteCommentAction(projectId: string, userId: string){
   await deleteQueries.deleteComment(projectId, userId);
+}
+
+// Used in: dashboard page
+// Require: user id
+// Result: user projects with its tasks and approved members
+export async function getUserProjectsAction(userId: string){
+  return await getQueries.getUserProjects(userId);
 }

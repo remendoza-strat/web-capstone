@@ -6,35 +6,7 @@ export function StripHTML(html: string){
   return html.replace(/<[^>]+>/g, "").trim();
 }
 
-// Cut sentence based on characters count
-export function LimitChar(paragraph: string, limit: number){
-  if(paragraph.length <= limit){
-    return paragraph;
-  }
-  return paragraph.slice(0, limit) + "...";
-}
 
-// Calculate progress per project tasks
-export function ComputeProgress(tasks: Task[], columnCount: number){
-  if (tasks.length === 0) return 0;
-
-  var total = 0;
-  const taskCount = tasks.length;
-
-  for(const t of tasks){
-    const position = t.position;
-    const column = columnCount;
-
-    if(position === (columnCount - 1)){
-      total += 100;
-    }
-    else{
-      total += Math.round((position/column) * 100);
-    }
-  }
-
-  return Math.round(total/taskCount);
-}
 
 // Get status of the project
 export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
@@ -63,32 +35,7 @@ export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
   }
 }
 
-// Format date
-export function DateTimeFormatter(date: Date){
-  const d = new Date(date);
-  const utc = d.getTime() + d.getTimezoneOffset() * 60000;
-  const phTime = new Date(utc + 8 * 60 * 60 * 1000);
 
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-  const month = months[phTime.getMonth()];
-  const day = phTime.getDate();
-  const year = phTime.getFullYear();
-
-  let hours = phTime.getHours();
-  const minutes = phTime.getMinutes();
-  const ampm = hours >= 12 ? "PM" : "AM";
-
-  hours = hours % 12;
-  hours = hours === 0 ? 12 : hours;
-
-  const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-
-  return `${month} ${day}, ${year} at ${hours}:${paddedMinutes}${ampm}`;
-}
 
 // Sort projects by status
 export function ProjectsByStatus(status: string, result: UserProjects[]){
@@ -159,14 +106,6 @@ export function ProjectsByRole(userId: string, role: string, result: UserProject
   return result;
 }
 
-// Sort projects by most recent updated
-export function ByRecentProjects(projects: UserProjects[]){
-  const recent = [...projects].sort((a, b) =>
-    new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
-  );
-  return recent;
-}
-
 // Convert date to PH timezone for display
 export const FormatDateDisplay = (date: Date) => {
   const display = new Date(date);
@@ -176,3 +115,95 @@ export const FormatDateDisplay = (date: Date) => {
 
   return localDate.toISOString().slice(0, 16);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Sort projects by most recent updated
+export function ByRecentProjects(projects: UserProjects[]){
+  const recent = [...projects].sort((a, b) =>
+    new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
+  );
+  return recent;
+}
+
+// Cut sentence based on characters count
+export function LimitChar(paragraph: string, limit: number){
+  if(paragraph.length <= limit){
+    return paragraph;
+  }
+  return paragraph.slice(0, limit) + "...";
+}
+
+// Format date
+export function DateTimeFormatter(date: Date){
+  const d = new Date(date);
+  const utc = d.getTime() + d.getTimezoneOffset() * 60000;
+  const phTime = new Date(utc + 8 * 60 * 60 * 1000);
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const month = months[phTime.getMonth()];
+  const day = phTime.getDate();
+  const year = phTime.getFullYear();
+
+  let hours = phTime.getHours();
+  const minutes = phTime.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours === 0 ? 12 : hours;
+
+  const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  return `${month} ${day}, ${year} at ${hours}:${paddedMinutes}${ampm}`;
+}
+
+// Calculate progress per project tasks
+export function ComputeProgress(tasks: Task[], columnCount: number){
+  if (tasks.length === 0) return 0;
+
+  var total = 0;
+  const taskCount = tasks.length;
+
+  for(const t of tasks){
+    const position = t.position;
+    const column = columnCount;
+
+    if(position === (columnCount - 1)){
+      total += 100;
+    }
+    else{
+      total += Math.round((position/column) * 100);
+    }
+  }
+
+  return Math.round(total/taskCount);
+}

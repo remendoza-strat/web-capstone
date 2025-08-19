@@ -187,6 +187,15 @@ export const getQueries = {
     const result = await db.select().from(users);
     return result;
   },
+
+  getUserProjects: async (userId: string) => {
+    const query = await db.query.projectMembers.findMany({
+      where: (pm, {and, eq}) => and(eq(pm.approved, true), eq(pm.userId, userId)),
+      with: {project: {with: {members: {with: {user: true}}, tasks: true}}}
+    })
+    const result = query.map((q) => ({...q.project, members: q.project.members.filter((member) => member.approved === true)}));
+    return result;
+  },
   
 }
 
