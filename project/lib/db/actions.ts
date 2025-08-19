@@ -12,12 +12,6 @@ import { projectMembers } from './schema';
 
 
 
-//----------------------------------------
-// Return = "id"
-// of the created newProject
-export async function createProjectAction(newProject: NewProject){
-  return await queries.projects.createProject(newProject);
-}
 
 // Return = users
 // that is not a member of the project or not yet invited
@@ -242,4 +236,11 @@ export async function deleteCommentAction(projectId: string, userId: string){
 // Result: user projects with its tasks and approved members
 export async function getUserProjectsAction(userId: string){
   return await getQueries.getUserProjects(userId);
+}
+
+// Used in: modal-project/create
+// Require: new project
+// Result: new project id
+export async function createProjectAction(newProject: NewProject){
+  return await createQueries.createProject(newProject);
 }

@@ -38,7 +38,7 @@ export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
       <div className="pr-2 space-y-4 overflow-y-auto max-h-96">
         {projects?.map((project) => (
           <Link href={`projects/${project.id}`} key={project.id}>
-            <div className="p-5 transition-colors border border-gray-200 rounded-xl dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+            <div className="p-5 my-2 transition-colors border border-gray-200 rounded-xl dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h4 className="mb-1 font-semibold text-gray-900 dark:text-white">{project.name}</h4>

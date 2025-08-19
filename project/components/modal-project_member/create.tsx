@@ -111,49 +111,46 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try{
-      // Validate project
-      if(!selectedProjectId){
-        toast.error("Must select a project to add member to.");
-        return;
-      }
-      
-      // Validate member
-      if(selectedUsers.length === 0){
-        toast.error("Must select at least one user to be added.");
-        return;
-      }
-
-      // Iterate the array and add user content to database
-      for(const { user, role } of selectedUsers){
-        const newProjectMember: NewProjectMember = {
-          projectId: selectedProjectId,
-          userId: user.id,
-          role: role,
-          approved: false
-        }; 
-
-        // Add user to project
-        try{
-          await createMutation.mutateAsync({ newProjectMember });
-        }
-        catch{
-          toast.error("Error occured.");
-          closeModal();
-          return;
-        }
-      }
-
-      // Display success and close modal
-      toast.success("Project membership invitation sent.");
-
-      // Send the project user added member to
-      onProjectSelect?.(selectedProjectId);
-      
-      // Close modal
-      closeModal();
+    // Validate project
+    if(!selectedProjectId){
+      toast.error("Must select a project to add member to.");
+      return;
     }
-    catch{return}
+    
+    // Validate member
+    if(selectedUsers.length === 0){
+      toast.error("Must select at least one user to be added.");
+      return;
+    }
+
+    // Iterate the array and add user content to database
+    for(const { user, role } of selectedUsers){
+      const newProjectMember: NewProjectMember = {
+        projectId: selectedProjectId,
+        userId: user.id,
+        role: role,
+        approved: false
+      }; 
+
+      // Add user to project
+      try{
+        await createMutation.mutateAsync({ newProjectMember });
+      }
+      catch{
+        toast.error("Error occured.");
+        closeModal();
+        return;
+      }
+    }
+
+    // Display success and close modal
+    toast.success("Project membership invitation sent.");
+
+    // Send the project user added member to
+    onProjectSelect?.(selectedProjectId);
+    
+    // Close modal
+    closeModal();
   };
 
   return(

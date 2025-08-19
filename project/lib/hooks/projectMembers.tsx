@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createProjectMemberAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectMemberAction } from "../db/actions";
-import { NewProjectMember, projectMembers } from "../db/schema";
+import { createProjectAction, createProjectMemberAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectMemberAction } from "../db/actions";
+import { NewProject, NewProjectMember, projectMembers } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 
 // Uses getProjectMembers()
@@ -131,5 +131,18 @@ export function getUserProjects(userId: string, options? : { enabled?: boolean }
       return data ?? null;
     },
     enabled: options?.enabled ?? !!userId
+  });
+}
+
+export function createProject(userId: string){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ newProject } : { newProject: NewProject }) => {
+      const data = await createProjectAction(newProject);
+      return data ?? null;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+    }
   });
 }

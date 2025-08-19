@@ -7,7 +7,6 @@ import { CreateProjectButton } from "@/components/create-project-button"
 import { AddMemberButton } from "@/components/add-member-button"
 import { CreateTaskButton } from "@/components/create-task-button"
 import { getUserIdAction, getUserProjectsAction } from "@/lib/db/actions"
-import { DashboardStats } from "@/components/dashboard-stats"
 import { RecentProjects } from "@/components/page-dashboard/recent-projects"
 import type { UserProjects } from "@/lib/customtype"
 import { getUserId } from "@/lib/hooks/users"
@@ -16,10 +15,13 @@ import { useModal } from "@/lib/states"
 import LoadingPage from "@/components/pages/loading"
 import ErrorPage from "@/components/pages/error"
 import { StatsCards } from "@/components/page-dashboard/stats-cards"
+import { QuickActions } from "@/components/page-dashboard/quick-actions"
+import { CreateProjectMember } from "@/components/modal-project_member/create"
+import { CreateProject } from "@/components/modal-project/create"
 
 export default function DashboardPage(){
   // Opening modal
-  const { isOpen, modalType, openModal } = useModal();
+  const { isOpen, modalType } = useModal();
   
   // Get current user
   const { user, isLoaded: userLoaded } = useUser();
@@ -51,8 +53,12 @@ export default function DashboardPage(){
   return(
     <DashboardLayout>
       {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
-   
+
+        
+        
          <> 
+         {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={userProjs ?? []}/>}
+         {isOpen && modalType === "createProject" && userId && <CreateProject userId={userId}/>}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -71,6 +77,10 @@ export default function DashboardPage(){
               <div className="lg:col-span-2">
                 <RecentProjects userProjs={userProjs ?? []}/>
               </div>
+              <div className="space-y-6">
+            {/* Quick Actions */}
+            <QuickActions/>
+          </div>
             </div>
      </>
    

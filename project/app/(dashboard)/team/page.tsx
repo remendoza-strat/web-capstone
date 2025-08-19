@@ -150,6 +150,7 @@ export default function TeamPage(){
                 </div>
                 <div className="flex items-center space-x-3">
                   <button
+                    type="button"
                     onClick={() => openModal("createMember")}
                     className="flex items-center px-6 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 shadow-md hover:bg-blue-700 rounded-xl"
                   >
@@ -172,6 +173,7 @@ export default function TeamPage(){
                 </div>
                 <div className="relative">
                   <button
+                    type="button"
                     onClick={() => setShowProjectDropdown(!showProjectDropdown)}
                     className="flex items-center space-x-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-w-[200px] justify-between bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   >
@@ -199,6 +201,7 @@ export default function TeamPage(){
                   )}
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowFilters(!showFilters)}
                   className="flex items-center px-4 py-3 space-x-2 text-gray-900 transition-colors bg-white border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-800 dark:text-white"
                 >
