@@ -41,9 +41,7 @@ export function UpdateProjectMember(
     }
 
     // Setup data to update
-    const updPm: Partial<typeof projectMembers.$inferInsert> = {
-      role: role
-    }
+    const updPm: Partial<typeof projectMembers.$inferInsert> = { role: role }
       
     // Update member  
     updateMutation.mutate({ pmId: member.id, updPm }, {

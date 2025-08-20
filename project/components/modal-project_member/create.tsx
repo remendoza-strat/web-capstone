@@ -134,7 +134,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
         };
         await createMutation.mutateAsync({ newProjectMember });
       }
-      toast.success("Project membership invitation sent successfully.");
+      toast.success("Project membership invitation sent.");
       closeModal();
       onProjectSelect?.(selectedProjectId);
     } 

@@ -107,7 +107,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
 
     // Validate member
     if(selectedUsers.length === 0){
-      toast.error("Must select at least one user to be assign task to.");
+      toast.error("Must select at least one user to assign task to.");
       return;
     }
     

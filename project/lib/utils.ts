@@ -140,9 +140,6 @@ export const FormatDateDisplay = (date: Date) => {
 
 
 
-
-
-
 // Sort projects by most recent updated
 export function ByRecentProjects(projects: UserProjects[]){
   const recent = [...projects].sort((a, b) =>
@@ -214,4 +211,26 @@ export function ProgressColor(progress: number){
   if (progress >= 50) return "bg-blue-500";
   if (progress >= 25) return "bg-yellow-500";
   return "bg-red-500";
+};
+
+// Days since membership invitation is sent
+export const TimeAgo = (date?: Date | string | null) => {
+  if (!date) return "Unknown";
+
+  const parsedDate = typeof date === "string"
+    ? new Date(date.replace(" ", "T"))
+    : date;
+
+  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
+    return "Invalid date";
+  }
+
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
+
+  if (diffInHours < 1) return "Just now";
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}d ago`;
 };

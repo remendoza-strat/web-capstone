@@ -31,7 +31,7 @@ export default function TeamPage(){
   const [rolesFilter, setRolesFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  // Hooks for data displat
+  // Hooks for data display
   const [selectedProject, setSelectedProject] = useState("");
   const [projectsData, setProjectsData] = useState<ProjectsWithMembers[]>([]);
   const [members, setMembers] = useState<ProjectMemberUser[]>([]);
@@ -122,10 +122,8 @@ export default function TeamPage(){
           const matchesStatus = statusFilter ? (m.approved ? "approved" : "pending") === statusFilter: true;
           return matchesSearch && matchesRole && matchesStatus;
         }
-        
         return matchesSearch;
       });
-
       setMembers(filtered);
     }, 300);
 
@@ -266,7 +264,7 @@ export default function TeamPage(){
             (
               <div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {members.map((member) => ( userId &&
+                  {members.map((member) => (userId &&
                     <MemberCard 
                       key={member.user.id}
                       userId={userId}

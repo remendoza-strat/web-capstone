@@ -63,6 +63,17 @@ export function getAllUsers(){
   });
 }
 
+export function getUserProjects(userId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["user-projects", userId],
+    queryFn: async () => {
+      const data = await getUserProjectsAction(userId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!userId
+  });
+}
+
 export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["all-project-members", userId],
@@ -94,6 +105,7 @@ export function updateProjectMember(userId: string){
       await updateProjectMemberAction(pmId, updPm);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
     }
   });
@@ -122,17 +134,6 @@ export function kickMember(userId: string){
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
     }
-  });
-}
-
-export function getUserProjects(userId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["user-projects", userId],
-    queryFn: async () => {
-      const data = await getUserProjectsAction(userId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!userId
   });
 }
 
@@ -176,6 +177,18 @@ export function updateProject(userId: string){
     mutationFn: async ({ projectId, updProject } : { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
       const socketId = getSocketId(); 
       return await updateProjectAction(projectId, updProject, socketId || undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+    }
+  });
+}
+
+export function deleteProjectMember(userId: string){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ pmId } : { pmId: string }) => {
+      await deleteProjectMemberAction(pmId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });

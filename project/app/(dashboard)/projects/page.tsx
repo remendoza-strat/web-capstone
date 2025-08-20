@@ -84,7 +84,7 @@ export default function ProjectsPage(){
 
       // Set value of filtered projects
       setFilteredProjs(result);
-    }, 200);
+    }, 300);
     return () => clearTimeout(delay);
   }, [search, status, dueDate, role, filterBtn]);
 
