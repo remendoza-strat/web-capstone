@@ -207,3 +207,11 @@ export function ComputeProgress(tasks: Task[], columnCount: number){
 
   return Math.round(total/taskCount);
 }
+
+// Get color of progress bar
+export function ProgressColor(progress: number){
+  if (progress >= 80) return "bg-green-500";
+  if (progress >= 50) return "bg-blue-500";
+  if (progress >= 25) return "bg-yellow-500";
+  return "bg-red-500";
+};

@@ -19,6 +19,7 @@ import { QuickActions } from "@/components/page-dashboard/quick-actions"
 import { CreateProjectMember } from "@/components/modal-project_member/create"
 import { CreateProject } from "@/components/modal-project/create"
 import { CreateTask } from "@/components/modal-task/create"
+import { InviteTab } from "@/components/page-dashboard/invite-tab"
 
 export default function DashboardPage(){
   // Opening modal
@@ -74,14 +75,14 @@ export default function DashboardPage(){
               </div>
             </div>
             <div className="mb-8">
-              <StatsCards userProjs={userProjs ?? []}/>
+              <StatsCards userId={userId ?? ""} userProjs={userProjs ?? []}/>
             </div>
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                <RecentProjects userProjs={userProjs ?? []}/>
+                <RecentProjects userId={userId ?? ""} userProjs={userProjs ?? []}/>
               </div>
               <div className="space-y-6">
-            {/* Quick Actions */}
+            <InviteTab userId={userId ?? ""} userProjs={userProjs ?? []}/>
             <QuickActions/>
           </div>
             </div>

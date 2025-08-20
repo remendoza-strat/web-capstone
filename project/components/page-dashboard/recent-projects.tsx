@@ -1,33 +1,28 @@
 import React from "react"
+import Link from "next/link"
 import { Calendar, Users, CheckSquare } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
-import { ByRecentProjects, ComputeProgress, DateTimeFormatter, LimitChar } from "@/lib/utils"
-import Link from "next/link";
+import { ByRecentProjects, ComputeProgress, DateTimeFormatter, LimitChar, ProgressColor } from "@/lib/utils"
 
-
-export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
-	// Sort by most recent updated date
-	const recent = ByRecentProjects(userProjs);
+export function RecentProjects({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
+  // Projects that user is approved
+  const approved = userProjs.filter((p) => p.members.some((m) => m.userId === userId && m.approved));
+  
+  // Sort by most recent updated date
+	const recent = ByRecentProjects(approved);
 
 	// Get important data per project
-	const projects = recent.slice(0, 3).map((project) => {
-			const memberCount = project.members.length;
-			const taskCount = project.tasks.length;
-			const briefDesc = LimitChar(project.description, 75);
-			const detailedDate = DateTimeFormatter(project.dueDate);
-			const progress = ComputeProgress(project.tasks, project.columnCount);
-			return{
-					...project, memberCount, taskCount, progress, briefDesc, detailedDate
-			};
+  const projects = recent.slice(0, 3).map((project) => {
+    const memberCount = (project.members.filter((m) => m.approved)).length;
+    const taskCount = project.tasks.length;
+    const briefDesc = LimitChar(project.description, 75);
+    const detailedDate = DateTimeFormatter(project.dueDate);
+    const progress = ComputeProgress(project.tasks, project.columnCount);
+    const progColor = ProgressColor(progress);
+    return{
+        ...project, memberCount, taskCount, briefDesc, detailedDate, progress, progColor
+    };
 	});
-
-	// Get color to display progress
-  const getProgressColor = (progress: number) => {
-    if (progress >= 80) return "bg-green-500";
-    if (progress >= 50) return "bg-blue-500";
-    if (progress >= 25) return "bg-yellow-500";
-    return "bg-red-500";
-  };
 
   return(
     <div className="p-6 bg-white border border-gray-200 dark:bg-gray-800 rounded-xl dark:border-gray-700">
@@ -66,7 +61,7 @@ export function RecentProjects({ userProjs } : { userProjs: UserProjects[] }){
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
                   <div 
-                    className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(project.progress)}`}
+                    className={`h-2 rounded-full transition-all duration-300 ${project.progColor}`}
                     style={{ width: `${project.progress}%` }}
                   />
                 </div>

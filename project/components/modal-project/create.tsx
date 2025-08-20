@@ -76,7 +76,7 @@ export function CreateProject({ userId } : {  userId: string }){
       toast.success("Project created successfully.");
       closeModal();
     } 
-    catch(error){
+    catch{
       toast.error("Error occured.");
       closeModal();
     }

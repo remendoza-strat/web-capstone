@@ -1,5 +1,4 @@
 "use client"
-import "../globals.css"
 import "react-quill-new/dist/quill.snow.css"
 import dynamic from "next/dynamic"
 import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search } from "lucide-react"
@@ -24,7 +23,8 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
 
   // Projects user can make task
 	const projects: UserProjects[] = projectsData
-		.filter((project) => project.members.some((member) => member.userId === userId && hasPermission(member.role, "addTask")));
+		.filter((project) => project.members.some((member) => member.userId === userId && member.approved && hasPermission(member.role, "addTask")))
+    .map((project) => ({...project, members: project.members.filter((member) => member.approved)}));
 
 	// Hook for project
 	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
@@ -77,7 +77,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
 				(u.user.email).toLowerCase().includes(search)
 			)
 			setSuggestions(userList);
-		}, 200);
+		}, 300);
 		return () => clearTimeout(timeout);
 	}, [query, selectedUsers]);
 
@@ -218,6 +218,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
             Create New Task
           </h2>
           <button
+            type="button"
             onClick={closeModal}
             className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
           >
@@ -285,7 +286,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              <FileText className="inline w-4 h-4 mr-2" />
+              <FileText className="inline w-4 h-4 mr-2"/>
               Description
             </label>
             <ReactQuill
@@ -296,7 +297,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                <Calendar className="inline w-4 h-4 mr-2" />
+                <Calendar className="inline w-4 h-4 mr-2"/>
                 Due Date
               </label>
               <input
@@ -308,7 +309,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
 
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                <AlertCircle className="inline w-4 h-4 mr-2" />
+                <AlertCircle className="inline w-4 h-4 mr-2"/>
                 Priority
               </label>
               <select
@@ -339,7 +340,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
               Task Assignees
             </label>
             <div className="relative">
-              <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500" />
+              <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500"/>
               <input
                 className="w-full py-3 pl-10 pr-4 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 type="text" placeholder="Search by name or email"
@@ -354,7 +355,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
                       onClick={() => handleAddUser(user)}
                     >
                       <div className="flex items-center justify-center w-8 h-8 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
-                        <UserAvatar clerkId={user.user.clerkId} />
+                        <UserAvatar clerkId={user.user.clerkId}/>
                       </div>
                       <div className="flex-1">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -416,9 +417,10 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
             </button>
             <button
               type="submit"
+              disabled={createTaskMutation.isPending || createTaskAssigneeMutation.isPending || updateProjectMutation.isPending}
               className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl"
             >
-              Create Task
+              {createTaskMutation.isPending || createTaskAssigneeMutation.isPending || updateProjectMutation.isPending? "Creating Task..." : "Create Task"}
             </button>
           </div>
         </form>

@@ -1,30 +1,45 @@
 import React from "react"
-import { BarChart3, AlertTriangle, CheckSquare, Clock } from "lucide-react"
+import { BarChart3, AlertTriangle, CheckSquare, FolderOpen } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 
-export function StatsCards({ userProjs } : { userProjs: UserProjects[] }){
-    // Active and overdue project computation
-  const activeProjs = (userProjs.filter((p) => 
+export function StatsCards({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
+  // Projects that user is approved
+  const approved = userProjs.filter((p) => p.members.some((m) => m.userId === userId && m.approved));
+
+  // Projects Stats
+  const allProjs = approved.length;
+  const compProjs = approved.filter((p) =>
+    p.tasks.length > 0 &&
+    p.tasks.every((t) => t.position === p.columnCount - 1)).length;
+  const activeProjs = (approved.filter((p) => 
     p.dueDate > new Date() && 
     p.tasks.some((t) => t.position < (p.columnCount - 1)))).length;
-  const overdueProjs = (userProjs.filter((p) => 
+  const overdueProjs = (approved.filter((p) => 
     p.dueDate < new Date() &&
     p.tasks.some((t) => t.position < (p.columnCount - 1)))).length;
-
-  // Active and overdue task computation
-  const activeTasks = userProjs.flatMap(p => p.tasks.filter (t =>
-    t.dueDate > new Date() && t.position < (p.columnCount - 1))).length;
-  const overdueTasks = userProjs.flatMap(p => p.tasks.filter (t =>
-    t.dueDate < new Date() && t.position < (p.columnCount - 1))).length;
 
   // Card data
   const statsData = [
     {
+      title: "All Projects",
+      value: allProjs,
+      icon: FolderOpen, 
+      color: "text-blue-600",
+      bgColor: "bg-blue-100 dark:bg-blue-900/30"
+    },
+    {
+      title: "Completed Projects",
+      value: compProjs,
+      icon: CheckSquare,
+      color: "text-green-600",
+      bgColor: "bg-green-100 dark:bg-green-900/30"
+    },
+    {
       title: "Active Projects",
       value: activeProjs,
       icon: BarChart3,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100 dark:bg-blue-900/30"
+      color: "text-orange-600",
+      bgColor: "bg-orange-100 dark:bg-orange-900/30"
     },
     {
       title: "Overdue Projects",
@@ -32,20 +47,6 @@ export function StatsCards({ userProjs } : { userProjs: UserProjects[] }){
       icon: AlertTriangle,
       color: "text-red-600",
       bgColor: "bg-red-100 dark:bg-red-900/30"
-    },
-    {
-      title: "Active Tasks",
-      value: activeTasks,
-      icon: CheckSquare,
-      color: "text-green-600",
-      bgColor: "bg-green-100 dark:bg-green-900/30"
-    },
-    {
-      title: "Overdue Tasks",
-      value: overdueTasks,
-      icon: Clock,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100 dark:bg-orange-900/30"
     }
   ];
 

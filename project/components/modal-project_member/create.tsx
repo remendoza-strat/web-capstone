@@ -26,7 +26,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
 
   // Get projects where user can add member to
   const projects: ProjectsWithMembers[] = projectsData
-    .filter((project) => project.members.some((member) => member.userId === userId && hasPermission(member.role, "addMember")));
+    .filter((project) => project.members.some((member) => member.userId === userId && member.approved && hasPermission(member.role, "addMember")));
 
   // Create project member
   const createMutation = createProjectMember(userId);
@@ -134,7 +134,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
         };
         await createMutation.mutateAsync({ newProjectMember });
       }
-      toast.success("Project membership invitation sent.");
+      toast.success("Project membership invitation sent successfully.");
       closeModal();
       onProjectSelect?.(selectedProjectId);
     } 
@@ -283,7 +283,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                   >
                     {createMutation.isPending? 
                       "Adding Member..."
-                      : `Add ${selectedUsers.length > 0 ? `${selectedUsers.length} ` : ''}Member${selectedUsers.length !== 1 ? 's' : ''}`}
+                      : `Add ${selectedUsers.length > 0 ? `${selectedUsers.length} ` : ""}Member${selectedUsers.length !== 1 ? "s" : ""}`}
                   </button>
                 </div>
               </form>
