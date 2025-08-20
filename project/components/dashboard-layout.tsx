@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { Home, FolderOpen, Users, Settings, Moon, Sun, Menu, X, BarChart3, Calendar } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 import { UserButton } from "@clerk/nextjs"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
@@ -27,7 +28,7 @@ export function DashboardLayout({ children } : { children: React.ReactNode }){
         }`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">
             ProjectFlow
           </div>
           <button
@@ -72,17 +73,7 @@ export function DashboardLayout({ children } : { children: React.ReactNode }){
           </button>
           <div className="flex justify-end flex-1">
             <div className="flex items-center space-x-4">
-              <button
-                type="button"
-                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                className="p-2 transition-colors bg-white rounded-lg dark:border-gray-600 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                {theme === "light" ? (
-                  <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400"/>
-                ) : (
-                  <Sun className="w-5 h-5 text-yellow-500"/>
-                )}
-              </button>
+              <ThemeToggle/>
               <UserButton/>
             </div>
           </div>
