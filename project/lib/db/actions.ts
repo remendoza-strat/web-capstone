@@ -107,77 +107,67 @@ export async function deleteTaskAction(projectId: string, taskId: string, socket
 
 
 
-// Used in: team page
+
 // Require: user id
 // Result: user projects with its members (approved && not)
 export async function getUserProjectsWithMembersAction(userId: string){
   return await getQueries.getUserProjectsWithMembers(userId);
 }
 
-// Used in: modal-project_member/create
 // Require: NONE
 // Result: all users
 export async function getAllUsersAction(){
   return await getQueries.getAllUsers();
 }
 
-// Used in: modal-project_member/create
 // Require: project member
 // Result: NONE
 export async function createProjectMemberAction(newProjectMember: NewProjectMember){
   await createQueries.createProjectMember(newProjectMember);
 }
 
-// Used in: modal-project_member/update
 // Require: project member id & project member
 // Result: NONE
 export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
   await updateQueries.updateProjectMember(pmId, updPm);
 }
 
-// Used in: modal-project_member/delete
 // Require: project id
 // Result: NONE
 export async function deleteProjectAction(projectId: string){
   await deleteQueries.deleteProject(projectId);
 }
 
-// Used in: modal-project_member/delete
 // Require: project member id
 // Result: NONE
 export async function deleteProjectMemberAction(pmId: string){
   await deleteQueries.deleteProjectMember(pmId);
 }
 
-// Used in: modal-project_member/delete
 // Require: project id & user id
 // Result: NONE
 export async function deleteTaskAssigneeAction(projectId: string, userId: string){
   await deleteQueries.deleteTaskAssignee(projectId, userId);
 }
 
-// Used in: modal-project_member/delete
 // Require: project id & user id
 // Result: NONE
 export async function deleteCommentAction(projectId: string, userId: string){
   await deleteQueries.deleteComment(projectId, userId);
 }
 
-// Used in: dashboard page
 // Require: user id
-// Result: user projects with its tasks and approved members
+// Result: user projects and invited projects with its tasks and members
 export async function getUserProjectsAction(userId: string){
   return await getQueries.getUserProjects(userId);
 }
 
-// Used in: modal-project/create
 // Require: new project
 // Result: new project id
 export async function createProjectAction(newProject: NewProject){
   return await createQueries.createProject(newProject);
 }
 
-// Used in: modal-task/create
 // Require: new task
 // Result: NONE
 export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){

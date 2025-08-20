@@ -1,110 +1,12 @@
 import type { Task } from "@/lib/db/schema"
 import { UserProjects } from "@/lib/customtype"
 
+
 // Remove html tags from text
 export function StripHTML(html: string){
   return html.replace(/<[^>]+>/g, "").trim();
 }
 
-
-
-// Get status of the project
-export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
-  const done = tasks.every((task) => task.position === (columnCount - 1));
-  if (done && tasks.length !== 0) return ["done", "Project done"];
-  
-  const now = new Date();
-  const dueDateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  const curDateUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  const daysDiff = Math.floor((dueDateUTC - curDateUTC) / (1000 * 60 * 60 * 24));
-
-  if(daysDiff < 0){
-    const display = daysDiff === -1? "1 day overdue" : (daysDiff * -1) + " days overdue";
-    return ["overdue", display];
-  }
-  else if(daysDiff === 0){
-    const milliDiff = date.getTime() - now.getTime();
-    if(milliDiff < 0){
-      return ["overdue", "Past due today"];
-    }
-    return ["active", "Due date today"];
-  }
-  else{
-    const display = daysDiff === 1? "1 day left" : daysDiff + " days left";
-    return ["active", display];
-  }
-}
-
-
-
-// Sort projects by status
-export function ProjectsByStatus(status: string, result: UserProjects[]){
-  if(status === "done"){
-    result = result.filter((p) => 
-      p.tasks.length !== 0 && p.tasks.every((t) => t.position === (p.columnCount - 1))
-    );
-  }
-  else if(status === "active"){
-    result = result.filter((p) => {
-      const milliDiff = p.dueDate.getTime() - (new Date()).getTime();
-      return milliDiff >= 0;
-    });
-  }
-  else if(status === "overdue"){
-    result = result.filter((p) => {
-      const milliDiff = p.dueDate.getTime() - (new Date()).getTime();
-      return milliDiff < 0 && p.tasks.every((t) => t.position !== (p.columnCount - 1));
-    });
-  }
-  return result;
-}
-
-// Sort projects by due date
-export function ProjectsByDueDate(dueDate: string, result: UserProjects[]){
-  if(dueDate === "today"){
-    result = result.filter((p) => {
-      const due = new Date(p.dueDate);
-      const now = new Date();
-
-      return due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth() && due.getDate() === now.getDate();
-    });
-  }
-  else if(dueDate === "week"){
-    result = result.filter((p) => {
-      const due = new Date(p.dueDate);
-      const now = new Date();
-
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
-      startOfWeek.setHours(0, 0, 0, 0);
-
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      endOfWeek.setHours(23, 59, 59, 999);
-
-      return due >= startOfWeek && due <= endOfWeek;
-    })
-  }
-  else if(dueDate === "month"){
-    result = result.filter((p) => {
-      const due = new Date(p.dueDate);
-      const now = new Date();
-
-      return due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth();
-    });
-  }
-  return result;
-}
-
-// Sort projects by user role
-export function ProjectsByRole(userId: string, role: string, result: UserProjects[]){
-  if(role){
-    result = result.filter((p) => 
-      p.members.some((m) => m.userId === userId && m.role === role)
-    );
-  }
-  return result;
-}
 
 // Convert date to PH timezone for display
 export const FormatDateDisplay = (date: Date) => {
@@ -210,8 +112,14 @@ export function ProgressColor(progress: number){
   if (progress >= 80) return "bg-green-500";
   if (progress >= 50) return "bg-blue-500";
   if (progress >= 25) return "bg-yellow-500";
-  return "bg-red-500";
 };
+
+// Get color of status label
+export function StatusColor(status: string){
+  if (status === "done") return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+  if (status === "active") return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+  if (status === "overdue") return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+}
 
 // Days since membership invitation is sent
 export const TimeAgo = (date?: Date | string | null) => {
@@ -234,3 +142,101 @@ export const TimeAgo = (date?: Date | string | null) => {
   const diffInDays = Math.floor(diffInHours / 24);
   return `${diffInDays}d ago`;
 };
+
+// Get status of the project
+export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
+  const done = tasks.every((task) => task.position === (columnCount - 1));
+  if (done && tasks.length !== 0) return ["done", "Project done"];
+  
+  const now = new Date();
+  const dueDateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const curDateUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const daysDiff = Math.floor((dueDateUTC - curDateUTC) / (1000 * 60 * 60 * 24));
+
+  if(daysDiff < 0){
+    const display = daysDiff === -1? "1 day overdue" : (daysDiff * -1) + " days overdue";
+    return ["overdue", display];
+  }
+  else if(daysDiff === 0){
+    const milliDiff = date.getTime() - now.getTime();
+    if(milliDiff < 0){
+      return ["overdue", "Past due today"];
+    }
+    return ["active", "Due date today"];
+  }
+  else{
+    const display = daysDiff === 1? "1 day left" : (daysDiff) + " days left";
+    return ["active", display];
+  }
+}
+
+// Sort projects by user role
+export function ProjectsByRole(userId: string, role: string, result: UserProjects[]){
+  if(role){
+    result = result.filter((p) => 
+      p.members.some((m) => m.userId === userId && m.role === role)
+    );
+  }
+  return result;
+}
+
+// Sort projects by due date
+export function ProjectsByDueDate(dueDate: string, result: UserProjects[]){
+  if(dueDate === "today"){
+    result = result.filter((p) => {
+      const due = new Date(p.dueDate);
+      const now = new Date();
+
+      return due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth() && due.getDate() === now.getDate();
+    });
+  }
+  else if(dueDate === "week"){
+    result = result.filter((p) => {
+      const due = new Date(p.dueDate);
+      const now = new Date();
+
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      return due >= startOfWeek && due <= endOfWeek;
+    })
+  }
+  else if(dueDate === "month"){
+    result = result.filter((p) => {
+      const due = new Date(p.dueDate);
+      const now = new Date();
+
+      return due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth();
+    });
+  }
+  return result;
+}
+
+// Sort projects by status
+export function ProjectsByStatus(status: string, result: UserProjects[]){
+  if(status === "done"){
+    result = result.filter((p) => p.tasks.length > 0 && p.tasks.every((t) => t.position === p.columnCount - 1));
+  } 
+  else if(status === "active"){
+    result = result.filter((p) => {
+      const milliDiff = p.dueDate.getTime() - new Date().getTime();
+      return(
+        (p.tasks.length === 0 || p.tasks.some((t) => t.position < p.columnCount - 1)) && milliDiff >= 0
+      );
+    });
+  } 
+  else if(status === "overdue"){
+    result = result.filter((p) => {
+      const milliDiff = p.dueDate.getTime() - new Date().getTime();
+      return(
+        (p.tasks.length === 0 || p.tasks.some((t) => t.position < p.columnCount - 1)) && milliDiff < 0
+      );
+    });
+  }
+  return result;
+}

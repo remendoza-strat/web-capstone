@@ -13,10 +13,10 @@ export function StatsCards({ userId, userProjs } : { userId: string, userProjs: 
     p.tasks.every((t) => t.position === p.columnCount - 1)).length;
   const activeProjs = (approved.filter((p) => 
     p.dueDate > new Date() && 
-    p.tasks.some((t) => t.position < (p.columnCount - 1)))).length;
+    (p.tasks.length === 0 || p.tasks.some((t) => t.position < p.columnCount - 1)))).length;
   const overdueProjs = (approved.filter((p) => 
     p.dueDate < new Date() &&
-    p.tasks.some((t) => t.position < (p.columnCount - 1)))).length;
+    (p.tasks.length === 0 || p.tasks.some((t) => t.position < p.columnCount - 1)))).length;
 
   // Card data
   const statsData = [
