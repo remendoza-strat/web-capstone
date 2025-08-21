@@ -6,10 +6,11 @@ import { projectMembers } from "@/lib/db/schema"
 import { updateProjectMember } from "@/lib/hooks/projectMembers"
 import { useModal } from "@/lib/states"
 import { X, UserCog } from "lucide-react"
+import { UserAvatar } from "@/components/user-avatar"
 
 export function UpdateProjectMember(
-  { userId, member, image, members, onProjectSelect } : 
-  { userId: string, member: ProjectMemberUser, image: string, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
+  { userId, member, members, onProjectSelect } : 
+  { userId: string, member: ProjectMemberUser, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
   
   // Closing modal
   const {closeModal } = useModal();
@@ -76,18 +77,7 @@ export function UpdateProjectMember(
           <div className="mb-4">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-12 h-12">
-                {image ? 
-                  (
-                    <img
-                      src={image}
-                      className="object-cover w-12 h-12 rounded-full"
-                    />
-                  ) : 
-                  (
-                    <div className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
-                      {member.user.fname[0]}
-                    </div>
-                  )}
+                <UserAvatar clerkId={member.user.clerkId}/>
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">{member.user.fname} {member.user.lname}</h3>

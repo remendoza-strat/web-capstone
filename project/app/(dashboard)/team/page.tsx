@@ -45,7 +45,6 @@ export default function TeamPage(){
   // For update and delete member
   const [selectedUpdateMember, setSelectedUpdateMember] = useState<ProjectMemberUser | null>(null);
   const [selectedDeleteMember, setSelectedDeleteMember] = useState<ProjectMemberUser | null>(null);
-  const [selectedImage, setSelectedImage] = useState("")
 
   // Get user id
   const { 
@@ -135,8 +134,8 @@ export default function TeamPage(){
       {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
           <>
             {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
-            {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} image={selectedImage} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
-            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjecMember userId={userId} member={selectedDeleteMember} image={selectedImage} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
+            {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
+            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjecMember userId={userId} member={selectedDeleteMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -270,13 +269,11 @@ export default function TeamPage(){
                       userId={userId}
                       canEdit={canEditMember}
                       member={member}
-                      onUpdateClick={(member, image) => {
+                      onUpdateClick={(member) => {
                         setSelectedUpdateMember(member)
-                        setSelectedImage(image) 
                       }}
-                      onDeleteClick={(member, image) => {
+                      onDeleteClick={(member) => {
                         setSelectedDeleteMember(member)
-                        setSelectedImage(image)
                       }}
                     />
                   ))}
