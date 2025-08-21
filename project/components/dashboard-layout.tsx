@@ -78,7 +78,7 @@ export function DashboardLayout({ children } : { children: React.ReactNode }){
             </div>
           </div>
         </div>
-        <main className="min-h-screen px-4 py-5 transition-colors bg-gray-50 dark:bg-gray-900">
+        <main className="min-h-screen px-6 py-6 transition-colors bg-gray-50 dark:bg-gray-900">
           {children}
         </main>
       </div>
