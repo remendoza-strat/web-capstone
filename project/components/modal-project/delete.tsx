@@ -53,7 +53,7 @@ export function DeleteProject({ userId, projectData } : { userId: string, projec
             onClick={closeModal}
             className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
           >
-            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">

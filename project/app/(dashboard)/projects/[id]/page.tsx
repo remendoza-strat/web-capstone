@@ -15,6 +15,7 @@ import { UpdateProject } from "@/components/modal-project/update"
 import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 import { DeleteProject } from "@/components/modal-project/delete"
+import { LeaveProject } from "@/components/modal-extras/leave-project"
 
 // List tabs
 const tabs = [
@@ -79,6 +80,7 @@ export default function ProjectPage(){
     <DashboardLayout>
       {isOpen && modalType === "updateProject" && <UpdateProject userId={userId} projectData={projectData}/>}
       {isOpen && modalType === "deleteProject" && <DeleteProject userId={userId} projectData={projectData}/>}
+      {isOpen && modalType === "leaveProject" && <LeaveProject userId={userId} projectData={projectData}/>}
         <div className="space-y-6">
           <div className="p-6 mb-8 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">

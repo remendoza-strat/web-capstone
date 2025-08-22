@@ -146,7 +146,11 @@ export function kickMember(userId: string){
       await deleteTaskAssigneeAction(projectId, userId);
       await deleteCommentAction(projectId, userId)
     },
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
+      queryClient.setQueryData(["user-projects", userId], (old: any) => {
+        if (!old) return old;
+        return old.filter((p: any) => p.id !== vars.projectId);
+      });
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
     }
   });

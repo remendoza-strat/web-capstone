@@ -198,11 +198,10 @@ export const getQueries = {
   },
 
   getProjectData: async (projectId: string) => {
-    const query = await db.query.projects.findFirst({
+    const result = await db.query.projects.findFirst({
       where: (p, {eq}) => eq(p.id, projectId),
       with: {members: {with: {user: true}}, tasks: {with: {assignees: {with: {user: true}}}}}
     });
-    const result = query? {...query, members: query.members.filter(member => member.approved)} : null
     return result;
   },
   
