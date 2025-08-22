@@ -128,7 +128,11 @@ export function deleteProject(userId: string){
     mutationFn: async ({ projectId } : { projectId: string }) => {
       await deleteProjectAction(projectId);
     },
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
+      queryClient.setQueryData(["user-projects", userId], (old: any) => {
+        if (!old) return old;
+        return old.filter((p: any) => p.id !== vars.projectId);
+      });
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
     }
   });
@@ -189,8 +193,9 @@ export function updateProject(userId: string){
       const socketId = getSocketId(); 
       return await updateProjectAction(projectId, updProject, socketId || undefined);
     },
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+      queryClient.invalidateQueries({ queryKey: ["project-data", vars.projectId] });
     }
   });
 }

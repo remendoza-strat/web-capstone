@@ -5,7 +5,7 @@ import { deleteProject, kickMember } from "@/lib/hooks/projectMembers"
 import { useModal } from "@/lib/states"
 import { UserAvatar } from "@/components/user-avatar"
 
-export function DeleteProjecMember(
+export function DeleteProjectMember(
   { userId, member, members, onProjectSelect } :
   { userId: string, member: ProjectMemberUser, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
   

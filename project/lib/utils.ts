@@ -8,6 +8,51 @@ export function StripHTML(html: string){
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Days since membership invitation is sent
+export const TimeAgo = (date?: Date | string | null) => {
+  if (!date) return "Unknown";
+
+  const parsedDate = typeof date === "string"
+    ? new Date(date.replace(" ", "T"))
+    : date;
+
+  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
+    return "Invalid date";
+  }
+
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
+
+  if (diffInHours < 1) return "Just now";
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}d ago`;
+};
+
 // Convert date to PH timezone for display
 export const FormatDateDisplay = (date: Date) => {
   const display = new Date(date);
@@ -17,30 +62,6 @@ export const FormatDateDisplay = (date: Date) => {
 
   return localDate.toISOString().slice(0, 16);
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Sort projects by most recent updated
 export function ByRecentProjects(projects: UserProjects[]){
@@ -120,28 +141,6 @@ export function StatusColor(status: string){
   if (status === "active") return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
   if (status === "overdue") return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
 }
-
-// Days since membership invitation is sent
-export const TimeAgo = (date?: Date | string | null) => {
-  if (!date) return "Unknown";
-
-  const parsedDate = typeof date === "string"
-    ? new Date(date.replace(" ", "T"))
-    : date;
-
-  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
-    return "Invalid date";
-  }
-
-  const now = new Date();
-  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
-
-  if (diffInHours < 1) return "Just now";
-  if (diffInHours < 24) return `${diffInHours}h ago`;
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays}d ago`;
-};
 
 // Get status of the project
 export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
