@@ -42,6 +42,50 @@ export function getProjectMembers(projectId: string, options? : { enabled?: bool
 
 
 
+
+
+// DASHBOARD PAGE / PROJECTS PAGE
+// projects where user = approved or not
+// members = approved or not
+export function getUserProjects(userId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["user-projects", userId],
+    queryFn: async () => {
+      const data = await getUserProjectsAction(userId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!userId
+  });
+}
+
+// TEAM PAGE
+// projects where user = approved
+// members = approved or not
+export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["all-project-members", userId],
+    queryFn: async () => {
+      const data = await getUserProjectsWithMembersAction(userId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!userId
+  });
+}
+
+// PROJECT PAGE (SLUG)
+// project
+// members = approved or not
+export function getProjectData(projectId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["project-data", projectId],
+    queryFn: async () => {
+      const data = await getProjectDataAction(projectId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!projectId
+  });
+}
+
 export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["member-icon", clerkId],
@@ -60,39 +104,6 @@ export function getAllUsers(){
       const data = await getAllUsersAction();
       return data ?? null;
     }
-  });
-}
-
-export function getUserProjects(userId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["user-projects", userId],
-    queryFn: async () => {
-      const data = await getUserProjectsAction(userId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!userId
-  });
-}
-
-export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["all-project-members", userId],
-    queryFn: async () => {
-      const data = await getUserProjectsWithMembersAction(userId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!userId
-  });
-}
-
-export function getProjectData(projectId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["project-data", projectId],
-    queryFn: async () => {
-      const data = await getProjectDataAction(projectId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!projectId
   });
 }
 

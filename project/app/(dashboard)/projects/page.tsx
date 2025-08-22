@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { Filter, Search, FolderOpen, UserPlus, FolderArchive, Plus } from "lucide-react"
+import { Filter, Search, FolderOpen, FolderArchive, Plus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { RoleArr, UserProjects } from "@/lib/customtype"
 import { getUserProjects } from "@/lib/hooks/projectMembers"

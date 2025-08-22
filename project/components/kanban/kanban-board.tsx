@@ -8,18 +8,17 @@ import { useModal } from "@/lib/states"
 import { CreateColumn } from "@/components/columns-modal/create"
 import { UpdateColumn } from "@/components/columns-modal/update"
 import { DeleteColumn } from "@/components/columns-modal/delete"
-import { getProjectWithTasks } from "@/lib/hooks/projects"
-import ErrorPage from "./pages/error"
-import LoadingPage from "./pages/loading"
-import { getProjectMembers } from "@/lib/hooks/projectMembers"
-import { CreateTask } from "./tasks-modal/create"
-import { Project, Task } from '../lib/db/schema';
+import ErrorPage from "@/components/pages/error"
+import LoadingPage from "@/components/pages/loading"
+import { CreateTask } from "@/components/tasks-modal/create"
+import { Project, Task } from "@/lib/db/schema"
 import { pusherClient } from "@/lib/pusher/client"
+import { ProjectData } from "@/lib/customtype"
 
-export function KanbanBoard({ editProject, projectId } : { editProject: boolean; projectId: string }){
+export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: ProjectData }){
 
     useEffect(() => {
-    const channel = pusherClient.subscribe(`kanban-channel-${projectId}`);
+    const channel = pusherClient.subscribe(`kanban-channel-${projectData.id}`);
     
     channel.bind("task-update", (data: { task: Task }) => {
       setBoardData((prev) => {
@@ -45,24 +44,20 @@ export function KanbanBoard({ editProject, projectId } : { editProject: boolean;
 
 return () => {
   channel.unbind_all();
-  pusherClient.unsubscribe(`kanban-channel-${projectId}`);
+  pusherClient.unsubscribe(`kanban-channel-${projectData.id}`);
 };
 
   }, []);
 
 
-  const { data: projectData, isLoading: projectDataLoading, error: projectDataError } =
-    getProjectWithTasks(projectId, { enabled: Boolean(projectId) });
 
-
-    const { data: projectMembers, isLoading: projectMembersLoading, error: projectMembersError } =
-    getProjectMembers(projectId, { enabled: Boolean(projectId) });
 
 
   const [boardData, setBoardData] = useState({
     columnNames: projectData?.columnNames || [],
     tasks: projectData?.tasks || [],
   });
+  
   const [updateColumnIndex, setUpdateColumnIndex] = useState<number | null>(null);
   const [deleteColumnIndex, setDeleteColumnIndex] = useState<number | null>(null);
   const [createTaskIndex, setCreateTaskIndex] = useState<number | null>(null);
@@ -79,10 +74,6 @@ return () => {
       });
     }
   }, [projectData]);
-
-  // Early returns
-  if (projectDataLoading || projectMembersLoading) return <LoadingPage />;
-  if (projectDataError || !projectData || projectMembersError || !projectMembers) return <ErrorPage code={404} message="Project not found." />;
 
   
   // Handle task movements
@@ -141,7 +132,7 @@ return () => {
         // Update database
         colTasks.forEach((task, index) => {
           task.order = index;
-          updateTaskMutation.mutate({ projectId: projectId, taskId: task.id, updTask: { order: index } });
+          updateTaskMutation.mutate({ projectId: projectData.id, taskId: task.id, updTask: { order: index } });
         });
 
         // Update display
@@ -169,7 +160,7 @@ return () => {
         // Update database
         reordered.forEach((task, index) => {
           task.order = index;
-          updateTaskMutation.mutate({ projectId: projectId, taskId: task.id, updTask: { order: index } });
+          updateTaskMutation.mutate({ projectId: projectData.id, taskId: task.id, updTask: { order: index } });
         });
 
         // Update display
@@ -204,14 +195,14 @@ return () => {
       // Update order for database of original column
       sourceCol.forEach((task, index) => {
         task.order = index;
-        updateTaskMutation.mutate({ projectId: projectId, taskId: task.id, updTask: { order: index } });
+        updateTaskMutation.mutate({ projectId: projectData.id, taskId: task.id, updTask: { order: index } });
       });
 
       // Update order for database of destination column
       destCol.forEach((task, index) => {
         task.order = index;
         task.position = destColumn;
-        updateTaskMutation.mutate({projectId: projectId,  taskId: task.id, updTask: { position: task.position, order: index } });
+        updateTaskMutation.mutate({projectId: projectData.id,  taskId: task.id, updTask: { position: task.position, order: index } });
       });
 
       // Update the list
@@ -266,11 +257,11 @@ return () => {
         projectData={projectData}/>
       }
 
-      {isOpen && modalType === "createTask" && createTaskIndex !== null && <CreateTask 
+      {/* {isOpen && modalType === "createTask" && createTaskIndex !== null && <CreateTask 
         columnIndex={createTaskIndex} 
         projectData={projectData}
         projectMembers={projectMembers}/>
-      }
+      } */}
 
   
 
