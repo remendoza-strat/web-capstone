@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction } from "../db/actions";
+import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction } from "../db/actions";
 import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
@@ -82,6 +82,17 @@ export function getUserProjectsWithMembers(userId: string, options? : { enabled?
       return data ?? null;
     },
     enabled: options?.enabled ?? !!userId
+  });
+}
+
+export function getProjectData(projectId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["project-data", projectId],
+    queryFn: async () => {
+      const data = await getProjectDataAction(projectId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!projectId
   });
 }
 

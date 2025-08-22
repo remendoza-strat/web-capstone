@@ -38,11 +38,6 @@ export async function getUserIdAction(clerkId: string){
   return await queries.users.getUserId(clerkId);
 }
 
-// Require: project id
-// Return: project with members and tasks
-export async function getProjectDataAction(projectId: string){
-  return await queries.projects.getProjectData(projectId);
-}
 
 // Require: project id
 // Return: project with tasks
@@ -172,6 +167,12 @@ export async function createProjectAction(newProject: NewProject){
 // Result: NONE
 export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){
   await createQueries.createTaskAssignee(newTaskAssignee);
+}
+
+// Require: project id
+// Result: project with members and tasks with assignees
+export async function getProjectDataAction(projectId: string){
+  return await getQueries.getProjectData(projectId);
 }
 
 // Tanstack - Pusher - Query
