@@ -7,7 +7,7 @@ export default function HomePage(){
   return(
     <>
       <Header/>
-        <div className="page-background">
+        <div>
           <Hero/>
           <Features/>
         </div>

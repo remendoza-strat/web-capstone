@@ -187,6 +187,15 @@ export const getQueries = {
     const result = await db.select().from(users);
     return result;
   },
+
+  getUserProjects: async (userId: string) => {
+    const query = await db.query.projectMembers.findMany({
+      where: (pm, {eq}) => eq(pm.userId, userId),
+      with: {project: {with: {members: {with: {user: true}}, tasks: true}}}
+    })
+    const result = query.map((q) => ({...q.project}));
+    return result;
+  },
   
 }
 
@@ -194,6 +203,17 @@ export const createQueries = {
 
   createProjectMember: async (newProjectMember: NewProjectMember) => {
     await db.insert(projectMembers).values(newProjectMember).execute();
+  },
+
+  createTaskAssignee: async (newTaskAssignee: NewTaskAssignee) => {
+    await db.insert(taskAssignees).values(newTaskAssignee).execute();
+  },
+
+  createProject: async (newProject: NewProject) => {
+    const [query] = await db.insert(projects).values(newProject)
+      .returning({ id: projects.id });
+    const result = query.id;
+    return result;
   },
   
 }

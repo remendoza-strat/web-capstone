@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createProjectMemberAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, getProjectMembersAction, getUserProjectsWithMembersAction, updateProjectMemberAction } from "../db/actions";
-import { NewProjectMember, projectMembers } from "../db/schema";
+import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction } from "../db/actions";
+import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
+import { getSocketId } from "../pusher/client";
 
 // Uses getProjectMembers()
 export function getProjectMembers(projectId: string, options? : { enabled?: boolean }){
@@ -62,6 +63,17 @@ export function getAllUsers(){
   });
 }
 
+export function getUserProjects(userId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["user-projects", userId],
+    queryFn: async () => {
+      const data = await getUserProjectsAction(userId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!userId
+  });
+}
+
 export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["all-project-members", userId],
@@ -80,6 +92,7 @@ export function createProjectMember(userId: string){
       await createProjectMemberAction(newProjectMember);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
     }
   });
@@ -92,6 +105,7 @@ export function updateProjectMember(userId: string){
       await updateProjectMemberAction(pmId, updPm);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
     }
   });
@@ -119,6 +133,65 @@ export function kickMember(userId: string){
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
+    }
+  });
+}
+
+export function createProject(userId: string){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ newProject } : { newProject: NewProject }) => {
+      const data = await createProjectAction(newProject);
+      return data ?? null;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+    }
+  });
+}
+
+export function createTaskAssignee(){
+  return useMutation({
+    mutationFn: async (newTaskAssignee: NewTaskAssignee) => {
+      await createTaskAssigneeAction(newTaskAssignee);
+    }
+  });
+}
+
+export function createTask(userId: string){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ projectId, newTask } : { projectId: string, newTask: NewTask }) => {
+      const socketId = getSocketId();
+      return await createTaskAction(projectId, newTask, socketId || undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+    }
+  });
+}
+
+export function updateProject(userId: string){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ projectId, updProject } : { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
+      const socketId = getSocketId(); 
+      return await updateProjectAction(projectId, updProject, socketId || undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+    }
+  });
+}
+
+export function deleteProjectMember(userId: string){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ pmId } : { pmId: string }) => {
+      await deleteProjectMemberAction(pmId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
     }
   });
 }

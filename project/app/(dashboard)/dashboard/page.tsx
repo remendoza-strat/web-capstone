@@ -1,134 +1,80 @@
 "use client"
-import { useState, useEffect } from "react"
-import { FolderOpenDot } from "lucide-react"
+import { LayoutDashboard } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { CreateProjectButton } from "@/components/create-project-button"
-import { AddMemberButton } from "@/components/add-member-button"
-import { CreateTaskButton } from "@/components/create-task-button"
-import { getUserIdAction, getUserProjectsAction } from "@/lib/db/actions"
-import { DashboardStats } from "@/components/dashboard-stats"
-import { RecentProjects } from "@/components/recent-projects"
-import type { UserProjects } from "@/lib/customtype"
+import { RecentProjects } from "@/components/page-dashboard/recent-projects"
+import { getUserId } from "@/lib/hooks/users"
+import { getUserProjects } from "@/lib/hooks/projectMembers"
+import { useModal } from "@/lib/states"
+import { StatsCards } from "@/components/page-dashboard/stats-cards"
+import { QuickActions } from "@/components/page-dashboard/quick-actions"
+import { CreateProjectMember } from "@/components/modal-project_member/create"
+import { CreateProject } from "@/components/modal-project/create"
+import { CreateTask } from "@/components/modal-task/create"
+import { InviteTab } from "@/components/page-dashboard/invite-tab"
+import LoadingPage from "@/components/pages/loading"
+import ErrorPage from "@/components/pages/error"
 
 export default function DashboardPage(){
-  // Hooks for modal
-  const [isOpen, setIsOpen] = useState(false);
-  const [modalType, setModalType] = useState("");
-
-  // Hook for getting current user
-  const { user } = useUser();
-
-  // Hook for data to send to components
-  const [userId, setUserId] = useState("");
-  const [userProjs, setUserProjs] = useState<UserProjects[]>([]);
+  // Opening modal
+  const { isOpen, modalType } = useModal();
+  
+  // Get current user
+  const { user, isLoaded: userLoaded } = useUser();
 
   // Get user id
-  useEffect(() => {
-    getUserId();
-  }, [user]);
+  const { 
+          data: userId, 
+          isLoading: userIdLoading, 
+          error: userIdError 
+        } 
+  = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
 
-  const getUserId = async () => {
-    try{
-      // Return if user is null
-      if (!user) return;
-      
-      // Get clerk id
-      const clerkId = user.id;
-      if (!clerkId) return;
-      
-      // Get user id with clerk id
-      const userId = await getUserIdAction(clerkId);
-      if (!userId) return;
+  // Get projects with members
+  const {
+          data: userProjs, 
+          isLoading: userProjsLoading, 
+          error: userProjsError 
+  } = getUserProjects(userId ?? "", { enabled: Boolean(userId) });
 
-      // Set user id
-      setUserId(userId);
+  // Show loading
+  const isLoading = !userLoaded || userIdLoading || userProjsLoading;
 
-      // Get data needed
-      getData(userId);
-    }
-    catch{return}
-  };
-
-  const getData = async (userId: string) => {
-    try{
-      // Get user projects
-      setUserProjs(await getUserProjectsAction(userId));
-    }
-    catch{return}
-  }
+  // Show error
+  const isError = userIdError || userProjsError;
 
   return(
     <DashboardLayout>
-      {isOpen && modalType === "project" && (
-        <CreateProjectButton close={() => setIsOpen(false)} success={() => getData(userId)} userId={userId}/>
-      )}
-      {isOpen && modalType === "member" && (
-        <AddMemberButton close={() => setIsOpen(false)} userId={userId} userProjs={userProjs}/>
-      )}
-      {isOpen && modalType === "task" && (
-        <CreateTaskButton close={() => setIsOpen(false)} success={() => getData(userId)} userId={userId} userProjs={userProjs} column={0} order={0}/>
-      )}
-      <div className="space-y-6 ">
-        <DashboardStats userProjs={userProjs}/>
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12 lg:items-start">
-          <div className="xl:col-span-7">
-            <RecentProjects userProjs={userProjs}/>
+      {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
+        <> 
+          {isOpen && modalType === "createProject" && userId && <CreateProject userId={userId}/>}
+          {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={userProjs ?? []}/>}
+          {isOpen && modalType === "createTask" && userId && <CreateTask userId={userId} projectsData={userProjs ?? []}/>}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="flex items-center text-3xl font-bold text-gray-900 dark:text-white">
+                  <LayoutDashboard className="w-8 h-8 mr-3 text-blue-600"/>
+                  Dashboard
+                </h1>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">Welcome back! Here's what's happening with your projects.</p>
+              </div>
+            </div>
           </div>
-          <div className="p-5 border xl:col-span-5 page-card">
-            <h3 className="mb-5 page-section-main">
-              Quick Actions
-            </h3>
-            <div className="space-y-3">
-              <button 
-                className="flex items-center justify-start w-full px-4 py-3 page-main-btn"
-                onClick={() => {setIsOpen(true); setModalType("project");}}>
-                  <div className="p-3 m-3 page-btn-icon">
-                    <FolderOpenDot size={20}/>  
-                  </div>   
-                  <div className="flex flex-col items-start m-3">
-                    <p className="page-btn-main-text">
-                      Create New Project
-                    </p>
-                    <span className="page-btn-sub-text">
-                      Start a new project to plan
-                    </span>
-                  </div>
-              </button>
-              <button 
-                className="flex items-center justify-start w-full px-4 py-3 page-sub-btn"
-                onClick={() => {setIsOpen(true); setModalType("member");}}>
-                  <div className="p-3 m-3 page-btn-icon">
-                    <FolderOpenDot size={20}/>  
-                  </div>   
-                  <div className="flex flex-col items-start m-3">
-                    <p className="page-btn-main-text">
-                      Add Team Member
-                    </p>
-                    <span className="page-btn-sub-text">
-                      Invite a user to collaborate
-                    </span>
-                  </div>
-              </button>
-              <button 
-                className="flex items-center justify-start w-full px-4 py-3 page-sub-btn"
-                onClick={() => {setIsOpen(true); setModalType("task");}}>
-                  <div className="p-3 m-3 page-btn-icon">
-                    <FolderOpenDot size={20}/>  
-                  </div>   
-                  <div className="flex flex-col items-start m-3">
-                    <p className="page-btn-main-text">
-                      Create New Task
-                    </p>
-                    <span className="page-btn-sub-text">
-                      Add a task to your project
-                    </span>
-                  </div>
-              </button>
-            </div>    
+          <div className="mb-8">
+            <StatsCards userId={userId ?? ""} userProjs={userProjs ?? []}/>
           </div>
-        </div>
-      </div>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <RecentProjects userId={userId ?? ""} userProjs={userProjs ?? []}/>
+            </div>
+            <div className="space-y-6">
+              <InviteTab userId={userId ?? ""} userProjs={userProjs ?? []}/>
+              <QuickActions/>
+            </div>
+          </div>
+        </>
+      )}
     </DashboardLayout>
   );
 }

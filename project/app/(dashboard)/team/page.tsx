@@ -31,7 +31,7 @@ export default function TeamPage(){
   const [rolesFilter, setRolesFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  // Hooks for data displat
+  // Hooks for data display
   const [selectedProject, setSelectedProject] = useState("");
   const [projectsData, setProjectsData] = useState<ProjectsWithMembers[]>([]);
   const [members, setMembers] = useState<ProjectMemberUser[]>([]);
@@ -45,7 +45,6 @@ export default function TeamPage(){
   // For update and delete member
   const [selectedUpdateMember, setSelectedUpdateMember] = useState<ProjectMemberUser | null>(null);
   const [selectedDeleteMember, setSelectedDeleteMember] = useState<ProjectMemberUser | null>(null);
-  const [selectedImage, setSelectedImage] = useState("")
 
   // Get user id
   const { 
@@ -122,10 +121,8 @@ export default function TeamPage(){
           const matchesStatus = statusFilter ? (m.approved ? "approved" : "pending") === statusFilter: true;
           return matchesSearch && matchesRole && matchesStatus;
         }
-        
         return matchesSearch;
       });
-
       setMembers(filtered);
     }, 300);
 
@@ -137,8 +134,8 @@ export default function TeamPage(){
       {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
           <>
             {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
-            {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} image={selectedImage} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
-            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjecMember userId={userId} member={selectedDeleteMember} image={selectedImage} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
+            {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
+            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjecMember userId={userId} member={selectedDeleteMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -150,6 +147,7 @@ export default function TeamPage(){
                 </div>
                 <div className="flex items-center space-x-3">
                   <button
+                    type="button"
                     onClick={() => openModal("createMember")}
                     className="flex items-center px-6 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 shadow-md hover:bg-blue-700 rounded-xl"
                   >
@@ -172,6 +170,7 @@ export default function TeamPage(){
                 </div>
                 <div className="relative">
                   <button
+                    type="button"
                     onClick={() => setShowProjectDropdown(!showProjectDropdown)}
                     className="flex items-center space-x-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-w-[200px] justify-between bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   >
@@ -185,6 +184,7 @@ export default function TeamPage(){
                     <div className="absolute left-0 right-0 z-10 mt-1 bg-white border border-gray-200 shadow-lg top-full dark:bg-gray-800 dark:border-gray-700 rounded-xl">
                       {projectsData.map((project) => (
                         <button
+                          type="button"
                           key={project.id}
                           onClick={() => {
                             setSelectedProject(project.id);
@@ -199,6 +199,7 @@ export default function TeamPage(){
                   )}
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowFilters(!showFilters)}
                   className="flex items-center px-4 py-3 space-x-2 text-gray-900 transition-colors bg-white border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-800 dark:text-white"
                 >
@@ -262,19 +263,17 @@ export default function TeamPage(){
             (
               <div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {members.map((member) => ( userId &&
+                  {members.map((member) => (userId &&
                     <MemberCard 
                       key={member.user.id}
                       userId={userId}
                       canEdit={canEditMember}
                       member={member}
-                      onUpdateClick={(member, image) => {
+                      onUpdateClick={(member) => {
                         setSelectedUpdateMember(member)
-                        setSelectedImage(image) 
                       }}
-                      onDeleteClick={(member, image) => {
+                      onDeleteClick={(member) => {
                         setSelectedDeleteMember(member)
-                        setSelectedImage(image)
                       }}
                     />
                   ))}

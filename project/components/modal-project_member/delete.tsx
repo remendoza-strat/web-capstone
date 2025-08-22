@@ -3,12 +3,13 @@ import { X, AlertTriangle, Trash2  } from "lucide-react"
 import { ProjectMemberUser } from "@/lib/customtype"
 import { deleteProject, kickMember } from "@/lib/hooks/projectMembers"
 import { useModal } from "@/lib/states"
+import { UserAvatar } from "@/components/user-avatar"
 
 export function DeleteProjecMember(
-  { userId, member, image, members, onProjectSelect } :
-  { userId: string, member: ProjectMemberUser, image: string, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
+  { userId, member, members, onProjectSelect } :
+  { userId: string, member: ProjectMemberUser, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
   
-    // Closing modal
+  // Closing modal
   const {closeModal } = useModal();
   
   // Delete or kick member
@@ -25,6 +26,7 @@ export function DeleteProjecMember(
         onSuccess: () => {
           toast.success("Project left and deleted successfully.");
           closeModal();
+          onProjectSelect?.(member.projectId);
         },
         onError: () => {
           toast.error("Error occured.");
@@ -45,17 +47,15 @@ export function DeleteProjecMember(
     // Kick member
     kickMemberMutation.mutate({pmId: member.id, projectId: member.projectId, userId: member.user.id}, {
       onSuccess: () => {
-        toast.success("User kicked successfully.");
+        toast.success("User successfully kicked.");
         closeModal();
+        onProjectSelect?.(member.projectId);
       },
       onError: () => {
         toast.error("Error occured.");
         closeModal();
       }
     });
-
-    // Send the project user added member to
-    onProjectSelect?.(member.projectId);
   }
 
   return(
@@ -71,6 +71,7 @@ export function DeleteProjecMember(
             </h2>
           </div>
           <button
+            type="button"
             onClick={closeModal}
             className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
           >
@@ -81,19 +82,7 @@ export function DeleteProjecMember(
         <form onSubmit={handleSubmit} className="p-6">
           <div className="mb-6">
             <div className="flex items-center mb-4 space-x-3">
-              {image ? 
-                  (
-                    <img
-                      src={image}
-                      className="object-cover w-12 h-12 rounded-full"
-                    />
-                  ) : 
-                  (
-                    <div className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
-                      {member.user.fname[0]}
-                    </div>
-                  )
-              }
+              <UserAvatar clerkId={member.user.clerkId}/>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">{member.user.fname} {member.user.lname}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">{member.role}</p>

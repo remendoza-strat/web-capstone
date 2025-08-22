@@ -10,7 +10,7 @@ import { createProjectMember, getAllUsers } from "@/lib/hooks/projectMembers"
 import { UserAvatar } from "@/components/user-avatar"
 import { useModal } from "@/lib/states"
 import ErrorPage from "@/components/pages/error"
-import LoadingCard from "@/components/pages/loading"
+import LoadingPage from "@/components/pages/loading"
 
 export function CreateProjectMember({ userId, projectsData, onProjectSelect } : { userId: string; projectsData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
   // Modal closing
@@ -26,7 +26,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
 
   // Get projects where user can add member to
   const projects: ProjectsWithMembers[] = projectsData
-    .filter((project) => project.members.some((member) => member.userId === userId && hasPermission(member.role, "addMember")));
+    .filter((project) => project.members.some((member) => member.userId === userId && member.approved && hasPermission(member.role, "addMember")));
 
   // Create project member
   const createMutation = createProjectMember(userId);
@@ -111,55 +111,43 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try{
-      // Validate project
-      if(!selectedProjectId){
-        toast.error("Must select a project to add member to.");
-        return;
-      }
-      
-      // Validate member
-      if(selectedUsers.length === 0){
-        toast.error("Must select at least one user to be added.");
-        return;
-      }
+    // Validate project
+    if(!selectedProjectId){
+      toast.error("Must select a project to add member to.");
+      return;
+    }
+    
+    // Validate member
+    if(selectedUsers.length === 0){
+      toast.error("Must select at least one user to be added.");
+      return;
+    }
 
-      // Iterate the array and add user content to database
+    // Add user to project
+    try{
       for(const { user, role } of selectedUsers){
         const newProjectMember: NewProjectMember = {
           projectId: selectedProjectId,
           userId: user.id,
           role: role,
-          approved: false
-        }; 
-
-        // Add user to project
-        try{
-          await createMutation.mutateAsync({ newProjectMember });
-        }
-        catch{
-          toast.error("Error occured.");
-          closeModal();
-          return;
-        }
+          approved: false,
+        };
+        await createMutation.mutateAsync({ newProjectMember });
       }
-
-      // Display success and close modal
       toast.success("Project membership invitation sent.");
-
-      // Send the project user added member to
+      closeModal();
       onProjectSelect?.(selectedProjectId);
-      
-      // Close modal
+    } 
+    catch(error){
+      toast.error("Error occurred.");
       closeModal();
     }
-    catch{return}
   };
 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
-        {allUsersLoading? (<LoadingCard/>) : allUsersError? (<ErrorPage code={404} message="Fetching data error"/>) :
+        {allUsersLoading? (<LoadingPage/>) : allUsersError? (<ErrorPage code={404} message="Fetching data error"/>) :
           (
             <>
               <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
@@ -167,6 +155,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                   Add Team Member
                 </h2>
                 <button
+                  type="button"
                   onClick={closeModal}
                   className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
@@ -294,7 +283,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                   >
                     {createMutation.isPending? 
                       "Adding Member..."
-                      : `Add ${selectedUsers.length > 0 ? `${selectedUsers.length} ` : ''}Member${selectedUsers.length !== 1 ? 's' : ''}`}
+                      : `Add ${selectedUsers.length > 0 ? `${selectedUsers.length} ` : ""}Member${selectedUsers.length !== 1 ? "s" : ""}`}
                   </button>
                 </div>
               </form>

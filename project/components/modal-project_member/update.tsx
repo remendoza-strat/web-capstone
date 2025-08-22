@@ -6,10 +6,11 @@ import { projectMembers } from "@/lib/db/schema"
 import { updateProjectMember } from "@/lib/hooks/projectMembers"
 import { useModal } from "@/lib/states"
 import { X, UserCog } from "lucide-react"
+import { UserAvatar } from "@/components/user-avatar"
 
 export function UpdateProjectMember(
-  { userId, member, image, members, onProjectSelect } : 
-  { userId: string, member: ProjectMemberUser, image: string, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
+  { userId, member, members, onProjectSelect } : 
+  { userId: string, member: ProjectMemberUser, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
   
   // Closing modal
   const {closeModal } = useModal();
@@ -41,27 +42,23 @@ export function UpdateProjectMember(
     }
 
     // Setup data to update
-    const updPm: Partial<typeof projectMembers.$inferInsert> = {
-      role: role
-    }
+    const updPm: Partial<typeof projectMembers.$inferInsert> = { role: role }
       
     // Update member  
     updateMutation.mutate({ pmId: member.id, updPm }, {
       onSuccess: () => {
         toast.success("Project member role updated successfully.");
         closeModal();
+        onProjectSelect?.(member.projectId);
       },
       onError: () => {
         toast.error("Error occured.");
         closeModal();
       }
     });
-
-    // Send the project user updated member to
-    onProjectSelect?.(member.projectId);
   }
     
-   return (
+  return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
       <div className="w-full max-w-md bg-white shadow-2xl dark:bg-gray-800 rounded-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
@@ -69,6 +66,7 @@ export function UpdateProjectMember(
             Update Member
           </h2>
           <button
+            type="button"
             onClick={closeModal}
             className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
           >
@@ -79,18 +77,7 @@ export function UpdateProjectMember(
           <div className="mb-4">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-12 h-12">
-                {image ? 
-                  (
-                    <img
-                      src={image}
-                      className="object-cover w-12 h-12 rounded-full"
-                    />
-                  ) : 
-                  (
-                    <div className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
-                      {member.user.fname[0]}
-                    </div>
-                  )}
+                <UserAvatar clerkId={member.user.clerkId}/>
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">{member.user.fname} {member.user.lname}</h3>
