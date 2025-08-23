@@ -5,6 +5,7 @@ import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { KanbanTask } from "@/components/kanban/kanban-task"
 import { TaskWithAssignees } from "@/lib/customtype"
+import { useModal } from "@/lib/states"
 
 export function KanbanColumn
   ({ id, title, tasks, userId, editProject, onUpdateColumn, onDeleteColumn, onCreateTask } : 
@@ -15,6 +16,9 @@ export function KanbanColumn
 
   // Show menu in column
   const [showMenu, setShowMenu] = useState(false);
+
+  // Opening modal
+  const { openModal } = useModal();
 
   return(
     <div
@@ -44,12 +48,14 @@ export function KanbanColumn
                 <button
                   type="button"
                   onClick={() => {
+                    openModal("updateColumn");
+                    onUpdateColumn();
                     setShowMenu(false);
                   }}
                   className="w-full px-4 py-3 text-left text-gray-700 transition-colors dark:text-gray-300 rounded-t-xl hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   <Edit2 className="inline w-4 h-4 mr-2"/>
-                  Edit Column
+                  Update Column
                 </button>
                 <button
                   type="button"

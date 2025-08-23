@@ -10,6 +10,7 @@ import { pusherClient } from "@/lib/pusher/client"
 import { ProjectData, TaskWithAssignees } from "@/lib/customtype"
 import { KanbanTask } from "@/components/kanban/kanban-task"
 import { KanbanUpdateTask } from "@/lib/hooks/projectMembers"
+import { UpdateColumn } from "@/components/modal-extras/update-column"
 
 export function KanbanBoard({ userId, editProject, projectData } : { userId: string; editProject: boolean; projectData: ProjectData; }){
   // For values to display in board
@@ -56,7 +57,7 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
 
         // Handle project update if provided
         if(data.project){
-          updated.columnNames = data.project.columnNames;
+          updated.columnNames = [...data.project.columnNames];
         }
 
         // Return the updates
@@ -238,6 +239,11 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
 
   return(
     <div>
+       {isOpen && modalType === "editColumn" && updateColumnIndex !== null && <UpdateColumn
+        columnIndex={updateColumnIndex} 
+        columnNames={boardData.columnNames} 
+        projectId={projectData.id}/>
+      }
       <div>
         <DndContext
           onDragStart={(event) => {

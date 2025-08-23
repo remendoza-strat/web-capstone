@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, 
-  getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction } from "../db/actions";
+ getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction, KanbanUpdateProjectAction } from "../db/actions";
 import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
@@ -19,8 +19,16 @@ export function KanbanUpdateTask(){
   return useMutation({
     mutationFn: async ({ projectId, taskId, updTask } : 
       { projectId: string; taskId: string; updTask: Partial<typeof tasks.$inferInsert>; }) => {
-      const socketId = getSocketId();
-      return await KanbanUpdateTaskAction( projectId, taskId, updTask, socketId || undefined);
+      await KanbanUpdateTaskAction( projectId, taskId, updTask);
+    },
+  });
+}
+
+export function KanbanUpdateProject(){
+  return useMutation({
+    mutationFn: async ({ projectId, updProject } : 
+      { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
+      await KanbanUpdateProjectAction( projectId, updProject);
     },
   });
 }
