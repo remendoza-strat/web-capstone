@@ -19,6 +19,31 @@ export function getProjectMembers(projectId: string, options? : { enabled?: bool
 
 
 
+export function updateTask(){
+const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      projectId,
+      taskId,
+      updTask,
+    }: {
+      projectId: string;
+      taskId: string;
+      updTask: Partial<typeof tasks.$inferInsert>;
+    }) => {
+      const socketId = getSocketId();
+      return await updateTaskAction(
+        projectId,
+        taskId,
+        updTask,
+        socketId || undefined
+      );
+    },
+     
+ 
+  });
+}
 
 
 
@@ -45,9 +70,6 @@ export function getProjectMembers(projectId: string, options? : { enabled?: bool
 
 
 
-// DASHBOARD PAGE / PROJECTS PAGE
-// projects where user = approved or not
-// members = approved or not
 export function getUserProjects(userId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["user-projects", userId],
@@ -59,9 +81,6 @@ export function getUserProjects(userId: string, options? : { enabled?: boolean }
   });
 }
 
-// TEAM PAGE
-// projects where user = approved
-// members = approved or not
 export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["all-project-members", userId],
@@ -73,9 +92,6 @@ export function getUserProjectsWithMembers(userId: string, options? : { enabled?
   });
 }
 
-// PROJECT PAGE (SLUG)
-// project
-// members = approved or not
 export function getProjectData(projectId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["project-data", projectId],
@@ -192,9 +208,8 @@ export function createTaskAssignee(){
 export function createTask(userId: string){
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ projectId, newTask } : { projectId: string, newTask: NewTask }) => {
-      const socketId = getSocketId();
-      return await createTaskAction(projectId, newTask, socketId || undefined);
+    mutationFn: async ({ newTask } : { newTask: NewTask }) => {
+      return await createTaskAction(newTask);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
@@ -206,8 +221,7 @@ export function updateProject(userId: string){
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ projectId, updProject } : { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
-      const socketId = getSocketId(); 
-      return await updateProjectAction(projectId, updProject, socketId || undefined);
+      return await updateProjectAction(projectId, updProject);
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
@@ -225,43 +239,5 @@ export function deleteProjectMember(userId: string){
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
     }
-  });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-export function updateTask(){
-const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      projectId,
-      taskId,
-      updTask,
-    }: {
-      projectId: string;
-      taskId: string;
-      updTask: Partial<typeof tasks.$inferInsert>;
-    }) => {
-      const socketId = getSocketId();
-      return await updateTaskAction(
-        projectId,
-        taskId,
-        updTask,
-        socketId || undefined
-      );
-    },
-     
- 
   });
 }

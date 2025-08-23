@@ -179,7 +179,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
         };
         
         // Create task
-        const taskId = await createTaskMutation.mutateAsync({ projectId: project.id, newTask });
+        const taskId = await createTaskMutation.mutateAsync({ newTask });
           
         // Assign task
         for(const { user } of selectedUsers){

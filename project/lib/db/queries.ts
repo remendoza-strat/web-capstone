@@ -223,13 +223,24 @@ export const createQueries = {
     const result = query.id;
     return result;
   },
-  
+
+  createTask: async (newTask: NewTask) => {
+    const [query] = await db.insert(tasks).values(newTask)
+      .returning({ id: tasks.id });
+    const result = query.id;
+    return result;
+  },
+
 }
 
 export const updateQueries = {
 
   updateProjectMember: async (pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>) => {
     await db.update(projectMembers).set({...updPm}).where(eq(projectMembers.id, pmId));
+  },
+
+  updateProject: async (projectId: string, updProject: Partial<typeof projects.$inferInsert>) => {
+    await db.update(projects).set({...updProject}).where(eq(projects.id, projectId));
   },
 
 }
