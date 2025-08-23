@@ -73,40 +73,37 @@ export async function deleteTaskAction(projectId: string, taskId: string, socket
 
 
 
-export async function updateTaskAction(
-  projectId: string,
-  taskId: string,
-  updTask: Partial<typeof tasks.$inferInsert>,
-  socketId?: string
-) {
-  // Update task row
-  await db.update(tasks)
-    .set({ ...updTask })
-    .where(eq(tasks.id, taskId));
 
 
-  const fullTask = await db.query.tasks.findFirst({
-    where: eq(tasks.id, taskId),
-    with: {
-      assignees: {
-        with: {
-          user: true,
-        },
-      },
-    },
-  });
 
-  if (fullTask) {
-   
-    await pusherServer.trigger(
-      `kanban-channel-${projectId}`,
-      "kanban-update",
-      { task: fullTask },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
 
-  return fullTask; 
+
+
+
+
+
+
+
+
+export async function KanbanUpdateTaskAction
+  (projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>, socketId?: string){
+    
+    await db.update(tasks).set({ ...updTask }).where(eq(tasks.id, taskId));
+
+    const fullTask = await db.query.tasks.findFirst({ 
+      where: eq(tasks.id, taskId),
+      with: {assignees: {with: {user: true}}}
+    });
+
+    if(fullTask){
+      await pusherServer.trigger(
+        `kanban-channel-${projectId}`,
+        "kanban-update",
+        { task: fullTask },
+        socketId ? { socket_id: socketId } : undefined
+      );
+    }
+    return fullTask; 
 }
 
 

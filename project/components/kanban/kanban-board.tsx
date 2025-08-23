@@ -1,16 +1,17 @@
-"use client";
-import { useEffect, useState } from "react";
-import { DndContext, DragOverlay } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { KanbanColumn } from "@/components/kanban/kanban-column";
-import { updateTask } from "@/lib/hooks/projectMembers";
-import { useModal } from "@/lib/states";
-import { Project } from "@/lib/db/schema";
-import { pusherClient } from "@/lib/pusher/client";
-import { ProjectData, TaskWithAssignees } from "@/lib/customtype";
-import { KanbanTask } from "@/components/kanban/kanban-task";
+"use client"
+import { useEffect, useState } from "react"
+import { Plus } from "lucide-react"
+import { DndContext, DragOverlay } from "@dnd-kit/core"
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { KanbanColumn } from "@/components/kanban/kanban-column"
+import { useModal } from "@/lib/states"
+import { Project } from "@/lib/db/schema"
+import { pusherClient } from "@/lib/pusher/client"
+import { ProjectData, TaskWithAssignees } from "@/lib/customtype"
+import { KanbanTask } from "@/components/kanban/kanban-task"
+import { KanbanUpdateTask } from "@/lib/hooks/projectMembers"
 
-export function KanbanBoard({ editProject, projectData, userId }: { userId: string; editProject: boolean; projectData: ProjectData; }){
+export function KanbanBoard({ userId, editProject, projectData } : { userId: string; editProject: boolean; projectData: ProjectData; }){
   // For values to display in board
   const [boardData, setBoardData] = useState<{
     columnNames: string[];
@@ -29,16 +30,18 @@ export function KanbanBoard({ editProject, projectData, userId }: { userId: stri
   const { isOpen, modalType, openModal } = useModal();
 
   // Updating task position
-  const updateMutation = updateTask();
+  const updateMutation = KanbanUpdateTask();
 
   // Active task
   const [activeTask, setActiveTask] = useState<TaskWithAssignees | null>(null);
 
   // Pusher socket
   useEffect(() => {
+
     // Subscribe to channel of the project
     const channel = pusherClient.subscribe(`kanban-channel-${projectData.id}`);
 
+    // Listen for events
     channel.bind("kanban-update", (data: { task?: TaskWithAssignees; project?: Project }) => {
       setBoardData((prev) => {
         let updated = { ...prev };
@@ -215,11 +218,11 @@ export function KanbanBoard({ editProject, projectData, userId }: { userId: stri
 
         // Update affected task in source
         const inSource = sourceCol.find((source) => source.id === task.id);
-        if (inSource) return{ ...task, order: inSource.order, position: inSource.position };
+        if (inSource) return { ...task, order: inSource.order, position: inSource.position };
 
         // Update affected task in destination
         const inDest = destCol.find((des) => des.id === task.id);
-        if (inDest) return{ ...task, order: inDest.order, position: inDest.position };
+        if (inDest) return { ...task, order: inDest.order, position: inDest.position };
 
         // Return task
         return task;
@@ -233,53 +236,8 @@ export function KanbanBoard({ editProject, projectData, userId }: { userId: stri
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  return (
+  return(
     <div>
-      {/* {isOpen && modalType === "createColumn" && (
-        <CreateColumn
-          columnNames={boardData.columnNames}
-          columnCount={boardData.columnNames.length}
-          projectId={projectData.id}
-        />
-      )}
-
-      {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && (
-        <UpdateColumn
-          columnIndex={updateColumnIndex}
-          columnNames={boardData.columnNames}
-          projectId={projectData.id}
-        />
-      )}
-
-      {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && (
-        <DeleteColumn
-          columnNames={boardData.columnNames}
-          columnCount={boardData.columnNames.length}
-          columnIndex={deleteColumnIndex}
-          projectData={projectData}
-        />
-      )} */}
-
       <div>
         <DndContext
           onDragStart={(event) => {
@@ -292,24 +250,23 @@ export function KanbanBoard({ editProject, projectData, userId }: { userId: stri
           }}
           onDragCancel={() => setActiveTask(null)}
         >
-          <div className="flex pb-4 space-x-6 overflow-x-auto">
+          <div className="flex pb-4 space-x-6 overflow-x-auto h-[calc(100vh-120px)]">
             {boardData.columnNames.map((columnTitle, columnIndex) => {
               const columnTasks = boardData.tasks
                 .filter((task) => task.position === columnIndex)
                 .sort((a, b) => a.order - b.order);
-
-              return (
+              return(
                 <SortableContext
                   key={columnIndex}
                   items={columnTasks.map((task) => task.id)}
                   strategy={verticalListSortingStrategy}
                 >
                   <KanbanColumn
-                    editProject={editProject}
                     id={`column-${columnIndex}`}
                     title={columnTitle}
                     tasks={columnTasks}
                     userId={userId}
+                    editProject={editProject}
                     onUpdateColumn={() => setUpdateColumnIndex(columnIndex)}
                     onDeleteColumn={() => setDeleteColumnIndex(columnIndex)}
                     onCreateTask={() => setCreateTaskIndex(columnIndex)}
@@ -317,17 +274,16 @@ export function KanbanBoard({ editProject, projectData, userId }: { userId: stri
                 </SortableContext>
               );
             })}
-
             {editProject && (
               <button
-                onClick={() => openModal("createColumn")}
-                className="flex-shrink-0 p-3 border-2 border-dashed rounded-lg w-80 border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors"
+                type="button"
+                className="flex-shrink-0 p-3 text-gray-500 transition-colors border-2 border-gray-300 border-dashed w-80 dark:text-gray-400 dark:border-gray-600 rounded-xl hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-600 dark:hover:text-blue-400"
               >
-                + Add Column
+                <Plus className="w-5 h-5 mx-auto mb-1"/>
+                <span className="text-sm">Add Column</span>
               </button>
             )}
           </div>
-
           <DragOverlay>
             {activeTask ? <KanbanTask task={activeTask} userId={userId} editProject={editProject} /> : null}
           </DragOverlay>

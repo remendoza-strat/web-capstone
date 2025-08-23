@@ -1,47 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, 
-  getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, updateTaskAction } from "../db/actions";
+  getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction } from "../db/actions";
 import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
 
-// Uses getProjectMembers()
-export function getProjectMembers(projectId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["project-members"],
-    queryFn: async () => {
-      const data = await getProjectMembersAction(projectId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!projectId
-  });
-}
 
 
 
-export function updateTask(){
-const queryClient = useQueryClient();
 
+
+
+
+
+
+
+export function KanbanUpdateTask(){
   return useMutation({
-    mutationFn: async ({
-      projectId,
-      taskId,
-      updTask,
-    }: {
-      projectId: string;
-      taskId: string;
-      updTask: Partial<typeof tasks.$inferInsert>;
-    }) => {
+    mutationFn: async ({ projectId, taskId, updTask } : 
+      { projectId: string; taskId: string; updTask: Partial<typeof tasks.$inferInsert>; }) => {
       const socketId = getSocketId();
-      return await updateTaskAction(
-        projectId,
-        taskId,
-        updTask,
-        socketId || undefined
-      );
+      return await KanbanUpdateTaskAction( projectId, taskId, updTask, socketId || undefined);
     },
-     
- 
   });
 }
 

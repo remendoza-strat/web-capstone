@@ -18,7 +18,7 @@ export function KanbanTask({
   userId: string;
   editProject: boolean;
 }) {
-  // Permission: allowed if user is assignee OR has project edit rights
+
   const assignee = task.assignees?.some((a) => a.userId === userId);
   const isAllowed = assignee || editProject;
 
@@ -32,7 +32,7 @@ export function KanbanTask({
   } = useSortable({
     id: task.id,
     data: { task },
-    disabled: !isAllowed, // lock at dnd-kit level
+    disabled: !isAllowed, 
   });
 
   const style = {
@@ -51,7 +51,9 @@ export function KanbanTask({
     }
   };
 
+  {/* RESTRUCTURE WHOLE CODE */}
   return (
+    
     <div
       ref={setNodeRef}
       style={style}
@@ -59,7 +61,6 @@ export function KanbanTask({
         ${isDragging ? "shadow-lg rotate-2 opacity-80" : ""}
       `}
     >
-      {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <h4 className="mb-2 font-medium text-gray-900 dark:text-white">
@@ -71,8 +72,6 @@ export function KanbanTask({
             </p>
           )}
         </div>
-
-        {/* Drag handle or lock */}
         <div
           {...(isAllowed ? { ...attributes, ...listeners } : {})}
           className={`p-1 ml-2 rounded transition-colors ${
@@ -88,8 +87,6 @@ export function KanbanTask({
           )}
         </div>
       </div>
-
-      {/* Label + Priority side by side */}
       <div className="flex items-center justify-between mb-3 text-xs">
         <span className="flex items-center px-2 py-1 space-x-1 font-medium text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/20 dark:text-blue-300">
           <Tag className="w-3 h-3" />
@@ -105,16 +102,12 @@ export function KanbanTask({
           <span className="font-medium capitalize">{task.priority}</span>
         </div>
       </div>
-
-      {/* Due date */}
       {task.dueDate && (
         <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
           <Calendar className="w-3 h-3" />
           <span>{DateTimeFormatter(task.dueDate)}</span>
         </div>
       )}
-
-      {/* Assignees */}
       {task.assignees && task.assignees.length > 0 && (
         <div className="flex mt-2 -space-x-2">
           {task.assignees.slice(0, 5).map((assignee) => (
