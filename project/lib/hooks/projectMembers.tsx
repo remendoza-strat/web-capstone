@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction } from "../db/actions";
-import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects } from "../db/schema";
+import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, 
+  getProjectMembersAction, getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, updateTaskAction } from "../db/actions";
+import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
 
@@ -224,5 +225,43 @@ export function deleteProjectMember(userId: string){
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
     }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+export function updateTask(){
+const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      projectId,
+      taskId,
+      updTask,
+    }: {
+      projectId: string;
+      taskId: string;
+      updTask: Partial<typeof tasks.$inferInsert>;
+    }) => {
+      const socketId = getSocketId();
+      return await updateTaskAction(
+        projectId,
+        taskId,
+        updTask,
+        socketId || undefined
+      );
+    },
+     
+ 
   });
 }

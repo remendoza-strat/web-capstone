@@ -2,57 +2,132 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { DateTimeFormatter } from "@/lib/utils";
 import { Task } from "@/lib/db/schema";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Calendar, Flag, Tag, Lock } from "lucide-react";
+import { DateTimeFormatter, LimitChar } from "@/lib/utils";
+import { TaskWithAssignees } from "@/lib/customtype";
+import { UserAvatar } from "../user-avatar";
+import { StripHTML } from "../calendar-view";
 
-export function KanbanTask({ task }: { task: Task }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useSortable({ id: task.id });
+export function KanbanTask({
+  task,
+  userId,
+  editProject,
+}: {
+  task: TaskWithAssignees;
+  userId: string;
+  editProject: boolean;
+}) {
+  // Permission: allowed if user is assignee OR has project edit rights
+  const assignee = task.assignees?.some((a) => a.userId === userId);
+  const isAllowed = assignee || editProject;
 
-  const style: React.CSSProperties = {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: task.id,
+    data: { task },
+    disabled: !isAllowed, // lock at dnd-kit level
+  });
+
+  const style = {
     transform: CSS.Transform.toString(transform),
-    opacity: isDragging ? 0.8 : 1,
+    transition,
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
-    console.log(task.id + " " + task.title);
+  const getPriorityColor = (priority: Task["priority"]) => {
+    switch (priority) {
+      case "High":
+        return "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400";
+      case "Medium":
+        return "text-orange-600 bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400";
+      case "Low":
+        return "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400";
+    }
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="flex flex-col gap-2 p-4 bg-white border rounded-lg dark:bg-outer_space-300 border-french_gray-300 dark:border-gray-400 hover:shadow-md"
+      className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md
+        ${isDragging ? "shadow-lg rotate-2 opacity-80" : ""}
+      `}
     >
-      <div className="flex items-end justify-end">
-        
-        <span
-          {...attributes}
-          {...listeners}
-          className="p-1 cursor-grab"
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex-1">
+          <h4 className="mb-2 font-medium text-gray-900 dark:text-white">
+            {task.title}
+          </h4>
+          {task.description && (
+            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+              {LimitChar(StripHTML(task.description), 50)}
+            </p>
+          )}
+        </div>
+
+        {/* Drag handle or lock */}
+        <div
+          {...(isAllowed ? { ...attributes, ...listeners } : {})}
+          className={`p-1 ml-2 rounded transition-colors ${
+            isAllowed
+              ? "cursor-grab active:cursor-grabbing hover:bg-gray-100 dark:hover:bg-gray-700"
+              : "cursor-not-allowed text-gray-400"
+          }`}
         >
-          <GripVertical className="w-4 h-4 text-gray-400" />
-        </span>
-      </div>
-      
-      <div onClick={handleClick} className="cursor-pointer">
-        <h4 className="text-sm font-medium text-outer_space-500 dark:text-platinum-500">
-          {DateTimeFormatter(task.dueDate)}
-        </h4>
-        <p className="text-xs text-payne's_gray-500 dark:text-french_gray-400 mb-3">
-          {task.title}
-        </p>
-        <div className="flex items-center justify-between">
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue_munsell-100 text-blue_munsell-700 dark:bg-blue_munsell-900 dark:text-blue_munsell-300">
-            {task.label}
-          </span>
-          <div className="flex items-center justify-center w-6 h-6 text-xs font-semibold text-white rounded-full bg-blue_munsell-500">
-            U
-          </div>
+          {isAllowed ? (
+            <GripVertical className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+          ) : (
+            <Lock className="w-4 h-4" />
+          )}
         </div>
       </div>
+
+      {/* Label + Priority side by side */}
+      <div className="flex items-center justify-between mb-3 text-xs">
+        <span className="flex items-center px-2 py-1 space-x-1 font-medium text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/20 dark:text-blue-300">
+          <Tag className="w-3 h-3" />
+          <span>{task.label}</span>
+        </span>
+
+        <div
+          className={`flex items-center space-x-1 px-2 py-1 rounded-full ${getPriorityColor(
+            task.priority
+          )}`}
+        >
+          <Flag className="w-3 h-3" />
+          <span className="font-medium capitalize">{task.priority}</span>
+        </div>
+      </div>
+
+      {/* Due date */}
+      {task.dueDate && (
+        <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+          <Calendar className="w-3 h-3" />
+          <span>{DateTimeFormatter(task.dueDate)}</span>
+        </div>
+      )}
+
+      {/* Assignees */}
+      {task.assignees && task.assignees.length > 0 && (
+        <div className="flex mt-2 -space-x-2">
+          {task.assignees.slice(0, 5).map((assignee) => (
+            <UserAvatar key={assignee.id} clerkId={assignee.user.clerkId} />
+          ))}
+
+          {task.assignees.length > 5 && (
+            <div className="flex items-center justify-center w-5 h-5 text-xs font-medium text-gray-700 bg-gray-300 border-2 border-white rounded-full dark:bg-gray-700 dark:text-gray-200 dark:border-gray-900">
+              +{task.assignees.length - 5}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

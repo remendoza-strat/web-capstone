@@ -57,21 +57,6 @@ export async function getProjectMembersAction(projectId: string){
   return await queries.projectMembers.getProjectMembers(projectId);
 }
 
-// Update task
-export async function updateTaskAction(projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>, socketId?: string){
-  const [result] = await db
-    .update(tasks)
-    .set({...updTask})
-    .where(eq(tasks.id, taskId))
-    .returning();
-
-  if(result){
-    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: result },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
-}
-
 // Delete task
 export async function deleteTaskAction(projectId: string, taskId: string, socketId?: string){
   const [result] = await db
@@ -175,6 +160,19 @@ export async function getProjectDataAction(projectId: string){
   return await getQueries.getProjectData(projectId);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Tanstack - Pusher - Query
 // Create Task
 export async function createTaskAction(projectId: string, newTask: NewTask, socketId?: string){
@@ -196,4 +194,41 @@ export async function updateProjectAction(projectId: string, updProject: Partial
       socketId ? { socket_id: socketId } : undefined
     );
   }
+}
+
+
+export async function updateTaskAction(
+  projectId: string,
+  taskId: string,
+  updTask: Partial<typeof tasks.$inferInsert>,
+  socketId?: string
+) {
+  // Update task row
+  await db.update(tasks)
+    .set({ ...updTask })
+    .where(eq(tasks.id, taskId));
+
+
+  const fullTask = await db.query.tasks.findFirst({
+    where: eq(tasks.id, taskId),
+    with: {
+      assignees: {
+        with: {
+          user: true,
+        },
+      },
+    },
+  });
+
+  if (fullTask) {
+   
+    await pusherServer.trigger(
+      `kanban-channel-${projectId}`,
+      "kanban-update",
+      { task: fullTask },
+      socketId ? { socket_id: socketId } : undefined
+    );
+  }
+
+  return fullTask; 
 }

@@ -16,6 +16,7 @@ import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 import { DeleteProject } from "@/components/modal-project/delete"
 import { LeaveProject } from "@/components/modal-extras/leave-project"
+import { KanbanBoard } from "@/components/kanban/kanban-board"
 
 // List tabs
 const tabs = [
@@ -150,7 +151,7 @@ export default function ProjectPage(){
               ))}
             </div>
             <div className="mt-4">
-              {activeTab === "kanban" && <div>Kanban Board</div>}
+              {activeTab === "kanban" && <KanbanBoard userId={userId} editProject={editProject} projectData={projectData}/>}
               {activeTab === "calendar" && <div>Calendar View</div>}
               {activeTab === "member" && <div>Team Members</div>}
             </div>

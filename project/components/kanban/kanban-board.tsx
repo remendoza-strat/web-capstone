@@ -1,227 +1,231 @@
-"use client"
-import { useEffect, useState } from "react"
-import { DndContext } from "@dnd-kit/core"
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { KanbanColumn } from "@/components/kanban-column"
-import { updateTask } from "@/lib/hooks/tasks"
-import { useModal } from "@/lib/states"
-import { CreateColumn } from "@/components/columns-modal/create"
-import { UpdateColumn } from "@/components/columns-modal/update"
-import { DeleteColumn } from "@/components/columns-modal/delete"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
-import { CreateTask } from "@/components/tasks-modal/create"
-import { Project, Task } from "@/lib/db/schema"
-import { pusherClient } from "@/lib/pusher/client"
-import { ProjectData } from "@/lib/customtype"
+"use client";
+import { useEffect, useState } from "react";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { KanbanColumn } from "@/components/kanban/kanban-column";
+import { updateTask } from "@/lib/hooks/projectMembers";
+import { useModal } from "@/lib/states";
+import { Project } from "@/lib/db/schema";
+import { pusherClient } from "@/lib/pusher/client";
+import { ProjectData, TaskWithAssignees } from "@/lib/customtype";
+import { KanbanTask } from "@/components/kanban/kanban-task";
 
-export function KanbanBoard({ editProject, projectData } : { editProject: boolean; projectData: ProjectData }){
-
-    useEffect(() => {
-    const channel = pusherClient.subscribe(`kanban-channel-${projectData.id}`);
-    
-    channel.bind("task-update", (data: { task: Task }) => {
-      setBoardData((prev) => {
-        const updatedTasks = prev.tasks.map((t) =>
-          t.id === data.task.id ? data.task : t
-        );
-
-        
-        if (!updatedTasks.find((t) => t.id === data.task.id)) {
-          updatedTasks.push(data.task);
-        }
-
-        return { ...prev, tasks: updatedTasks };
-      });
-    });
-
-    channel.bind("project-update", (data: { project: Project }) => {
-    setBoardData((prev) => ({
-      ...prev,
-      columnNames: data.project.columnNames
-    }));
-  });
-
-return () => {
-  channel.unbind_all();
-  pusherClient.unsubscribe(`kanban-channel-${projectData.id}`);
-};
-
-  }, []);
-
-
-
-
-
-  const [boardData, setBoardData] = useState({
+export function KanbanBoard({ editProject, projectData, userId }: { userId: string; editProject: boolean; projectData: ProjectData; }){
+  // For values to display in board
+  const [boardData, setBoardData] = useState<{
+    columnNames: string[];
+    tasks: TaskWithAssignees[];
+  }>({
     columnNames: projectData?.columnNames || [],
-    tasks: projectData?.tasks || [],
+    tasks: projectData?.tasks || []
   });
-  
+
+  // For kanban operations
   const [updateColumnIndex, setUpdateColumnIndex] = useState<number | null>(null);
   const [deleteColumnIndex, setDeleteColumnIndex] = useState<number | null>(null);
   const [createTaskIndex, setCreateTaskIndex] = useState<number | null>(null);
+  
+  // Modal opening and closing
   const { isOpen, modalType, openModal } = useModal();
 
-  const updateTaskMutation = updateTask();
+  // Updating task position
+  const updateMutation = updateTask();
 
-  // Update boardData when projectData changes
+  // Active task
+  const [activeTask, setActiveTask] = useState<TaskWithAssignees | null>(null);
+
+  // Pusher socket
   useEffect(() => {
-    if (projectData) {
-      setBoardData({
-        columnNames: projectData.columnNames,
-        tasks: projectData.tasks,
-      });
-    }
-  }, [projectData]);
+    // Subscribe to channel of the project
+    const channel = pusherClient.subscribe(`kanban-channel-${projectData.id}`);
 
-  
-  // Handle task movements
+    channel.bind("kanban-update", (data: { task?: TaskWithAssignees; project?: Project }) => {
+      setBoardData((prev) => {
+        let updated = { ...prev };
+
+        // Handle task update if provided
+        if(data.task){
+          const exists = updated.tasks.some((t) => t.id === data.task!.id);
+          updated.tasks = exists
+            ? updated.tasks.map((t) => (t.id === data.task!.id ? data.task! : t))
+            : [...updated.tasks, data.task!];
+        }
+
+        // Handle project update if provided
+        if(data.project){
+          updated.columnNames = data.project.columnNames;
+        }
+
+        // Return the updates
+        return updated;
+      });
+    });
+
+    // Cleanup
+    return () => {
+      channel.unbind_all();
+      pusherClient.unsubscribe(`kanban-channel-${projectData.id}`);
+    };
+  }, [projectData.id]);
+
+  // Handle when drag action ends
   function handleDragEnd(event: any){
+
+    // Get dragged task and dropped area
     const { active, over } = event;
 
-    // Task is dragged outside the board
+    // Invalid drop
     if (!over) return;
 
-    // Id of task dragged
+    // Dragged task and dropped area
     const activeId = active.id as string;
-
-    // Id of column or task dragged onto
     const overId = over.id as string;
 
-    // No change in task dragged position
+    // Dropped to self
     if (activeId === overId) return;
 
-    // Get the task dragged
+    // Find data of task being dragged
     const activeTask = boardData.tasks.find((task) => task.id === activeId);
     if (!activeTask) return;
 
-    // Set default column destination
+    // Block drag if current user is not an assignee or have no permission
+    const isAssignee = activeTask.assignees?.some((a) => a.userId === userId);
+    if (!isAssignee && !editProject) return;
+
+    // Set initial destination column
     let destColumn = activeTask.position;
 
-    // Task dragged in column
+    // If dropped in column, get column index
     if(overId.startsWith("column-")){
       destColumn = Number(overId.replace("column-", ""));
     } 
-    // Task dragged in task
-    else {
+
+    // If dropped in task, get column of the task
+    else{
       const overTask = boardData.tasks.find((task) => task.id === overId);
       if (!overTask) return;
       destColumn = overTask.position;
     }
 
-    // Copy tasks
+    // Copy of all tasks
     const updatedTasks = [...boardData.tasks];
-    
-    // Tasks without the dragged task
+
+    // Copy of all tasks without the task being dragged
     const withoutActive = updatedTasks.filter((t) => t.id !== activeId);
 
-    // Same column reordering
-    if(activeTask.position === destColumn){
-      // Dropped onto the column
-      if(overId.startsWith("column-")){
-        // Get column tasks but exclude the dragged task
-        const colTasks = boardData.tasks
-          .filter((task) => task.position === destColumn && task.id !== activeId)
-          .sort((a, b) => a.order - b.order);
+    // Same column drop
+    if(activeTask.position === destColumn){ 
 
-        // Put the dragged task at the end
-        const moved = { ...activeTask, order: colTasks.length };
-        colTasks.push(moved);
+      // Get all tasks of column, without the active task, and order
+      const colTasks = boardData.tasks
+        .filter((task) => task.position === destColumn && task.id !== activeId)
+        .sort((a, b) => a.order - b.order);
 
-        // Update database
-        colTasks.forEach((task, index) => {
-          task.order = index;
-          updateTaskMutation.mutate({ projectId: projectData.id, taskId: task.id, updTask: { order: index } });
-        });
-
-        // Update display
-        setBoardData((prev) => ({...prev, tasks: prev.tasks.map((task) => task.id === activeTask.id
-              ? { ...task, order: colTasks.length - 1 }
-              : colTasks.find((ctask) => ctask.id === task.id) || task)
-        }));
-      }
-      // Dropped onto the task
-      else{
-        // Get column tasks
-        const colTasks = boardData.tasks
-          .filter((task) => task.position === destColumn)
-          .sort((a, b) => a.order - b.order);
-
-        // Get old and new task task index
-        const oldIndex = colTasks.findIndex((task) => task.id === activeId);
+      // Dropped in another task
+      if(!overId.startsWith("column-")){
+        
+        // Get dropped onto task
         const newIndex = colTasks.findIndex((task) => task.id === overId);
 
-        // Remove and add the dragged task
-        const reordered = [...colTasks];
-        const [moved] = reordered.splice(oldIndex, 1);
-        reordered.splice(newIndex, 0, moved);
-
-        // Update database
-        reordered.forEach((task, index) => {
-          task.order = index;
-          updateTaskMutation.mutate({ projectId: projectData.id, taskId: task.id, updTask: { order: index } });
-        });
-
-        // Update display
-        setBoardData((prev) => ({...prev, tasks: prev.tasks.map((task) => 
-          reordered.find((rtask) => rtask.id === task.id) || task)
-        }));
+        // Insert dragged task
+        colTasks.splice(newIndex, 0, activeTask);
       } 
-    }
-    // Different column
-    else{
-      // Tasks in the original column
-      const sourceCol = withoutActive
-        .filter((task) => task.position === activeTask.position)
-        .sort((a, b) => a.order - b.order);
 
-      // Task in the destination column
-      const destCol = withoutActive
-        .filter((task) => task.position === destColumn)
-        .sort((a, b) => a.order - b.order);
-
-      // If dragged on column, then append the task
-      if(overId.startsWith("column-")){
-        destCol.push({ ...activeTask, position: destColumn, order: destCol.length });
-      } 
-      // If dragged on task, insert it before the task
+      // Dropped on the bottom
       else{
-        const insertIndex = destCol.findIndex((task) => task.id === overId);
-        const index = insertIndex === -1 ? destCol.length : insertIndex;
-        destCol.splice(index, 0, { ...activeTask, position: destColumn, order: index });
+        
+        // Add active task on last
+        colTasks.push({ ...activeTask, order: colTasks.length });
       }
 
-      // Update order for database of original column
-      sourceCol.forEach((task, index) => {
+      // Update order
+      colTasks.forEach((task, index) => {
         task.order = index;
-        updateTaskMutation.mutate({ projectId: projectData.id, taskId: task.id, updTask: { order: index } });
+        updateMutation.mutate({
+          projectId: projectData.id,
+          taskId: task.id,
+          updTask: { order: index }
+        });
       });
 
-      // Update order for database of destination column
+      // Update board state
+      setBoardData((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map(
+          (task) => colTasks.find((t) => t.id === task.id) || task)
+      }));
+    } 
+
+    // Different column drop
+    else{
+    
+    // Tasks of column of task dragged
+    const sourceCol = withoutActive
+      .filter((task) => task.position === activeTask.position)
+      .sort((a, b) => a.order - b.order);
+
+    // Tasks of destination column
+    const destCol = withoutActive
+      .filter((task) => task.position === destColumn)
+      .sort((a, b) => a.order - b.order);
+
+    // Dragged in column, push the task
+    if(overId.startsWith("column-")){
+      destCol.push({
+        ...activeTask,
+        position: destColumn,
+        order: destCol.length
+      });
+    } 
+
+    // Dragged in task
+    else{
+      const insertIndex = destCol.findIndex((task) => task.id === overId);
+      const index = insertIndex === -1 ? destCol.length : insertIndex;
+      destCol.splice(index, 0, {
+          ...activeTask,
+          position: destColumn,
+          order: index
+        });
+      }
+
+      // Update order of source column
+      sourceCol.forEach((task, index) => {
+        task.order = index;
+        updateMutation.mutate({
+          projectId: projectData.id,
+          taskId: task.id,
+          updTask: { order: index }
+        });
+      });
+
+      // Update order of destination column
       destCol.forEach((task, index) => {
         task.order = index;
         task.position = destColumn;
-        updateTaskMutation.mutate({projectId: projectData.id,  taskId: task.id, updTask: { position: task.position, order: index } });
+        updateMutation.mutate({
+          projectId: projectData.id,
+          taskId: task.id,
+          updTask: { position: task.position, order: index }
+        });
       });
 
-      // Update the list
+      // Merge updated tasks
       const merged = updatedTasks.map((task) => {
-    
-        // If task is in original column, get the updated order and position
-        const inSource = sourceCol.find((source) => source.id === task.id);
-        if (inSource) return { ...task, order: inSource.order, position: inSource.position };
 
-        // If task is in destination column, get the updated order and position
+        // Update affected task in source
+        const inSource = sourceCol.find((source) => source.id === task.id);
+        if (inSource) return{ ...task, order: inSource.order, position: inSource.position };
+
+        // Update affected task in destination
         const inDest = destCol.find((des) => des.id === task.id);
-        if (inDest) return { ...task, order: inDest.order, position: inDest.position };
+        if (inDest) return{ ...task, order: inDest.order, position: inDest.position };
 
         // Return task
         return task;
-        
       });
 
-      // Update order for display
+      // Update task
       setBoardData((prev) => ({
         ...prev,
         tasks: merged
@@ -230,80 +234,105 @@ return () => {
   }
 
 
-  
 
 
 
 
-  return(
-   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  return (
     <div>
-      {isOpen && modalType === "createColumn" &&  <CreateColumn 
-        columnNames={boardData.columnNames} 
-        columnCount={boardData.columnNames.length} 
-        projectId={projectData.id}/>
-      }
+      {/* {isOpen && modalType === "createColumn" && (
+        <CreateColumn
+          columnNames={boardData.columnNames}
+          columnCount={boardData.columnNames.length}
+          projectId={projectData.id}
+        />
+      )}
 
-      {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && <UpdateColumn
-        columnIndex={updateColumnIndex} 
-        columnNames={boardData.columnNames} 
-        projectId={projectData.id}/>
-      }
+      {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && (
+        <UpdateColumn
+          columnIndex={updateColumnIndex}
+          columnNames={boardData.columnNames}
+          projectId={projectData.id}
+        />
+      )}
 
-      {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && <DeleteColumn 
-        columnNames={boardData.columnNames} 
-        columnCount={boardData.columnNames.length} 
-        columnIndex={deleteColumnIndex} 
-        projectData={projectData}/>
-      }
+      {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && (
+        <DeleteColumn
+          columnNames={boardData.columnNames}
+          columnCount={boardData.columnNames.length}
+          columnIndex={deleteColumnIndex}
+          projectData={projectData}
+        />
+      )} */}
 
-      {/* {isOpen && modalType === "createTask" && createTaskIndex !== null && <CreateTask 
-        columnIndex={createTaskIndex} 
-        projectData={projectData}
-        projectMembers={projectMembers}/>
-      } */}
+      <div>
+        <DndContext
+          onDragStart={(event) => {
+            const task = event.active.data.current?.task as TaskWithAssignees;
+            if (task) setActiveTask(task);
+          }}
+          onDragEnd={(event) => {
+            handleDragEnd(event);
+            setActiveTask(null);
+          }}
+          onDragCancel={() => setActiveTask(null)}
+        >
+          <div className="flex pb-4 space-x-6 overflow-x-auto">
+            {boardData.columnNames.map((columnTitle, columnIndex) => {
+              const columnTasks = boardData.tasks
+                .filter((task) => task.position === columnIndex)
+                .sort((a, b) => a.order - b.order);
 
-  
+              return (
+                <SortableContext
+                  key={columnIndex}
+                  items={columnTasks.map((task) => task.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <KanbanColumn
+                    editProject={editProject}
+                    id={`column-${columnIndex}`}
+                    title={columnTitle}
+                    tasks={columnTasks}
+                    userId={userId}
+                    onUpdateColumn={() => setUpdateColumnIndex(columnIndex)}
+                    onDeleteColumn={() => setDeleteColumnIndex(columnIndex)}
+                    onCreateTask={() => setCreateTaskIndex(columnIndex)}
+                  />
+                </SortableContext>
+              );
+            })}
 
-    <div className="p-6 bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-gray-400">
-      <DndContext onDragEnd={handleDragEnd}>
-        <div className="flex pb-4 space-x-6 overflow-x-auto">
-          {boardData.columnNames.map((columnTitle, columnIndex) => {
-            const columnTasks = boardData.tasks
-              .filter((task) => task.position === columnIndex)
-              .sort((a, b) => a.order - b.order);
-
-            
-            return (
-              <SortableContext
-                key={columnIndex}
-                items={columnTasks.map((task) => task.id)}
-                strategy={verticalListSortingStrategy}
+            {editProject && (
+              <button
+                onClick={() => openModal("createColumn")}
+                className="flex-shrink-0 p-3 border-2 border-dashed rounded-lg w-80 border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors"
               >
-                <KanbanColumn 
-                  editProject={editProject}
-                  id={`column-${columnIndex}`} 
-                  title={columnTitle} 
-                  tasks={columnTasks} 
-                  onUpdateColumn={() => setUpdateColumnIndex(columnIndex)}
-                  onDeleteColumn={() => setDeleteColumnIndex(columnIndex)}
-                  onCreateTask={() => setCreateTaskIndex(columnIndex)}
-                />
-              </SortableContext>
-            );
-          })}
+                + Add Column
+              </button>
+            )}
+          </div>
 
-          {editProject && 
-          <button
-          onClick={() => openModal("createColumn")}
-          className="flex-shrink-0 p-3 border-2 border-dashed rounded-lg w-80 border-french_gray-300 dark:border-gray-400 text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors">
-            + Add Column
-          </button>
-          }
-        </div>
-      </DndContext>
+          <DragOverlay>
+            {activeTask ? <KanbanTask task={activeTask} userId={userId} editProject={editProject} /> : null}
+          </DragOverlay>
+        </DndContext>
+      </div>
     </div>
-    </div>
-
   );
 }
