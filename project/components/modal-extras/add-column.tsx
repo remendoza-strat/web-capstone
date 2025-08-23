@@ -6,17 +6,17 @@ import { useModal } from "@/lib/states"
 import { ProjectSchema } from "@/lib/validations"
 import { KanbanUpdateProject } from "@/lib/hooks/projectMembers"
 
-export function UpdateColumn({ columnIndex, columnNames, projectId } : { columnIndex: number; columnNames: string[]; projectId: string }){
+export function AddColumn({ columnNames, projectId } : { columnNames: string[]; projectId: string }){
   // Closing modal
   const { closeModal } = useModal();
 
   // Get column name
-  const [columnName, setColumnName] = useState(columnNames[columnIndex]);
+  const [columnName, setColumnName] = useState("");
 
-  // Updating column name
-  const updateMutation = KanbanUpdateProject();
+  // Adding column
+  const createMutation = KanbanUpdateProject();
     
-  // Handle update
+  // Handle add
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -32,20 +32,17 @@ export function UpdateColumn({ columnIndex, columnNames, projectId } : { columnI
       }
     }
       
-    // Update list of column names
-    const updatedNames = [...columnNames];
-    updatedNames[columnIndex] = columnName;
-
     // Setup project data to update
     const updProject: Partial<typeof projects.$inferInsert> = {
-      columnNames: updatedNames,
-      updatedAt: new Date()
+			columnCount: (columnName.length + 1),
+			columnNames: [...columnNames, columnName],
+			updatedAt: new Date()
     }
         
     // Update project  
-    updateMutation.mutate({ projectId: projectId, updProject }, {
+    createMutation.mutate({ projectId: projectId, updProject }, {
       onSuccess: () => {
-        toast.success("Column updated successfully.");
+        toast.success("Column created successfully.");
         closeModal();
       },
       onError: () => {
@@ -60,7 +57,7 @@ export function UpdateColumn({ columnIndex, columnNames, projectId } : { columnI
       <div className="w-full max-w-md bg-white shadow-2xl dark:bg-gray-800 rounded-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Update Column
+            Add Column
           </h2>
           <button
             type="button"
@@ -93,10 +90,10 @@ export function UpdateColumn({ columnIndex, columnNames, projectId } : { columnI
             </button>
             <button
               type="submit"
-              disabled={updateMutation.isPending}
+              disabled={createMutation.isPending}
               className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl"
             >
-              {updateMutation.isPending? "Saving Changes..." : "Save Changes"}
+              {createMutation.isPending? "Adding Column..." : "Add Column"}
             </button>
           </div>
         </form>

@@ -11,6 +11,7 @@ import { ProjectData, TaskWithAssignees } from "@/lib/customtype"
 import { KanbanTask } from "@/components/kanban/kanban-task"
 import { KanbanUpdateTask } from "@/lib/hooks/projectMembers"
 import { UpdateColumn } from "@/components/modal-extras/update-column"
+import { AddColumn } from "@/components/modal-extras/add-column"
 
 export function KanbanBoard({ userId, editProject, projectData } : { userId: string; editProject: boolean; projectData: ProjectData; }){
   // For values to display in board
@@ -239,7 +240,11 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
 
   return(
     <div>
-       {isOpen && modalType === "editColumn" && updateColumnIndex !== null && <UpdateColumn
+      {isOpen && modalType === "addColumn" && <AddColumn
+        columnNames={boardData.columnNames} 
+        projectId={projectData.id}/>
+      }
+      {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && <UpdateColumn
         columnIndex={updateColumnIndex} 
         columnNames={boardData.columnNames} 
         projectId={projectData.id}/>
@@ -283,6 +288,9 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
             {editProject && (
               <button
                 type="button"
+                onClick={() => {
+                  openModal("addColumn");
+                }} 
                 className="flex-shrink-0 p-3 text-gray-500 transition-colors border-2 border-gray-300 border-dashed w-80 dark:text-gray-400 dark:border-gray-600 rounded-xl hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-600 dark:hover:text-blue-400"
               >
                 <Plus className="w-5 h-5 mx-auto mb-1"/>
