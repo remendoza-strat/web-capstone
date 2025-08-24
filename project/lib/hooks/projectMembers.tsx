@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, 
  getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction, 
  KanbanUpdateProjectAction, KanbanDeleteTaskAction,
- KanbanCreateTaskAction} from "../db/actions";
+ KanbanCreateTaskAction,
+ getTaskDataAction} from "../db/actions";
 import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
@@ -106,6 +107,17 @@ export function getProjectData(projectId: string, options? : { enabled?: boolean
       return data ?? null;
     },
     enabled: options?.enabled ?? !!projectId
+  });
+}
+
+export function getTaskData(taskId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["task-data", taskId],
+    queryFn: async () => {
+      const data = await getTaskDataAction(taskId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!taskId
   });
 }
 

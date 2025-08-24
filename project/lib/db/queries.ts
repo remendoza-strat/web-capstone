@@ -205,6 +205,14 @@ export const getQueries = {
     return result;
   },
   
+  getTaskData: async (taskId: string) => {
+    const result = await db.query.tasks.findFirst({
+      where: (t, {eq}) => eq(t.id, taskId),
+      with: {project: {with: {members: {with: {user: true}}}}, assignees: {with: {user: true}}, comments: {with: {user: true}}}
+    });
+    return result;
+  },
+
 }
 
 export const createQueries = {

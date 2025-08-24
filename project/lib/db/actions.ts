@@ -190,6 +190,9 @@ export async function getUserProjectsAction(userId: string){
 export async function getProjectDataAction(projectId: string){
   return await getQueries.getProjectData(projectId);
 }
+export async function getTaskDataAction(taskId: string){
+  return await getQueries.getTaskData(taskId);
+}
 
 // CREATE ACTIONS
 export async function createProjectAction(newProject: NewProject){
