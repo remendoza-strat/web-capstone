@@ -6,7 +6,7 @@ import { useModal } from "@/lib/states"
 import { ProjectSchema } from "@/lib/validations"
 import { KanbanUpdateProject } from "@/lib/hooks/projectMembers"
 
-export function AddColumn({ columnNames, projectId } : { columnNames: string[]; projectId: string }){
+export function CreateColumn({ columnNames, projectId } : { columnNames: string[]; projectId: string }){
   // Closing modal
   const { closeModal } = useModal();
 
@@ -57,7 +57,7 @@ export function AddColumn({ columnNames, projectId } : { columnNames: string[]; 
       <div className="w-full max-w-md bg-white shadow-2xl dark:bg-gray-800 rounded-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Add Column
+            Create Column
           </h2>
           <button
             type="button"
@@ -93,7 +93,7 @@ export function AddColumn({ columnNames, projectId } : { columnNames: string[]; 
               disabled={createMutation.isPending}
               className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl"
             >
-              {createMutation.isPending? "Adding Column..." : "Add Column"}
+              {createMutation.isPending? "Creating Column..." : "Create Column"}
             </button>
           </div>
         </form>

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, 
- getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction, KanbanUpdateProjectAction } from "../db/actions";
+ getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction, 
+ KanbanUpdateProjectAction, KanbanDeleteTaskAction } from "../db/actions";
 import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
@@ -19,7 +20,7 @@ export function KanbanUpdateTask(){
   return useMutation({
     mutationFn: async ({ projectId, taskId, updTask } : 
       { projectId: string; taskId: string; updTask: Partial<typeof tasks.$inferInsert>; }) => {
-      await KanbanUpdateTaskAction( projectId, taskId, updTask);
+      await KanbanUpdateTaskAction(projectId, taskId, updTask);
     },
   });
 }
@@ -28,12 +29,19 @@ export function KanbanUpdateProject(){
   return useMutation({
     mutationFn: async ({ projectId, updProject } : 
       { projectId: string; updProject: Partial<typeof projects.$inferInsert> }) => {
-      await KanbanUpdateProjectAction( projectId, updProject);
+      await KanbanUpdateProjectAction(projectId, updProject);
     },
   });
 }
 
-
+export function KanbanDeleteTask(){
+  return useMutation({
+    mutationFn: async ({ projectId, taskId } : 
+      { projectId: string; taskId: string;}) => {
+      await KanbanDeleteTaskAction(projectId, taskId);
+    },
+  });
+}
 
 
 

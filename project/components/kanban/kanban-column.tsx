@@ -60,6 +60,8 @@ export function KanbanColumn
                 <button
                   type="button"
                   onClick={() => {
+                    openModal("deleteColumn");
+                    onDeleteColumn();
                     setShowMenu(false);
                   }}
                   className="w-full px-4 py-3 text-left text-red-600 transition-colors rounded-b-xl dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 last:rounded-b-xl"

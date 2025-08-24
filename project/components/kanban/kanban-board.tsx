@@ -5,13 +5,13 @@ import { DndContext, DragOverlay } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { KanbanColumn } from "@/components/kanban/kanban-column"
 import { useModal } from "@/lib/states"
-import { Project } from "@/lib/db/schema"
 import { pusherClient } from "@/lib/pusher/client"
 import { ProjectData, TaskWithAssignees } from "@/lib/customtype"
 import { KanbanTask } from "@/components/kanban/kanban-task"
 import { KanbanUpdateTask } from "@/lib/hooks/projectMembers"
 import { UpdateColumn } from "@/components/modal-extras/update-column"
-import { AddColumn } from "@/components/modal-extras/add-column"
+import { CreateColumn } from "@/components/modal-extras/create-column"
+import { DeleteColumn } from "@/components/modal-extras/delete-column"
 
 export function KanbanBoard({ userId, editProject, projectData } : { userId: string; editProject: boolean; projectData: ProjectData; }){
   // For values to display in board
@@ -44,24 +44,27 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
     const channel = pusherClient.subscribe(`kanban-channel-${projectData.id}`);
 
     // Listen for events
-    channel.bind("kanban-update", (data: { task?: TaskWithAssignees; project?: Project }) => {
+    channel.bind("kanban-update", (data: any) => {
       setBoardData((prev) => {
         let updated = { ...prev };
-
-        // Handle task update if provided
-        if(data.task){
-          const exists = updated.tasks.some((t) => t.id === data.task!.id);
-          updated.tasks = exists
-            ? updated.tasks.map((t) => (t.id === data.task!.id ? data.task! : t))
-            : [...updated.tasks, data.task!];
+        switch(data.action){
+          case "update":
+            if(data.task){
+              const exists = updated.tasks.some((t) => t.id === data.task.id);
+              updated.tasks = exists
+                ? updated.tasks.map((t) => (t.id === data.task.id ? data.task : t))
+                : [...updated.tasks, data.task];
+            }
+          break;
+          case "delete":
+            updated.tasks = updated.tasks.filter((t) => t.id !== data.taskId);
+          break;
+          case "project":
+            if(data.project){
+              updated.columnNames = [...data.project.columnNames];
+            }
+          break;
         }
-
-        // Handle project update if provided
-        if(data.project){
-          updated.columnNames = [...data.project.columnNames];
-        }
-
-        // Return the updates
         return updated;
       });
     });
@@ -240,13 +243,19 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
 
   return(
     <div>
-      {isOpen && modalType === "addColumn" && <AddColumn
+      {isOpen && modalType === "addColumn" && <CreateColumn
         columnNames={boardData.columnNames} 
         projectId={projectData.id}/>
       }
       {isOpen && modalType === "updateColumn" && updateColumnIndex !== null && <UpdateColumn
         columnIndex={updateColumnIndex} 
         columnNames={boardData.columnNames} 
+        projectId={projectData.id}/>
+      }
+      {isOpen && modalType === "deleteColumn" && deleteColumnIndex !== null && <DeleteColumn
+        columnIndex={deleteColumnIndex} 
+        columnNames={boardData.columnNames} 
+        boardTasks={boardData.tasks}
         projectId={projectData.id}/>
       }
       <div>

@@ -98,13 +98,11 @@ export async function KanbanUpdateTaskAction
   });
 
   // Broadcast
-  if(fullTask){
-    await pusherServer.trigger(
-      `kanban-channel-${projectId}`,
-      "kanban-update",
-      { task: fullTask }
-    );
-  }
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "update", task: fullTask }
+  );
 }
 
 export async function KanbanUpdateProjectAction
@@ -121,10 +119,29 @@ export async function KanbanUpdateProjectAction
   await pusherServer.trigger(
     `kanban-channel-${projectId}`,
     "kanban-update",
-    { project: updatedProject[0] }
+    { action: "project", project: updatedProject[0] }
   );
 }
 
+export async function KanbanDeleteTaskAction
+  (projectId: string, taskId: string){
+
+  // Get full task info before deleting
+  const fullTask = await db.query.tasks.findFirst({ 
+    where: eq(tasks.id, taskId),
+    with: {assignees: {with: {user: true}}}
+  });
+
+  // Delete task
+  await db.delete(tasks).where(eq(tasks.id, taskId));
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "delete", taskId }
+  );
+}
 
 
 
