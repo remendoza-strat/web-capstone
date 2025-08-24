@@ -8,10 +8,10 @@ import { TaskWithAssignees } from "@/lib/customtype"
 import { UserAvatar } from "@/components/user-avatar"
 import { StripHTML } from "@/lib/utils"
 
-export function KanbanTask({ task, userId, editProject } : { task: TaskWithAssignees; userId: string; editProject: boolean; }){
+export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignees; userId: string; editTask: boolean; }){
   // Check if user is allowed to drag the task
   const assignee = task.assignees?.some((a) => a.userId === userId);
-  const isAllowed = assignee || editProject;
+  const isAllowed = assignee || editTask;
 
   // Enable drag and drop
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } 

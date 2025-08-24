@@ -76,6 +76,8 @@ export default function ProjectPage(){
   // User role
   const role = projectData.members.find((m) => m.userId === userId)?.role as Role;
   const editProject = hasPermission(role, "editProject");
+  const addTask = hasPermission(role, "addTask");
+  const editTask = hasPermission(role, "editTask")
 
   return(
     <DashboardLayout>
@@ -151,7 +153,7 @@ export default function ProjectPage(){
               ))}
             </div>
             <div className="mt-4">
-              {activeTab === "kanban" && <KanbanBoard userId={userId} editProject={editProject} projectData={projectData}/>}
+              {activeTab === "kanban" && <KanbanBoard userId={userId} editProject={editProject} addTask={addTask} editTask={editTask} projectData={projectData}/>}
               {activeTab === "calendar" && <div>Calendar View</div>}
               {activeTab === "member" && <div>Team Members</div>}
             </div>

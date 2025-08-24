@@ -14,7 +14,7 @@ import { CreateColumn } from "@/components/modal-extras/create-column"
 import { DeleteColumn } from "@/components/modal-extras/delete-column"
 import { CreateTask } from "@/components/modal-extras/create-task"
 
-export function KanbanBoard({ userId, editProject, projectData } : { userId: string; editProject: boolean; projectData: ProjectData; }){
+export function KanbanBoard({ userId, editProject, addTask, editTask, projectData } : { userId: string; editProject: boolean; addTask: boolean; editTask: boolean; projectData: ProjectData; }){
   // For values to display in board
   const [boardData, setBoardData] = useState<{
     columnNames: string[];
@@ -99,7 +99,7 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
 
     // Block drag if current user is not an assignee or have no permission
     const isAssignee = activeTask.assignees?.some((a) => a.userId === userId);
-    if (!isAssignee && !editProject) return;
+    if (!isAssignee && !editTask) return;
 
     // Set initial destination column
     let destColumn = activeTask.position;
@@ -293,6 +293,8 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
                     tasks={columnTasks}
                     userId={userId}
                     editProject={editProject}
+                    addTask={addTask}
+                    editTask={editTask}
                     onUpdateColumn={() => setUpdateColumnIndex(columnIndex)}
                     onDeleteColumn={() => setDeleteColumnIndex(columnIndex)}
                     onCreateTask={() => setCreateTaskIndex(columnIndex)}
@@ -314,7 +316,7 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
             )}
           </div>
           <DragOverlay>
-            {activeTask ? <KanbanTask task={activeTask} userId={userId} editProject={editProject} /> : null}
+            {activeTask ? <KanbanTask task={activeTask} userId={userId} editTask={editTask}/> : null}
           </DragOverlay>
         </DndContext>
       </div>
