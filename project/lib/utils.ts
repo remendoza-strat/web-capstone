@@ -71,27 +71,6 @@ export function ComputeProgress(tasks: Task[], columnCount: number){
   return Math.round(total/taskCount);
 }
 
-// Get color of progress bar
-export function ProgressColor(progress: number){
-  if (progress >= 80) return "bg-green-500";
-  if (progress >= 50) return "bg-blue-500";
-  if (progress >= 25) return "bg-yellow-500";
-};
-
-// Get color of status label
-export function StatusColor(status: string){
-  if (status === "done") return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
-  if (status === "active") return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
-  if (status === "overdue") return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
-}
-
-// Get color of priority
-export function PriorityColor(priority: string){
-  if (priority === "High") return "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400";
-  if (priority === "Medium") return "text-orange-600 bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400";
-  if (priority === "Low") return "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400";
-};
-
 // Get status of the project
 export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
   const done = tasks.every((task) => task.position === (columnCount - 1));

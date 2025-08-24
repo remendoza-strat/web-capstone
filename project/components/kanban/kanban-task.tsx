@@ -3,7 +3,7 @@ import Link from "next/link"
 import { GripVertical, Calendar, Flag, Tag, Lock } from "lucide-react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { DateTimeFormatter, LimitChar, PriorityColor } from "@/lib/utils"
+import { DateTimeFormatter, LimitChar } from "@/lib/utils"
 import { TaskWithAssignees } from "@/lib/customtype"
 import { UserAvatar } from "@/components/user-avatar"
 import { StripHTML } from "@/lib/utils"
@@ -19,6 +19,13 @@ export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignee
 
   // Apply movement and transition
   const style = { transform: CSS.Transform.toString(transform), transition };
+
+  // Get color of priority
+  function PriorityColor(priority: string){
+    if (priority === "High") return "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400";
+    if (priority === "Medium") return "text-orange-600 bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400";
+    if (priority === "Low") return "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400";
+  };
 
   return(
     <div
