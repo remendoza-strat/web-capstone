@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, 
  getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction, 
- KanbanUpdateProjectAction, KanbanDeleteTaskAction } from "../db/actions";
+ KanbanUpdateProjectAction, KanbanDeleteTaskAction,
+ KanbanCreateTaskAction} from "../db/actions";
 import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
@@ -37,9 +38,18 @@ export function KanbanUpdateProject(){
 export function KanbanDeleteTask(){
   return useMutation({
     mutationFn: async ({ projectId, taskId } : 
-      { projectId: string; taskId: string;}) => {
+      { projectId: string; taskId: string; }) => {
       await KanbanDeleteTaskAction(projectId, taskId);
     },
+  });
+}
+
+export function KanbanCreateTask(){
+  return useMutation({
+    mutationFn: async ({ projectId, newTask, assignees } : 
+      { projectId: string; newTask: NewTask; assignees: string[]; }) => {
+      await KanbanCreateTaskAction(projectId, newTask, assignees);
+    }
   });
 }
 

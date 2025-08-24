@@ -12,6 +12,7 @@ import { KanbanUpdateTask } from "@/lib/hooks/projectMembers"
 import { UpdateColumn } from "@/components/modal-extras/update-column"
 import { CreateColumn } from "@/components/modal-extras/create-column"
 import { DeleteColumn } from "@/components/modal-extras/delete-column"
+import { CreateTask } from "@/components/modal-extras/create-task"
 
 export function KanbanBoard({ userId, editProject, projectData } : { userId: string; editProject: boolean; projectData: ProjectData; }){
   // For values to display in board
@@ -257,6 +258,11 @@ export function KanbanBoard({ userId, editProject, projectData } : { userId: str
         columnNames={boardData.columnNames} 
         boardTasks={boardData.tasks}
         projectId={projectData.id}/>
+      }
+      {isOpen && modalType === "createTask" && createTaskIndex !== null && <CreateTask
+        columnIndex={createTaskIndex} 
+        columnOrder={(boardData.tasks.filter((task) => task.position === createTaskIndex)).length} 
+        projectData={projectData}/>
       }
       <div>
         <DndContext

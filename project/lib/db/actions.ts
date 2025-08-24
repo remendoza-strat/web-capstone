@@ -1,7 +1,7 @@
 "use server"
 import { createQueries, deleteQueries, getQueries, queries, updateQueries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
-import { projects, tasks } from "@/lib/db/schema"
+import { projects, taskAssignees, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
 import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
@@ -126,13 +126,7 @@ export async function KanbanUpdateProjectAction
 export async function KanbanDeleteTaskAction
   (projectId: string, taskId: string){
 
-  // Get full task info before deleting
-  const fullTask = await db.query.tasks.findFirst({ 
-    where: eq(tasks.id, taskId),
-    with: {assignees: {with: {user: true}}}
-  });
-
-  // Delete task
+  // Delete the task
   await db.delete(tasks).where(eq(tasks.id, taskId));
 
   // Broadcast
@@ -143,7 +137,38 @@ export async function KanbanDeleteTaskAction
   );
 }
 
+export async function KanbanCreateTaskAction
+  (projectId: string, newTask: NewTask, assignees: string[]){
+  
+  // Create task
+  const [inserted] = await db
+    .insert(tasks)
+    .values(newTask)
+    .returning({ id: tasks.id });
 
+  // Create task assignees
+  if(assignees.length > 0){
+    await db.insert(taskAssignees).values(
+      assignees.map((userId) => ({
+        taskId: inserted.id,
+        userId
+      }))
+    );
+  }
+
+  // Get full task info to return
+  const fullTask = await db.query.tasks.findFirst({
+    where: eq(tasks.id, inserted.id),
+    with: {assignees: {with: {user: true}}}
+  });
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "update", task: fullTask }
+  );
+}
 
 
 

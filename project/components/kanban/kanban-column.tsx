@@ -85,6 +85,10 @@ export function KanbanColumn
           {editProject && (
             <button
               type="button"
+              onClick={() => {
+                openModal("createTask");
+                onCreateTask();
+              }}
               className="w-full p-3 mt-3 text-gray-500 transition-colors border-2 border-gray-300 border-dashed dark:text-gray-400 dark:border-gray-600 rounded-xl hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-600 dark:hover:text-blue-400"
             >
               <Plus className="w-5 h-5 mx-auto mb-1"/>

@@ -1,67 +1,10 @@
 import type { Task } from "@/lib/db/schema"
 import { UserProjects } from "@/lib/customtype"
 
-
 // Remove html tags from text
 export function StripHTML(html: string){
   return html.replace(/<[^>]+>/g, "").trim();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Days since membership invitation is sent
-export const TimeAgo = (date?: Date | string | null) => {
-  if (!date) return "Unknown";
-
-  const parsedDate = typeof date === "string"
-    ? new Date(date.replace(" ", "T"))
-    : date;
-
-  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
-    return "Invalid date";
-  }
-
-  const now = new Date();
-  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
-
-  if (diffInHours < 1) return "Just now";
-  if (diffInHours < 24) return `${diffInHours}h ago`;
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays}d ago`;
-};
-
-// Convert date to PH timezone for display
-export const FormatDateDisplay = (date: Date) => {
-  const display = new Date(date);
-
-  const phOffset = 8 * 60;
-  const localDate = new Date(display.getTime() + phOffset * 60 * 1000);
-
-  return localDate.toISOString().slice(0, 16);
-};
 
 // Sort projects by most recent updated
 export function ByRecentProjects(projects: UserProjects[]){
@@ -239,3 +182,35 @@ export function ProjectsByStatus(status: string, result: UserProjects[]){
   }
   return result;
 }
+
+// Days since membership invitation is sent
+export const TimeAgo = (date?: Date | string | null) => {
+  if (!date) return "Unknown";
+
+  const parsedDate = typeof date === "string"
+    ? new Date(date.replace(" ", "T"))
+    : date;
+
+  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
+    return "Invalid date";
+  }
+
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
+
+  if (diffInHours < 1) return "Just now";
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}d ago`;
+};
+
+// Convert date to PH timezone for display
+export const FormatDateDisplay = (date: Date) => {
+  const display = new Date(date);
+
+  const phOffset = 8 * 60;
+  const localDate = new Date(display.getTime() + phOffset * 60 * 1000);
+
+  return localDate.toISOString().slice(0, 16);
+};
