@@ -85,6 +85,13 @@ export function StatusColor(status: string){
   if (status === "overdue") return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
 }
 
+// Get color of priority
+export function PriorityColor(priority: string){
+  if (priority === "High") return "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400";
+  if (priority === "Medium") return "text-orange-600 bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400";
+  if (priority === "Low") return "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400";
+};
+
 // Get status of the project
 export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
   const done = tasks.every((task) => task.position === (columnCount - 1));

@@ -68,7 +68,7 @@ export default function ProjectPage(){
   if (projectDataError || !projectData) return <ErrorPage code={404} message="Project not found"/>;
 
   // Check if the user is member of the project
-  const isMember = projectData.members.some((m) => m.userId === userId) ?? false;
+  const isMember = projectData.members.some((m) => m.userId === userId && m.approved) ?? false;
   if(!isMember){
     return <ErrorPage code={403} message="Not a project member"/>;
   }
