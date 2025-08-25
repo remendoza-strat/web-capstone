@@ -19,6 +19,7 @@ import { NewTaskAssignee, tasks } from "@/lib/db/schema"
 import { getTaskData, KanbanUpdateTask, createTaskAssignee, KanbanDeleteTaskAssignee, KanbanUpdateProject, KanbanDeleteTask } from "@/lib/hooks/projectMembers"
 import type { User } from "@/lib/db/schema"
 import { TaskSchema } from "@/lib/validations"
+import { CommentSection } from "@/components/page-task/comment-section"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
@@ -280,6 +281,7 @@ export default function TaskPage(){
   const editTask = hasPermission(role, "editTask");
   const assignee = taskData.assignees.some((a) => a.userId === userId);
   const allowed = editTask || assignee;
+  const editComment = hasPermission(role, "editComment");
 
   return(
 		<DashboardLayout>
@@ -530,6 +532,7 @@ export default function TaskPage(){
               )}
             </div>
           </div>
+          <CommentSection clerkId={user?.id ?? ""} comments={taskData.comments} editComment={editComment}/>
         </div>
       </div>
 		</DashboardLayout>
