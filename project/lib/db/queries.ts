@@ -118,7 +118,7 @@ export const deleteQueries = {
     await db.delete(projectMembers).where(eq(projectMembers.id, pmId));
   },
 
-  deleteTaskAssignee: async (projectId: string, userId: string) => {
+  deleteAllTaskAssignee: async (projectId: string, userId: string) => {
     await db.delete(taskAssignees).where(
       and(
         eq(taskAssignees.userId, userId),
@@ -130,7 +130,7 @@ export const deleteQueries = {
     );
   },
 
-  deleteComment: async (projectId: string, userId: string) => {
+  deleteAllComment: async (projectId: string, userId: string) => {
     await db.delete(comments).where(
       and(
         eq(comments.userId, userId),

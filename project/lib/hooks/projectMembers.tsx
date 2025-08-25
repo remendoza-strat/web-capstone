@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteTaskAssigneeAction, getAllUsersAction, 
+import { createProjectAction, createProjectMemberAction, createTaskAction, createTaskAssigneeAction, deleteAllCommentAction, deleteProjectAction, deleteProjectMemberAction, deleteAllTaskAssigneeAction, getAllUsersAction, 
  getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction, 
  KanbanUpdateProjectAction, KanbanDeleteTaskAction,
  KanbanCreateTaskAction,
@@ -172,8 +172,8 @@ export function kickMember(userId: string){
   return useMutation({
     mutationFn: async ({ pmId, projectId, userId } : { pmId: string, projectId: string, userId: string }) => {
       await deleteProjectMemberAction(pmId);
-      await deleteTaskAssigneeAction(projectId, userId);
-      await deleteCommentAction(projectId, userId)
+      await deleteAllTaskAssigneeAction(projectId, userId);
+      await deleteAllCommentAction(projectId, userId)
     },
     onSuccess: (_, vars) => {
       queryClient.setQueryData(["user-projects", userId], (old: any) => {
