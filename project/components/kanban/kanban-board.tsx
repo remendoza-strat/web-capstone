@@ -24,6 +24,14 @@ export function KanbanBoard({ userId, editProject, addTask, editTask, projectDat
     tasks: projectData?.tasks || []
   });
 
+  // Refresh data
+  useEffect(() => {
+    setBoardData({
+      columnNames: projectData?.columnNames || [],
+      tasks: projectData?.tasks || []
+    });
+  }, [projectData]);
+
   // For kanban operations
   const [updateColumnIndex, setUpdateColumnIndex] = useState<number | null>(null);
   const [deleteColumnIndex, setDeleteColumnIndex] = useState<number | null>(null);

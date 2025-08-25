@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 import { useEffect, useState } from "react"
 import { validate as isUuid } from "uuid"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Calendar, Edit2, Flag, UserRound, Save, Search, Tag, UserMinus, X } from "lucide-react"
+import { ArrowLeft, Calendar, Edit2, Flag, UserRound, Save, Search, Tag, UserMinus, X, Trash2 } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { hasPermission } from "@/lib/permissions"
@@ -16,7 +16,7 @@ import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 import { UserAvatar } from "@/components/user-avatar"
 import { NewTaskAssignee, tasks } from "@/lib/db/schema"
-import { getTaskData, KanbanUpdateTask, createTaskAssignee, KanbanDeleteTaskAssignee, KanbanUpdateProject } from "@/lib/hooks/projectMembers"
+import { getTaskData, KanbanUpdateTask, createTaskAssignee, KanbanDeleteTaskAssignee, KanbanUpdateProject, KanbanDeleteTask } from "@/lib/hooks/projectMembers"
 import type { User } from "@/lib/db/schema"
 import { TaskSchema } from "@/lib/validations"
 
@@ -32,6 +32,7 @@ export default function TaskPage(){
   const createTaskAssigneeMutation = createTaskAssignee();
   const deleteTaskAssigneeMutation = KanbanDeleteTaskAssignee();
   const updateProjectMutation = KanbanUpdateProject();
+  const deleteTaskMutation = KanbanDeleteTask();
 
   // Hooks for input
   const [title, setTitle] = useState("");
@@ -134,6 +135,17 @@ export default function TaskPage(){
     if (priority === "Low") return "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400";
   };
 
+  // Delete task
+  function deleteTask(){
+    if(taskData){
+      deleteTaskMutation.mutate({projectId: taskData.project.id, taskId: taskData.id}, {
+        onSuccess: () => {
+          toast.success("Task deleted successfully.");
+          router.push(`/projects/${taskData.projectId}`);
+        }
+      });
+    }
+  }
 
   async function updateTask(){
     if(taskData){
@@ -293,6 +305,15 @@ export default function TaskPage(){
                     >
                       <X className="w-4 h-4"/>
                       <span>Cancel</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={deleteTaskMutation.isPending}
+                      onClick={() => deleteTask()}
+                      className="flex items-center px-4 py-2 space-x-2 font-medium text-white transition-colors bg-red-600 hover:bg-red-700 rounded-xl"
+                    >
+                      <Trash2 className="w-4 h-4"/>
+                      <span>{deleteTaskMutation.isPending? "Deleting Task..." : "Delete Task"}</span>
                     </button>
                     <button
                       type="button"

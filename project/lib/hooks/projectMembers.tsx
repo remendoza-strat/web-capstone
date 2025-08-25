@@ -18,6 +18,7 @@ export function KanbanUpdateTask(){
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["task-data", vars.taskId] });
+      queryClient.invalidateQueries({ queryKey: ["project-data", vars.projectId] });
     }
   });
 }
@@ -199,14 +200,6 @@ export function createTaskAssignee(){
   return useMutation({
     mutationFn: async (newTaskAssignee: NewTaskAssignee) => {
       await createTaskAssigneeAction(newTaskAssignee);
-    }
-  });
-}
-
-export function deleteTaskAssignee(){
-  return useMutation({
-    mutationFn: async ({ projectId, userId } : { projectId: string, userId: string }) => {
-      await deleteTaskAssigneeAction(projectId, userId);
     }
   });
 }
