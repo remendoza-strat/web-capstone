@@ -19,11 +19,15 @@ import { getSocketId } from "../pusher/client";
 
 
 export function KanbanUpdateTask(){
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ projectId, taskId, updTask } : 
       { projectId: string; taskId: string; updTask: Partial<typeof tasks.$inferInsert>; }) => {
       await KanbanUpdateTaskAction(projectId, taskId, updTask);
     },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["task-data", vars.taskId] });
+    }
   });
 }
 
@@ -219,6 +223,14 @@ export function createTaskAssignee(){
   return useMutation({
     mutationFn: async (newTaskAssignee: NewTaskAssignee) => {
       await createTaskAssigneeAction(newTaskAssignee);
+    }
+  });
+}
+
+export function deleteTaskAssignee(){
+  return useMutation({
+    mutationFn: async ({ projectId, userId } : { projectId: string, userId: string }) => {
+      await deleteTaskAssigneeAction(projectId, userId);
     }
   });
 }
