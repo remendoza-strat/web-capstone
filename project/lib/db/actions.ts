@@ -154,6 +154,9 @@ export async function deleteProjectAction(projectId: string){
 export async function deleteProjectMemberAction(pmId: string){
   await deleteQueries.deleteProjectMember(pmId);
 }
+export async function deleteCommentAction(cId: string){
+  await deleteQueries.deleteComment(cId);
+}
 export async function deleteAllTaskAssigneeAction(projectId: string, userId: string){
   await deleteQueries.deleteAllTaskAssignee(projectId, userId);
 }

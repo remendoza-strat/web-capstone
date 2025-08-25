@@ -5,7 +5,7 @@ import { MessageCircle, Send, MoreHorizontal, Check, X } from "lucide-react"
 import { CommentsWithUser } from "@/lib/customtype"
 import { UserAvatar } from "@/components/user-avatar"
 import { DateTimeFormatter } from "@/lib/utils"
-import { createComment, updateComment } from "@/lib/hooks/projectMembers"
+import { createComment, deleteComment, updateComment } from "@/lib/hooks/projectMembers"
 import { comments, NewComment } from "@/lib/db/schema"
 
 export function CommentSection(
@@ -23,6 +23,7 @@ export function CommentSection(
   // Mutation for operations
   const createCommentMutation = createComment();
 	const updateCommentMutation = updateComment();
+  const deleteCommentMutation = deleteComment(taskId);
   
   // Comments storage
   const [commentsList, setCommentsList] = useState<CommentsWithUser[]>(allComments);
@@ -78,6 +79,20 @@ export function CommentSection(
         }
       }
     );
+    }
+  }
+
+  // Delete comment
+  function deleteUserComment(id: string){
+    // TODO: validate comment
+
+    if(id){
+      // Update comment
+      deleteCommentMutation.mutate({ cId: id}, {
+        onSuccess: () => {
+          toast.success("Comment successfully deleted.");
+        }
+      });
     }
   }
 
@@ -150,6 +165,7 @@ export function CommentSection(
                               Edit
                             </button>
                             <button
+                              onClick={() => deleteUserComment(comment.id)}
                               type="button"
                               className="w-full px-3 py-2 text-left text-red-600 transition-colors dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 last:rounded-b-xl"
                             >

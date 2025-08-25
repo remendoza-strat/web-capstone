@@ -6,7 +6,8 @@ import { createProjectAction, createProjectMemberAction, createTaskAction, creat
  getTaskDataAction,
  KanbanDeleteTaskAssigneeAction,
  createCommentAction,
- updateCommentAction} from "../db/actions";
+ updateCommentAction,
+ deleteCommentAction} from "../db/actions";
 import { comments, NewComment, NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
@@ -263,6 +264,18 @@ export function updateComment(){
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["task-data", vars.updComment.taskId] });
+    }
+  });
+}
+
+export function deleteComment(taskId: string){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ cId } : { cId: string }) => {
+      await deleteCommentAction(cId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["task-data", taskId] });
     }
   });
 }
