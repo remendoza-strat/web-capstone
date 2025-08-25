@@ -1,52 +1,124 @@
 "use client"
-
-import { useState } from "react"
-import { format } from "date-fns"
-import { MoreHorizontal, MessageCircle, Send, X, Trash2, Check, Edit2 } from "lucide-react"
+import { toast } from "sonner"
+import { useEffect, useState } from "react"
+import { MessageCircle, Send, MoreHorizontal, Check, X } from "lucide-react"
 import { CommentsWithUser } from "@/lib/customtype"
-import { UserAvatar } from "../user-avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import { DateTimeFormatter } from "@/lib/utils"
+import { createComment, updateComment } from "@/lib/hooks/projectMembers"
+import { comments, NewComment } from "@/lib/db/schema"
 
-export function CommentSection({clerkId, comments, editComment}:{clerkId: string, comments: CommentsWithUser[], editComment: boolean}) {
+export function CommentSection(
+  { clerkId, userId, taskId, editComment, allComments } : 
+  { clerkId: string; userId: string; taskId: string; editComment: boolean; allComments: CommentsWithUser[]; }){
 
-	const [newComment, setNewComment] = useState("");
-	const [editText, setEditText] = useState("");
-	const [showCommentMenu, setShowCommentMenu] = useState(false);
-	const [showEdit, setShowEdit] = useState(false);
+  // Hooks for input
+  const [inputCreateComment, setInputCreateComment] = useState("");
+  const [inputUpdateComment, setInputUpdateComment] = useState("");
 
-  return (
-    <div className="mb-8 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
-      <div className="p-8">
+  // Hooks for UI
+  const [showCommentMenu, setShowCommentMenu] = useState<string | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+
+  // Mutation for operations
+  const createCommentMutation = createComment();
+	const updateCommentMutation = updateComment();
+  
+  // Comments storage
+  const [commentsList, setCommentsList] = useState<CommentsWithUser[]>(allComments);
+
+  // Refresh list
+  useEffect(() => {
+    setCommentsList(allComments);
+  }, [allComments]);
+
+  // Handle new comment
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // TODO: validate comment
+
+    // Object of comment
+    const newComment: NewComment = {
+      taskId: taskId,
+      userId: userId,
+      content: inputCreateComment
+    }
+
+    // Create comment
+    createCommentMutation.mutate(newComment,{
+      onSuccess: () => {
+        toast.success("Comment successfully posted.");
+        setInputCreateComment("");
+      },
+      onError: () => {
+        toast.error("Error occured.");
+      }
+    });
+  }
+
+  // Update comment
+  function updateUserComment(id: string){
+    // TODO: validate comment
+
+    if(id){
+      // Object of comment
+      const updComment: Partial<typeof comments.$inferInsert> = { content: inputUpdateComment, updatedAt: new Date() };
+
+      // Update comment
+      updateCommentMutation.mutate({ cId: id, updComment: updComment },{
+        onSuccess: () => {
+          toast.success("Comment successfully updated.");
+          setCommentsList(prev =>
+            prev.map(c => (c.id === id ? { ...c, ...updComment } : c)));
+          setEditingCommentId(null);
+        },
+        onError: () => {
+          toast.error("Error occured.");
+        }
+      }
+    );
+    }
+  }
+
+  return(
+    <div className="mb-8 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700 rounded-2xl">
+      <div className="p-6 lg:p-8">
         <h4 className="flex items-center mb-6 text-lg font-semibold text-gray-900 dark:text-white">
           <MessageCircle className="w-5 h-5 mr-2"/>
-          ({comments.length > 1 ? "Comments" : "Comment"}) ({comments.length})
+          {commentsList.length > 1 ? "Comments" : "Comment"} ({commentsList.length})
         </h4>
-        <form className="mb-8">
-          <div className="flex items-center space-x-4">
+        <form onSubmit={handleSubmit} className="mb-8">
+          <div className="flex items-start space-x-4">
             <UserAvatar clerkId={clerkId}/>
-            <div className="flex items-center flex-1 min-w-0 space-x-3">
-              <input
-                type="text"
-                value={newComment} onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment..."
-                className="flex-1 min-w-0 px-4 py-3 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              />
-              <button
-                type="submit"
-                className="flex-shrink-0 px-6 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl"
-              >
-                <Send className="w-4 h-4"/>
-              </button>
+            <div className="flex-1">
+              <div className="flex space-x-3">
+                <input
+                  type="text" 
+                  value={inputCreateComment} onChange={(e) => setInputCreateComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="flex-1 px-4 py-3 text-gray-900 bg-white border border-gray-300 dark:text-white dark:bg-gray-700 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="flex items-center justify-center px-5 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-xl"
+                >
+                  <Send className="w-4 h-4"/>
+                </button>
+              </div>
             </div>
           </div>
         </form>
         <div className="space-y-6">
-          {comments.map((comment) => (
-            <div key={comment.id} className="flex space-x-4">
+          {[...commentsList].sort((a, b) => {
+            const aTime = new Date(a.updatedAt ?? 0).getTime();
+            const bTime = new Date(b.updatedAt ?? 0).getTime();
+            return bTime - aTime}).map((comment) => (
+            <div key={comment.id} className="relative flex items-start space-x-4">
               <UserAvatar clerkId={comment.user.clerkId}/>
               <div className="flex-1">
-                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="relative p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                  <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
                         {comment.user.fname} {comment.user.lname}
@@ -55,67 +127,71 @@ export function CommentSection({clerkId, comments, editComment}:{clerkId: string
                         {DateTimeFormatter(comment.createdAt ?? new Date())}
                       </span>
                     </div>
-                    {editComment || comment.user.clerkId === clerkId && (
+                    {(editComment || comment.user.id === userId) && (
                       <div className="relative">
                         <button
-                          onClick={() => setShowCommentMenu(true)}
+                          type="button"
+                          onClick={() => setShowCommentMenu(showCommentMenu === comment.id ? null : comment.id)}
                           className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
                         >
                           <MoreHorizontal className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
                         </button>
-                        {showCommentMenu && (
-                          <div className="absolute right-0 z-10 w-32 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                        {showCommentMenu === comment.id && (
+                          <div className="absolute right-0 z-10 w-32 mt-1 bg-white border border-gray-200 shadow-lg top-full dark:bg-gray-800 dark:border-gray-700 rounded-xl">
                             <button
-															onClick={() => setShowEdit(true)}
-                              className="flex items-center w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                              type="button"
+                              onClick={() => {
+                                setInputUpdateComment(comment.content);
+                                setEditingCommentId(comment.id);
+                                setShowCommentMenu(null);
+                              }}
+                              className="w-full px-3 py-2 text-left text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 first:rounded-t-xl"
                             >
-                              <Edit2 className="w-4 h-4 mr-2"/> 
-															Edit
+                              Edit
                             </button>
                             <button
-                              className="flex items-center w-full px-3 py-2 text-sm text-left text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              type="button"
+                              className="w-full px-3 py-2 text-left text-red-600 transition-colors dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 last:rounded-b-xl"
                             >
-                              <Trash2 className="w-4 h-4 mr-2"/> 
-															Delete
+                              Delete
                             </button>
                           </div>
                         )}
                       </div>
                     )}
                   </div>
-                  {showEdit ? (
-                    <div className="flex items-center space-x-2">
+                  {editingCommentId === comment.id ? (
+                    <div className="flex items-center mt-2 space-x-2">
                       <input
                         type="text"
-                        value={editText} onChange={(e) => setEditText(e.target.value)}
-                        className="flex-1 px-3 py-2 text-sm bg-white border rounded-lg dark:bg-gray-600 dark:text-white"
+                        value={inputUpdateComment} onChange={(e) => setInputUpdateComment(e.target.value)}
+                        className="flex-1 px-3 py-2 text-sm bg-white border rounded-xl dark:bg-gray-600 dark:text-white"
                       />
                       <button
-                        className="p-2 text-green-600 rounded hover:bg-green-50 dark:hover:bg-green-800"
-                      >
+                        type="button"
+											  onClick={() => updateUserComment(comment.id)}
+											  className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-800">
                         <Check className="w-4 h-4"/>
                       </button>
                       <button
-                        className="p-2 text-gray-500 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                        type="button"
+                        onClick={() => setEditingCommentId(null)}
+                        className="p-2 text-gray-900 hover:bg-gray-200 dark:hover:bg-gray-600"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-4 h-4"/>
                       </button>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-700 dark:text-gray-300">
-                      {comment.content}
-                    </p>
+                    <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
                   )}
                 </div>
               </div>
             </div>
           ))}
-          {comments.length === 0 && (
+          {commentsList.length === 0 && (
             <div className="py-12 text-center">
               <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600"/>
-              <p className="text-gray-500 dark:text-gray-400">
-                No comments yet. Start the conversation!
-              </p>
+              <p className="text-gray-500 dark:text-gray-400">No comments yet. Start the conversation!</p>
             </div>
           )}
         </div>

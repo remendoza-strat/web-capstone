@@ -1,6 +1,6 @@
 "use server"
 import { createQueries, deleteQueries, getQueries, updateQueries } from "@/lib/db/queries"
-import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
+import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment, comments } from "@/lib/db/schema"
 import { projects, taskAssignees, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
 import { pusherServer } from "../pusher/server"
@@ -132,6 +132,9 @@ export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee)
 export async function createProjectMemberAction(newProjectMember: NewProjectMember){
   await createQueries.createProjectMember(newProjectMember);
 }
+export async function createCommentAction(newComment: NewComment){
+  await createQueries.createComment(newComment);
+}
 
 // UPDATE ACTIONS
 export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
@@ -139,6 +142,9 @@ export async function updateProjectAction(projectId: string, updProject: Partial
 }
 export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
   await updateQueries.updateProjectMember(pmId, updPm);
+}
+export async function updateCommentAction(cId: string, updComment: Partial<typeof comments.$inferInsert>){
+  await updateQueries.updateComment(cId, updComment);
 }
 
 // DELETE ACTIONS

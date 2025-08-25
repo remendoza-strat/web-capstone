@@ -4,8 +4,10 @@ import { createProjectAction, createProjectMemberAction, createTaskAction, creat
  KanbanUpdateProjectAction, KanbanDeleteTaskAction,
  KanbanCreateTaskAction,
  getTaskDataAction,
- KanbanDeleteTaskAssigneeAction} from "../db/actions";
-import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
+ KanbanDeleteTaskAssigneeAction,
+ createCommentAction,
+ updateCommentAction} from "../db/actions";
+import { comments, NewComment, NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
 
@@ -237,6 +239,30 @@ export function deleteProjectMember(userId: string){
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+    }
+  });
+}
+
+export function createComment(){
+  const queryClient = useQueryClient();
+  return useMutation({ 
+    mutationFn: async (newComment: NewComment) => {
+      await createCommentAction(newComment);
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["task-data", vars.taskId] });
+    }
+  });
+}
+
+export function updateComment(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ cId, updComment } : { cId: string, updComment: Partial<typeof comments.$inferInsert> }) => {
+      await updateCommentAction(cId, updComment);
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["task-data", vars.updComment.taskId] });
     }
   });
 }

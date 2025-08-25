@@ -532,7 +532,7 @@ export default function TaskPage(){
               )}
             </div>
           </div>
-          <CommentSection clerkId={user?.id ?? ""} comments={taskData.comments} editComment={editComment}/>
+          <CommentSection clerkId={user?.id ?? ""} userId={userId ?? ""} taskId={taskId ?? ""} editComment={editComment} allComments={taskData.comments}/>
         </div>
       </div>
 		</DashboardLayout>

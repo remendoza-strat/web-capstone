@@ -1,7 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm"
 import { db } from "@/lib/db/connection"
 import { users, projects, projectMembers, tasks, taskAssignees, comments } from "@/lib/db/schema"
-import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
+import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment } from "@/lib/db/schema"
 
 export const getQueries = {
 
@@ -86,6 +86,10 @@ export const createQueries = {
     return result;
   },
 
+  createComment: async (newComment: NewComment) => {
+    await db.insert(comments).values(newComment).execute();
+  },
+
 }
 
 export const updateQueries = {
@@ -96,6 +100,10 @@ export const updateQueries = {
 
   updateProject: async (projectId: string, updProject: Partial<typeof projects.$inferInsert>) => {
     await db.update(projects).set({...updProject}).where(eq(projects.id, projectId));
+  },
+
+  updateComment: async (cId: string, updComment: Partial<typeof comments.$inferInsert>) => {
+    await db.update(comments).set({...updComment}).where(eq(comments.id, cId));
   },
 
 }
