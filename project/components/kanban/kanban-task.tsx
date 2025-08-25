@@ -28,10 +28,11 @@ export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignee
   };
 
   return(
-    <div
+    <Link
+      href={`/task/${task.id}`}
       ref={setNodeRef}
       style={style}
-      className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md
+      className={`block bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 transition-all hover:shadow-md
         ${isDragging ? "shadow-lg rotate-2 opacity-30" : ""}
       `}
     >
@@ -46,6 +47,7 @@ export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignee
         </div>
         <div
           {...(isAllowed ? { ...attributes, ...listeners } : {})}
+          onClick={(e) => e.preventDefault()}
           className={`p-1 ml-2 rounded transition-colors ${isAllowed ? 
             "cursor-grab active:cursor-grabbing hover:bg-gray-100 dark:hover:bg-gray-700"
             : "cursor-not-allowed text-gray-400"
@@ -61,36 +63,34 @@ export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignee
           }
         </div>
       </div>
-      <Link href={`/task/${task.id}`}>
-        <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="flex items-center px-2 py-1 space-x-1 font-medium text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/20 dark:text-blue-300">
-            <Tag className="w-3 h-3"/>
-            <span>{task.label}</span>
-          </span>
-          <div
-            className={`flex items-center space-x-1 px-2 py-1 rounded-full ${PriorityColor(task.priority)}`}
-          >
-            <Flag className="w-3 h-3"/>
-            <span className="font-medium capitalize">{task.priority}</span>
-          </div>
+      <div className="flex items-center justify-between mb-3 text-xs">
+        <span className="flex items-center px-2 py-1 space-x-1 font-medium text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/20 dark:text-blue-300">
+          <Tag className="w-3 h-3"/>
+          <span>{task.label}</span>
+        </span>
+        <div
+          className={`flex items-center space-x-1 px-2 py-1 rounded-full ${PriorityColor(task.priority)}`}
+        >
+          <Flag className="w-3 h-3"/>
+          <span className="font-medium capitalize">{task.priority}</span>
         </div>
-        <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-          <Calendar className="w-3 h-3"/>
-          <span>{DateTimeFormatter(task.dueDate)}</span>
+      </div>
+      <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+        <Calendar className="w-3 h-3"/>
+        <span>{DateTimeFormatter(task.dueDate)}</span>
+      </div>
+      {task.assignees && task.assignees.length > 0 && (
+        <div className="flex mt-2 -space-x-2">
+          {task.assignees.slice(0, 5).map((assignee) => (
+            <UserAvatar key={assignee.id} clerkId={assignee.user.clerkId}/>
+          ))}
+          {task.assignees.length > 5 && (
+            <div className="flex items-center justify-center w-5 h-5 text-xs font-medium text-gray-700 bg-gray-300 border-2 border-white rounded-full dark:bg-gray-700 dark:text-gray-200 dark:border-gray-900">
+              +{task.assignees.length - 5}
+            </div>
+          )}
         </div>
-        {task.assignees && task.assignees.length > 0 && (
-          <div className="flex mt-2 -space-x-2">
-            {task.assignees.slice(0, 5).map((assignee) => (
-              <UserAvatar key={assignee.id} clerkId={assignee.user.clerkId}/>
-            ))}
-            {task.assignees.length > 5 && (
-              <div className="flex items-center justify-center w-5 h-5 text-xs font-medium text-gray-700 bg-gray-300 border-2 border-white rounded-full dark:bg-gray-700 dark:text-gray-200 dark:border-gray-900">
-                +{task.assignees.length - 5}
-              </div>
-            )}
-          </div>
-        )}
-      </Link>
-    </div>
+      )}
+    </Link>
   );
 }

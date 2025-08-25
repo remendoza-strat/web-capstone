@@ -1,5 +1,5 @@
 "use server"
-import { createQueries, deleteQueries, getQueries, queries, updateQueries } from "@/lib/db/queries"
+import { createQueries, deleteQueries, getQueries, updateQueries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
 import { projects, taskAssignees, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
@@ -7,84 +7,7 @@ import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
 
-
-// Return = users
-// that is not a member of the project or not yet invited
-export async function getNonProjectMembersAction(projectId: string){
-  return await queries.projectMembers.getNonProjectMembers(projectId);
-}
-
-// Return = tasks
-// of the given userId
-export async function getUserTasksAction(userId: string){
-  return await queries.tasks.getUserTasks(userId);
-}
-
-// Create user
-export async function createUserAction(newUser: NewUser){
-  return await queries.users.createUser(newUser);
-}
-
-
-// Update = "updatedAt"
-// of given projectId
-export async function updateProjectTimeAction(projectId: string){
-  await queries.projects.updateProjectTime(projectId);
-}
-
-// Requires: clerk id
-// Return: user id
-export async function getUserIdAction(clerkId: string){
-  return await queries.users.getUserId(clerkId);
-}
-
-
-// Require: project id
-// Return: project with tasks
-export async function getProjectWithTasksAction(projectId: string){
-  return await queries.projects.getProjectWithTasks(projectId);
-}
-
-// Require: project id
-// Return: project data
-export async function getProjectAction(projectId: string){
-  return await queries.projects.getProject(projectId);
-}
-
-// Require: project id
-// Return: project members
-export async function getProjectMembersAction(projectId: string){
-  return await queries.projectMembers.getProjectMembers(projectId);
-}
-
-// Delete task
-export async function deleteTaskAction(projectId: string, taskId: string, socketId?: string){
-  const [result] = await db
-    .delete(tasks)
-    .where(eq(tasks.id, taskId))
-    .returning();
-
-  if(result){
-    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: result },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// KANBAN ACTIONS
 export async function KanbanUpdateTaskAction
   (projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>){
     
@@ -104,7 +27,6 @@ export async function KanbanUpdateTaskAction
     { action: "update", task: fullTask }
   );
 }
-
 export async function KanbanUpdateProjectAction
   (projectId: string, updProject: Partial<typeof projects.$inferInsert>){
     
@@ -122,7 +44,6 @@ export async function KanbanUpdateProjectAction
     { action: "project", project: updatedProject[0] }
   );
 }
-
 export async function KanbanDeleteTaskAction
   (projectId: string, taskId: string){
 
@@ -136,7 +57,6 @@ export async function KanbanDeleteTaskAction
     { action: "delete", taskId }
   );
 }
-
 export async function KanbanCreateTaskAction
   (projectId: string, newTask: NewTask, assignees: string[]){
   
@@ -169,15 +89,17 @@ export async function KanbanCreateTaskAction
     { action: "update", task: fullTask }
   );
 }
-
-
-
-
-
-
-
+export async function KanbanDeleteTaskAssigneeAction
+  (taId: string){
+  
+  // Delete assignee
+  await db.delete(taskAssignees).where(eq(taskAssignees.id, taId));
+}
 
 // GET ACTIONS
+export async function getUserIdAction(clerkId: string){
+  return await getQueries.getUserId(clerkId);
+}
 export async function getUserProjectsWithMembersAction(userId: string){
   return await getQueries.getUserProjectsWithMembers(userId);
 }
@@ -195,6 +117,9 @@ export async function getTaskDataAction(taskId: string){
 }
 
 // CREATE ACTIONS
+export async function createUserAction(newUser: NewUser){
+  return await createQueries.createUser(newUser);
+}
 export async function createProjectAction(newProject: NewProject){
   return await createQueries.createProject(newProject);
 }

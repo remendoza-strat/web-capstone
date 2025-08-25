@@ -16,7 +16,7 @@ import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 import { UserAvatar } from "@/components/user-avatar"
 import { NewTaskAssignee, tasks } from "@/lib/db/schema"
-import { getTaskData, KanbanUpdateTask, createTaskAssignee, deleteTaskAssignee, KanbanUpdateProject } from "@/lib/hooks/projectMembers"
+import { getTaskData, KanbanUpdateTask, createTaskAssignee, KanbanDeleteTaskAssignee, KanbanUpdateProject } from "@/lib/hooks/projectMembers"
 import type { User } from "@/lib/db/schema"
 import { TaskSchema } from "@/lib/validations"
 
@@ -30,7 +30,7 @@ export default function TaskPage(){
   // Mutation for operations
   const updateTaskMutation = KanbanUpdateTask();
   const createTaskAssigneeMutation = createTaskAssignee();
-  const deleteTaskAssigneeMutation = deleteTaskAssignee();
+  const deleteTaskAssigneeMutation = KanbanDeleteTaskAssignee();
   const updateProjectMutation = KanbanUpdateProject();
 
   // Hooks for input
@@ -212,7 +212,7 @@ export default function TaskPage(){
 
         // Delete task assignees
         for(const delAssignee of delAssignees){
-          await deleteTaskAssigneeMutation.mutateAsync({ projectId: taskData.projectId, userId: delAssignee.userId });
+          await deleteTaskAssigneeMutation.mutateAsync(delAssignee.id);
         }
       }
       catch{

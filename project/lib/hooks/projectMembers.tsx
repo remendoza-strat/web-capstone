@@ -3,20 +3,11 @@ import { createProjectAction, createProjectMemberAction, createTaskAction, creat
  getUserProjectsAction, getUserProjectsWithMembersAction, updateProjectAction, updateProjectMemberAction, getProjectDataAction, KanbanUpdateTaskAction, 
  KanbanUpdateProjectAction, KanbanDeleteTaskAction,
  KanbanCreateTaskAction,
- getTaskDataAction} from "../db/actions";
+ getTaskDataAction,
+ KanbanDeleteTaskAssigneeAction} from "../db/actions";
 import { NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
 import { getSocketId } from "../pusher/client";
-
-
-
-
-
-
-
-
-
-
 
 export function KanbanUpdateTask(){
   const queryClient = useQueryClient();
@@ -58,28 +49,13 @@ export function KanbanCreateTask(){
   });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export function KanbanDeleteTaskAssignee(){
+  return useMutation({
+    mutationFn: async (taId: string) => {
+      await KanbanDeleteTaskAssigneeAction(taId);
+    }
+  });
+}
 
 export function getUserProjects(userId: string, options? : { enabled?: boolean }){
   return useQuery({
