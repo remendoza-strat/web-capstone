@@ -18,12 +18,13 @@ import { DeleteProject } from "@/components/modal-project/delete"
 import { LeaveProject } from "@/components/modal-extras/leave-project"
 import { KanbanBoard } from "@/components/kanban/kanban-board"
 import { CalendarView } from "@/components/calendar-view"
+import { TeamView } from "@/components/team-view"
 
 // List tabs
 const tabs = [
   { id: "kanban", label: "Kanban Board", icon: Kanban },
   { id: "calendar", label: "Calendar", icon: Calendar },
-  { id: "member", label: "Members", icon: Users }
+  { id: "team", label: "Team", icon: Users }
 ];
 
 export default function ProjectPage(){
@@ -156,7 +157,7 @@ export default function ProjectPage(){
             <div className="mt-4">
               {activeTab === "kanban" && <KanbanBoard userId={userId} editProject={editProject} addTask={addTask} editTask={editTask} projectData={projectData}/>}
               {activeTab === "calendar" && <div><CalendarView tasks={projectData.tasks}/></div>}
-              {activeTab === "member" && <div>Team Members</div>}
+              {activeTab === "team" && <div><TeamView members={projectData.members}/></div>}
             </div>
           </div>
         </div>
