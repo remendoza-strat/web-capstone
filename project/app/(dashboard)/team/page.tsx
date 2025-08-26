@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { ChevronDown, Filter, Search, Users, FolderOpen, UserPlus } from "lucide-react"
+import { ChevronDown, Filter, Search, Users, UsersRound, FolderOpen, UserPlus } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { MemberCard } from "@/components/page-team/member-card"
 import { ProjectMemberUser, ProjectsWithMembers, RoleArr } from "@/lib/customtype"
@@ -139,8 +139,8 @@ export default function TeamPage(){
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h1 className="flex items-center text-3xl font-bold text-gray-900 dark:text-white">
-                    <Users className="w-8 h-8 mr-3 text-blue-600"/>
-                    Team Members
+                    <UsersRound className="w-8 h-8 mr-3 text-blue-600"/>
+                    Team
                   </h1>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Manage your team and project assignments</p>
                 </div>

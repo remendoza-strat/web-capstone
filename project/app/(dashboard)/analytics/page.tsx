@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { ChevronDown, ChartColumnStacked } from "lucide-react"
+import { ChevronDown, ChartNoAxesCombined } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { UserProjects } from "@/lib/customtype"
 import { getUserId, getUserProjects } from "@/lib/db/tanstack"
@@ -43,11 +43,11 @@ export default function AnalyticsPage(){
   // Set initial selected project
   useEffect(() => {
     if (!projectData) return;
-    setAllProjects(projectData.filter((p) => p.members.some((m) => m.userId === userId && m.approved)));
-
-    if(!selectedProject){
-      setSelectedProject(allProjects[0]);
-    }
+    const filteredProjects = projectData.filter(
+      (p) => p.members.some((m) => m.userId === userId && m.approved)
+    );
+    setAllProjects(filteredProjects);
+    setSelectedProject(filteredProjects[0]);
   }, [projectData]);
 
   return(
@@ -56,11 +56,11 @@ export default function AnalyticsPage(){
         <>
           <div className="mb-8">
             <h1 className="flex items-center text-3xl font-bold text-gray-900 dark:text-white">
-              <ChartColumnStacked className="w-8 h-8 mr-3 text-blue-600"/>
+              <ChartNoAxesCombined className="w-8 h-8 mr-3 text-blue-600"/>
               Analytics
             </h1>
             <p className="mt-2 text-gray-600 dark:text-gray-300">
-              Insights and metrics for your project performance
+              Insights and metrics for your projects
             </p>
             <div className="flex justify-end mt-4">
               <div className="relative">
