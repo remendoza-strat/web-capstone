@@ -1,33 +1,35 @@
 "use client"
-import { validate as isUuid } from "uuid";
+import { useState } from "react"
+import { validate as isUuid } from "uuid"
 import { useParams } from "next/navigation"
+import { Calendar, DoorOpen, Edit2, Kanban, Trash2, Users } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
+import { DashboardLayout } from "@/components/dashboard-layout"
+import { useModal } from "@/lib/states"
+import { hasPermission } from "@/lib/permissions"
+import { Role } from "@/lib/customtype"
+import { DateTimeFormatter } from "@/lib/utils"
+import { getUserId, getProjectData } from "@/lib/db/tanstack"
+import { UpdateProject } from "@/components/modal-project/update"
 import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
-import Link from "next/link";
-import { ArrowLeft, DoorOpen, Pencil, Trash2 } from "lucide-react";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { UpdateProject } from "@/components/projects-modal/update";
-import { DeleteProject } from "@/components/projects-modal/delete";
-import { useModal } from "@/lib/states";
-import { hasPermission } from "@/lib/permissions";
-import { ProjectsWithTasks, Role } from "@/lib/customtype";
-import { DateTimeFormatter } from "@/lib/utils";
-import { getProjectData, getProject } from "@/lib/hooks/projects"
-import { getUserId } from "@/lib/hooks/users"
-import { KanbanBoard } from "@/components/kanban-board";
-import { Task } from "@/lib/db/schema";
-import { LeaveProject } from "@/components/projects-modal/leave";
-import { useState } from "react";
-import { CalendarView } from "@/components/calendar-view";
+import { DeleteProject } from "@/components/modal-project/delete"
+import { LeaveProject } from "@/components/modal-extras/leave-project"
+import { KanbanBoard } from "@/components/kanban/kanban-board"
+import { CalendarView } from "@/components/calendar-view"
+import { TeamView } from "@/components/team-view"
 
+// List tabs
+const tabs = [
+  { id: "board", label: "Board", icon: Kanban },
+  { id: "calendar", label: "Calendar", icon: Calendar },
+  { id: "team", label: "Team", icon: Users }
+];
 
-
-
-//-----------------------------------------------DONE SECTION-----------------------------------------------/
 export default function ProjectPage(){
-  const [activeTab, setActiveTab] = useState<"kanban" | "list" | "calendar">("kanban");
-  
+  // Get current selected tab
+  const [activeTab, setActiveTab] = useState<string>("board");
+
   // Get project id from parameter
   const params = useParams<{ id: string }>();
   const projectId = params.id;
@@ -40,7 +42,7 @@ export default function ProjectPage(){
 
   // Check if valid project id
   if(!projectId || !isUuid(projectId)){
-    return <ErrorPage code={404} message="Invalid project ID."/>;
+    return <ErrorPage code={404} message="Invalid project ID"/>;
   }
 
   // Get user id with clerk id
@@ -59,161 +61,105 @@ export default function ProjectPage(){
         } 
   = getProjectData(projectId, { enabled: Boolean(projectId) });
 
-  // Get project with project id
-  const {
-          data: project,
-          isLoading: projectLoading,
-          error: projectError
-        } 
-  = getProject(projectId, { enabled: Boolean(projectId) });
-
   // Show loading page if still processing
-  if (!userLoaded || userIdLoading || projectDataLoading || projectLoading) return <LoadingPage/>;
+  if (!userLoaded || userIdLoading || projectDataLoading) return <LoadingPage/>;
 
   // Display error for queries
-  if (userIdError || !userId) return <ErrorPage code={403} message="User not found."/>;
-  if (projectDataError || !projectData || projectError || !project) return <ErrorPage code={404} message="Project not found."/>;
+  if (userIdError || !userId) return <ErrorPage code={403} message="User not found"/>;
+  if (projectDataError || !projectData) return <ErrorPage code={404} message="Project not found"/>;
 
   // Check if the user is member of the project
-  const isMember = projectData.members?.some((m) => m.userId === userId) ?? false;
+  const isMember = projectData.members.some((m) => m.userId === userId && m.approved) ?? false;
   if(!isMember){
-    return <ErrorPage code={403} message="Not a project member."/>;
+    return <ErrorPage code={403} message="Not a project member"/>;
   }
   
   // User role
-  const role: Role = projectData.members.find((m) => m.userId === userId)?.role as Role;
+  const role = projectData.members.find((m) => m.userId === userId)?.role as Role;
   const editProject = hasPermission(role, "editProject");
+  const addTask = hasPermission(role, "addTask");
+  const editTask = hasPermission(role, "editTask")
 
-  // Get tasks
-  const tasks: Task[] = projectData.tasks;
-//-----------------------------------------------DONE SECTION-----------------------------------------------/
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-   return (
-      <DashboardLayout>
-        {isOpen && modalType === "updateProject" && <UpdateProject project={project} tasks={tasks}/>}
-        {isOpen && modalType === "deleteProject" && <DeleteProject projectId={projectId}/>}
-        {isOpen && modalType === "leaveProject" && <LeaveProject projectId={projectId} userId={userId} projectName={project.name}/>}
-  
+  return(
+    <DashboardLayout>
+      {isOpen && modalType === "updateProject" && <UpdateProject userId={userId} projectData={projectData}/>}
+      {isOpen && modalType === "deleteProject" && <DeleteProject userId={userId} projectData={projectData}/>}
+      {isOpen && modalType === "leaveProject" && <LeaveProject userId={userId} projectData={projectData}/>}
         <div className="space-y-6">
-
-          <div className="flex items-center justify-between">
-  
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/projects"
-                className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-              >
-                <ArrowLeft size={20} />
-              </Link>
-              <div>
-                <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">
-                  {project.name}
+          <div className="p-6 mb-8 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex-1 mb-4 lg:mb-0">
+                <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+                  {projectData.name}
                 </h1>
-                <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-1">
-                  {project.description}
+                <p className="mb-4 text-lg text-gray-600 dark:text-gray-300">
+                  {projectData.description}
                 </p>
-                <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-1">
-                  {DateTimeFormatter(project.dueDate)}
-                </p>
+                <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2"/>
+                    <span>Due: {DateTimeFormatter(projectData.dueDate)}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-  
-            <div className="flex items-center space-x-2">
-  
-              {editProject && (
+              <div className="flex space-x-3">
+                {editProject &&
                 <>
                   <button
-                    className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
+                    type="button"
                     onClick={() => openModal("updateProject")}
+                    className="flex items-center px-4 py-2 space-x-2 font-medium text-gray-700 transition-colors bg-white border border-gray-300 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
-                    <Pencil size={20} />
+                    <Edit2 className="w-4 h-4"/>
+                    <span>Update</span>
                   </button>
                   <button
-                    className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
+                    type="button"
                     onClick={() => openModal("deleteProject")}
+                    className="flex items-center px-4 py-2 space-x-2 font-medium text-red-700 transition-colors bg-white border border-red-300 dark:text-red-400 dark:bg-gray-700 dark:border-red-600 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
-                    <Trash2 size={20} />
+                    <Trash2 className="w-4 h-4"/>
+                    <span>Delete</span>
                   </button>
                 </>
-              )}
-
-              <button 
-                className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors"
-                onClick={() => openModal("leaveProject")}>
-                <DoorOpen size={20} />
-              </button>
-              
+                }
+                <button
+                  type="button"
+                  onClick={() => openModal("leaveProject")}
+                  className="flex items-center px-4 py-2 space-x-2 font-medium text-orange-700 transition-colors bg-white border border-orange-300 dark:text-orange-400 dark:bg-gray-700 dark:border-orange-600 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                >
+                  <DoorOpen className="w-4 h-4"/>
+                  <span>Leave</span>
+                </button>
+              </div>
             </div>
-  
           </div>
-
-
-
-          <div>
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex space-x-6" aria-label="Tabs">
-              <button
-                onClick={() => setActiveTab("kanban")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "kanban"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Kanban Board
-              </button>
-              <button
-                onClick={() => setActiveTab("list")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "list"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Calendar
-              </button>
-              <button
-                onClick={() => setActiveTab("calendar")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "calendar"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Members
-              </button>
-            </nav>
+          <div className="p-2 mb-8 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
+            <div className="flex space-x-1">
+              {tabs.map((tab) => (
+                <button
+                  type="button"
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-200
+                    ${activeTab === tab.id
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"}
+                  `}
+                >
+                  <tab.icon className="w-5 h-5"/>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-4">
+              {activeTab === "board" && <KanbanBoard userId={userId} editProject={editProject} addTask={addTask} editTask={editTask} projectData={projectData}/>}
+              {activeTab === "calendar" && <div><CalendarView tasks={projectData.tasks}/></div>}
+              {activeTab === "team" && <div><TeamView members={projectData.members}/></div>}
+            </div>
           </div>
-
-
-<div className="mt-4 h-[600px] overflow-auto">
-  {activeTab === "kanban" && (
-    <KanbanBoard editProject={editProject} projectId={projectId} />
-  )}
-  {activeTab === "list" && (
-    <CalendarView tasks={tasks} />
-  )}
-  {activeTab === "calendar" && (
-    <KanbanBoard editProject={editProject} projectId={projectId} />
-  )}
-</div>
         </div>
-         
-        </div>
-  
-      </DashboardLayout>
+    </DashboardLayout>
   );
 }

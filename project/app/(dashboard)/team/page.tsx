@@ -4,14 +4,13 @@ import { ChevronDown, Filter, Search, Users, FolderOpen, UserPlus } from "lucide
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { MemberCard } from "@/components/page-team/member-card"
 import { ProjectMemberUser, ProjectsWithMembers, RoleArr } from "@/lib/customtype"
-import { getUserProjectsWithMembers } from "@/lib/hooks/projectMembers"
-import { getUserId } from "@/lib/hooks/users"
+import { getUserId, getUserProjectsWithMembers } from "@/lib/db/tanstack"
 import { useUser } from "@clerk/nextjs"
 import { useModal } from "@/lib/states"
 import { hasPermission } from "@/lib/permissions"
 import { CreateProjectMember } from "@/components/modal-project_member/create"
 import { UpdateProjectMember } from "@/components/modal-project_member/update"
-import { DeleteProjecMember } from "@/components/modal-project_member/delete"
+import { DeleteProjectMember } from "@/components/modal-project_member/delete"
 import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 
@@ -135,7 +134,7 @@ export default function TeamPage(){
           <>
             {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
             {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
-            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjecMember userId={userId} member={selectedDeleteMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
+            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjectMember userId={userId} member={selectedDeleteMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>

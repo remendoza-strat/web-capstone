@@ -1,28 +1,44 @@
-"use client"
-import { useState } from "react"
-import { Calendar, FileText, Type, X } from "lucide-react"
+import React, { useState } from "react"
 import { toast } from "sonner"
-import type { NewProject, NewProjectMember } from "@/lib/db/schema"
+import { X, Type, FileText, Calendar } from "lucide-react"
 import { ProjectSchema } from "@/lib/validations"
 import { useModal } from "@/lib/states"
-import { createProject, createProjectMember } from "@/lib/db/tanstack"
+import { FormatDateDisplay } from "@/lib/utils"
+import { updateProject } from "@/lib/db/tanstack"
+import { projects } from "@/lib/db/schema"
+import { ProjectData } from "@/lib/customtype"
 
-export function CreateProject({ userId } : {  userId: string }){
+export function UpdateProject({ userId, projectData } : { userId: string, projectData: ProjectData }){
   // Closing modal
   const { closeModal } = useModal();
-    
-  // Create project and member
-  const createProjectMutation = createProject(userId);
-  const createProjectMemberMutation = createProjectMember(userId);
-		
-  // Hooks for input
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
+
+  // Input hooks
+  const [name, setName] = useState(projectData.name);
+  const [description, setDescription] = useState(projectData.description);
+  const [dueDate, setDueDate] = useState(FormatDateDisplay(projectData.dueDate));
+
+  // Update project
+  const updateMutation = updateProject(userId);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if there are tasks due beyond new project due date
+    var isOverlap;
+    if(projectData.tasks.length === 0){
+      isOverlap = false;
+    }
+    else{
+      const taskDue = projectData.tasks.map((task) => new Date(task.dueDate)).reduce((max, date) => (date > max ? date : max));
+      isOverlap = new Date(taskDue) > new Date(dueDate);
+    }
+
+    // Show error if task due overlap
+    if(isOverlap){
+      toast.error("There are tasks which due date is beyond the new project due.");
+      return;
+    }
 
     // Validate input
     const result = ProjectSchema.safeParse({
@@ -30,7 +46,7 @@ export function CreateProject({ userId } : {  userId: string }){
       description,
       dueDate
     });
-
+  
     // Display error from validation
     if(!result.success){
       const errors = result.error.flatten().fieldErrors;
@@ -47,48 +63,35 @@ export function CreateProject({ userId } : {  userId: string }){
         return;
       }
     }
-    
-    // Create object of new project
-    const newProject: NewProject = {
+
+    // Setup project data to update
+    const updProject: Partial<typeof projects.$inferInsert> = {
       name: name,
       description: description,
       dueDate: new Date(dueDate),
-      columnCount: 5,
-      columnNames: ["Backlog", "This Week", "In Progress", "To Review", "Done"]
-    };
-
-    try{
-      // Create project
-      const projectId = await createProjectMutation.mutateAsync({ newProject });
-
-      // Create object of new project member
-      const newProjectMember: NewProjectMember = {
-        projectId: projectId,
-        userId: userId,
-        role: "Project Manager",
-        approved: true
-      }
-
-      // Create project member
-      await createProjectMemberMutation.mutateAsync({ newProjectMember });
-
-      // Display success
-      toast.success("Project created successfully.");
-      closeModal();
-    } 
-    catch{
-      toast.error("Error occured.");
-      closeModal();
+      updatedAt: new Date()
     }
-  };
+        
+    // Update project  
+    updateMutation.mutate({ projectId: projectData.id, updProject }, {
+      onSuccess: () => {
+        toast.success("Project updated successfully.");
+        closeModal();
+      },
+      onError: () => {
+        toast.error("Error occured.");
+        closeModal();
+      }
+    });
+  }
 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
       <div className="w-full max-w-md bg-white shadow-2xl dark:bg-gray-800 rounded-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Create New Project
-            </h2>
+            Update Project
+          </h2>
           <button
             type="button"
             onClick={closeModal}
@@ -141,10 +144,10 @@ export function CreateProject({ userId } : {  userId: string }){
             </button>
             <button
               type="submit"
-              disabled={createProjectMutation.isPending || createProjectMemberMutation.isPending}
+              disabled={updateMutation.isPending}
               className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl"
             >
-              {createProjectMutation.isPending || createProjectMemberMutation.isPending? "Creating Project..." : "Create Project"}
+              {updateMutation.isPending? "Updating Project..." : "Update Project"}
             </button>
           </div>
         </form>

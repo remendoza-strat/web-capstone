@@ -1,4 +1,4 @@
-import type { Project, ProjectMember, Task, User } from "@/lib/db/schema"
+import type { Comment, Project, ProjectMember, Task, TaskAssignee, User } from "@/lib/db/schema"
 
 // Priorities
 export type Priority = "Low" | "Medium" | "High";
@@ -30,4 +30,17 @@ export interface MembersWithData extends ProjectMember{
 }
 export interface ProjectsWithMembers extends Project{
   members: ProjectMemberUser[];
+}
+export interface TaskAssigneeUser extends TaskAssignee{
+  user: User;
+}
+export interface TaskWithAssignees extends Task{
+  assignees: TaskAssigneeUser[];
+}
+export interface ProjectData extends Project{
+  members: ProjectMemberUser[]; 
+  tasks: TaskWithAssignees[];
+}
+export interface CommentsWithUser extends Comment{
+  user: User;
 }

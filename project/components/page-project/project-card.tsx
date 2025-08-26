@@ -2,7 +2,7 @@ import React from "react"
 import Link from "next/link"
 import { Calendar, Users, CheckSquare, AlertTriangle, CheckCircle, Play } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
-import { ComputeProgress, DateTimeFormatter, LimitChar, ProgressColor, ProjectStatus, StatusColor } from "@/lib/utils"
+import { ComputeProgress, DateTimeFormatter, LimitChar, ProjectStatus } from "@/lib/utils"
 import { UserAvatar } from "@/components/user-avatar"
 
 export function ProjectCard({ project } : { project: UserProjects }){
@@ -17,6 +17,21 @@ export function ProjectCard({ project } : { project: UserProjects }){
         return <AlertTriangle className="w-4 h-4"/>
     }
   }
+
+	// Get color of progress bar
+  function ProgressColor(progress: number){
+    if (progress >= 80) return "bg-green-500";
+    if (progress >= 50) return "bg-blue-500";
+    if (progress >= 25) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
+	// Get color of status label
+	function StatusColor(status: string){
+		if (status === "done") return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+		if (status === "active") return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+		if (status === "overdue") return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+	}
 
 	// Get project data
 	const briefDesc = LimitChar(project.description, 100);

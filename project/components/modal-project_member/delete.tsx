@@ -1,11 +1,11 @@
 import { toast } from "sonner"
 import { X, AlertTriangle, Trash2  } from "lucide-react"
 import { ProjectMemberUser } from "@/lib/customtype"
-import { deleteProject, kickMember } from "@/lib/hooks/projectMembers"
+import { deleteProject, kickMember } from "@/lib/db/tanstack"
 import { useModal } from "@/lib/states"
 import { UserAvatar } from "@/components/user-avatar"
 
-export function DeleteProjecMember(
+export function DeleteProjectMember(
   { userId, member, members, onProjectSelect } :
   { userId: string, member: ProjectMemberUser, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
   

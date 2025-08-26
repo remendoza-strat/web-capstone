@@ -1,11 +1,12 @@
 "use client"
 import React, { useState } from "react"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, FolderOpen, Users, Settings, Moon, Sun, Menu, X, BarChart3, Calendar } from "lucide-react"
-import { useTheme } from "@/components/theme-provider"
+import { Home, FolderOpen, Users, Settings, Menu, X, BarChart3, Calendar } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
 import { ThemeToggle } from "@/components/theme-toggle"
 
+// Links of nav bar
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Projects", href: "/projects", icon: FolderOpen },
@@ -16,8 +17,10 @@ const navigation = [
 ];
 
 export function DashboardLayout({ children } : { children: React.ReactNode }){
+  // Track side bar
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
+
+  // Get current path
   const pathname = usePathname(); 
 
   return(
@@ -45,7 +48,7 @@ export function DashboardLayout({ children } : { children: React.ReactNode }){
               const isActive = pathname.startsWith(item.href);
               return(
                 <li key={item.name}>
-                  <a
+                  <Link
                     href={item.href}
                     className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                       isActive
@@ -55,7 +58,7 @@ export function DashboardLayout({ children } : { children: React.ReactNode }){
                   >
                     <item.icon className={`mr-3 w-5 h-5 ${isActive ? "text-blue-600 dark:text-blue-400" : ""}`}/>
                     {item.name}
-                  </a>
+                  </Link>
                 </li>
               );
             })}

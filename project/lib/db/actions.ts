@@ -1,198 +1,162 @@
 "use server"
-import { createQueries, deleteQueries, getQueries, queries, updateQueries } from "@/lib/db/queries"
-import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee } from "@/lib/db/schema"
-import { projects, tasks } from "@/lib/db/schema"
+import { createQueries, deleteQueries, getQueries, updateQueries } from "@/lib/db/queries"
+import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment, comments } from "@/lib/db/schema"
+import { projects, taskAssignees, tasks } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
 import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
 
+// KANBAN ACTIONS
+export async function KanbanUpdateTaskAction
+  (projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>){
+    
+  // Update the task
+  await db.update(tasks).set({ ...updTask }).where(eq(tasks.id, taskId));
 
-// Return = users
-// that is not a member of the project or not yet invited
-export async function getNonProjectMembersAction(projectId: string){
-  return await queries.projectMembers.getNonProjectMembers(projectId);
+  // Get full task info to return
+  const fullTask = await db.query.tasks.findFirst({ 
+    where: eq(tasks.id, taskId),
+    with: {assignees: {with: {user: true}}}
+  });
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "update", task: fullTask }
+  );
+}
+export async function KanbanUpdateProjectAction
+  (projectId: string, updProject: Partial<typeof projects.$inferInsert>){
+    
+  // Update the project
+  const updatedProject = await db
+    .update(projects)
+    .set(updProject)
+    .where(eq(projects.id, projectId))
+    .returning();
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "project", project: updatedProject[0] }
+  );
+}
+export async function KanbanDeleteTaskAction
+  (projectId: string, taskId: string){
+
+  // Delete the task
+  await db.delete(tasks).where(eq(tasks.id, taskId));
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "delete", taskId }
+  );
+}
+export async function KanbanCreateTaskAction
+  (projectId: string, newTask: NewTask, assignees: string[]){
+  
+  // Create task
+  const [inserted] = await db
+    .insert(tasks)
+    .values(newTask)
+    .returning({ id: tasks.id });
+
+  // Create task assignees
+  if(assignees.length > 0){
+    await db.insert(taskAssignees).values(
+      assignees.map((userId) => ({
+        taskId: inserted.id,
+        userId
+      }))
+    );
+  }
+
+  // Get full task info to return
+  const fullTask = await db.query.tasks.findFirst({
+    where: eq(tasks.id, inserted.id),
+    with: {assignees: {with: {user: true}}}
+  });
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "update", task: fullTask }
+  );
 }
 
-// Return = tasks
-// of the given userId
-export async function getUserTasksAction(userId: string){
-  return await queries.tasks.getUserTasks(userId);
-}
-
-// Create user
-export async function createUserAction(newUser: NewUser){
-  return await queries.users.createUser(newUser);
-}
-
-
-// Update = "updatedAt"
-// of given projectId
-export async function updateProjectTimeAction(projectId: string){
-  await queries.projects.updateProjectTime(projectId);
-}
-
-// Requires: clerk id
-// Return: user id
+// GET ACTIONS
 export async function getUserIdAction(clerkId: string){
-  return await queries.users.getUserId(clerkId);
+  return await getQueries.getUserId(clerkId);
 }
-
-// Require: project id
-// Return: project with members and tasks
-export async function getProjectDataAction(projectId: string){
-  return await queries.projects.getProjectData(projectId);
-}
-
-// Require: project id
-// Return: project with tasks
-export async function getProjectWithTasksAction(projectId: string){
-  return await queries.projects.getProjectWithTasks(projectId);
-}
-
-// Require: project id
-// Return: project data
-export async function getProjectAction(projectId: string){
-  return await queries.projects.getProject(projectId);
-}
-
-// Require: project id
-// Return: project members
-export async function getProjectMembersAction(projectId: string){
-  return await queries.projectMembers.getProjectMembers(projectId);
-}
-
-// Update task
-export async function updateTaskAction(projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>, socketId?: string){
-  const [result] = await db
-    .update(tasks)
-    .set({...updTask})
-    .where(eq(tasks.id, taskId))
-    .returning();
-
-  if(result){
-    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: result },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
-}
-
-// Delete task
-export async function deleteTaskAction(projectId: string, taskId: string, socketId?: string){
-  const [result] = await db
-    .delete(tasks)
-    .where(eq(tasks.id, taskId))
-    .returning();
-
-  if(result){
-    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: result },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Require: user id
-// Result: user projects with its members (approved && not)
 export async function getUserProjectsWithMembersAction(userId: string){
   return await getQueries.getUserProjectsWithMembers(userId);
 }
-
-// Require: NONE
-// Result: all users
 export async function getAllUsersAction(){
   return await getQueries.getAllUsers();
 }
-
-// Require: project member
-// Result: NONE
-export async function createProjectMemberAction(newProjectMember: NewProjectMember){
-  await createQueries.createProjectMember(newProjectMember);
-}
-
-// Require: project member id & project member
-// Result: NONE
-export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
-  await updateQueries.updateProjectMember(pmId, updPm);
-}
-
-// Require: project id
-// Result: NONE
-export async function deleteProjectAction(projectId: string){
-  await deleteQueries.deleteProject(projectId);
-}
-
-// Require: project member id
-// Result: NONE
-export async function deleteProjectMemberAction(pmId: string){
-  await deleteQueries.deleteProjectMember(pmId);
-}
-
-// Require: project id & user id
-// Result: NONE
-export async function deleteTaskAssigneeAction(projectId: string, userId: string){
-  await deleteQueries.deleteTaskAssignee(projectId, userId);
-}
-
-// Require: project id & user id
-// Result: NONE
-export async function deleteCommentAction(projectId: string, userId: string){
-  await deleteQueries.deleteComment(projectId, userId);
-}
-
-// Require: user id
-// Result: user projects and invited projects with its tasks and members
 export async function getUserProjectsAction(userId: string){
   return await getQueries.getUserProjects(userId);
 }
+export async function getProjectDataAction(projectId: string){
+  return await getQueries.getProjectData(projectId);
+}
+export async function getTaskDataAction(taskId: string){
+  return await getQueries.getTaskData(taskId);
+}
 
-// Require: new project
-// Result: new project id
+// CREATE ACTIONS
+export async function createUserAction(newUser: NewUser){
+  return await createQueries.createUser(newUser);
+}
 export async function createProjectAction(newProject: NewProject){
   return await createQueries.createProject(newProject);
 }
-
-// Require: new task
-// Result: NONE
+export async function createTaskAction(newTask: NewTask){
+  return await createQueries.createTask(newTask);
+}
 export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){
   await createQueries.createTaskAssignee(newTaskAssignee);
 }
-
-// Tanstack - Pusher - Query
-// Create Task
-export async function createTaskAction(projectId: string, newTask: NewTask, socketId?: string){
-  const [result] = await db.insert(tasks).values(newTask).returning({ id: tasks.id });
-  if(result.id){
-    await pusherServer.trigger(`kanban-channel-${projectId}`, "task-update", { task: { ...newTask, id: result.id } },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
-  return result.id;
+export async function createProjectMemberAction(newProjectMember: NewProjectMember){
+  await createQueries.createProjectMember(newProjectMember);
+}
+export async function createCommentAction(newComment: NewComment){
+  await createQueries.createComment(newComment);
 }
 
-// Tanstack - Pusher - Query
-// Update Project
-export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, socketId?: string){
-  const [result] = await db.update(projects).set({...updProject}).where(eq(projects.id, projectId)).returning();
-  if(result){
-    await pusherServer.trigger(`kanban-channel-${projectId}`, "project-update", { project: result },
-      socketId ? { socket_id: socketId } : undefined
-    );
-  }
+// UPDATE ACTIONS
+export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
+  await updateQueries.updateProject(projectId, updProject);
+}
+export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
+  await updateQueries.updateProjectMember(pmId, updPm);
+}
+export async function updateCommentAction(cId: string, updComment: Partial<typeof comments.$inferInsert>){
+  await updateQueries.updateComment(cId, updComment);
+}
+
+// DELETE ACTIONS
+export async function deleteProjectAction(projectId: string){
+  await deleteQueries.deleteProject(projectId);
+}
+export async function deleteProjectMemberAction(pmId: string){
+  await deleteQueries.deleteProjectMember(pmId);
+}
+export async function deleteTaskAssigneeAction(taId: string){
+  await deleteQueries.deleteTaskAssignee(taId);
+}
+export async function deleteCommentAction(cId: string){
+  await deleteQueries.deleteComment(cId);
+}
+export async function deleteAllTaskAssigneeAction(projectId: string, userId: string){
+  await deleteQueries.deleteAllTaskAssignee(projectId, userId);
+}
+export async function deleteAllCommentAction(projectId: string, userId: string){
+  await deleteQueries.deleteAllComment(projectId, userId);
 }

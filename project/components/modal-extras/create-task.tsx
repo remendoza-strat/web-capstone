@@ -7,122 +7,89 @@ import { useState, useEffect } from "react"
 import { TaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
 import { Priority, PriorityArr } from "@/lib/customtype"
-import type { NewTask, NewTaskAssignee, User} from "@/lib/db/schema"
-import type { UserProjects } from "@/lib/customtype"
-import { hasPermission } from "@/lib/permissions"
+import type { NewTask, User } from "@/lib/db/schema"
+import type { ProjectData } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
 import { UserAvatar } from "@/components/user-avatar"
-import { createTask, createTaskAssignee, updateProject } from "@/lib/db/tanstack"
+import { KanbanCreateTask, KanbanUpdateProject } from "@/lib/db/tanstack"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
 
-export function CreateTask({ userId, projectsData } : { userId: string; projectsData: UserProjects[] }){
+export function CreateTask({ columnIndex, columnOrder, projectData } : { columnIndex: number; columnOrder: number, projectData: ProjectData }){
   // Closing modal
   const { closeModal } = useModal();
 
-  // Projects user can make task
-	const projects: UserProjects[] = projectsData
-		.filter((project) => project.members.some((member) => member.userId === userId && member.approved && hasPermission(member.role, "addTask")))
-    .map((project) => ({...project, members: project.members.filter((member) => member.approved)}));
-
-	// Hook for project
-	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
-  const [selectedColumn, setSeletectColumn] = useState(0);
-
-	// Hook for user
-	const [query, setQuery] = useState("");
-	const [suggestions, setSuggestions] = useState<{user: User, role: string}[]>([]);
-	const [selectedUsers, setSelectedUsers] = useState<{user: User, role: string}[]>([]);
-	
-	// Hook for input
-	const [title, setTitle] = useState("");
-	const [description, setDescription] = useState("");
-	const [dueDate, setDueDate] = useState("");
-	const [priority, setPriority] = useState<Priority>("Low");
-	const [label, setLabel] = useState("");
+  // Hook for user
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<{user: User, role: string}[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<{user: User, role: string}[]>([]);
+  
+  // Hook for input
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [priority, setPriority] = useState<Priority>("Low");
+  const [label, setLabel] = useState("");
 
   // Mutations to perform
-  const createTaskMutation = createTask(userId);
-  const createTaskAssigneeMutation = createTaskAssignee();
-  const updateProjectMutation = updateProject(userId);
+  const createTaskMutation = KanbanCreateTask();
+  const updateProjectMutation = KanbanUpdateProject();
 
-	// Set initial selected project
-	useEffect(() =>{
-		if(projects.length > 0){
-			setSelectedProjectId(projects[0].id);
-		}
-	}, []);
+  // Getting suggested user and removing already selected user
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      if(!query){
+        setSuggestions([]);
+        return;
+      }
+      const members = projectData.members.filter((m) => m.approved);
+      const selectedIds = selectedUsers.map((s) => s.user.id);
+      const remaining = members.filter((m) => !selectedIds.includes(m.user.id));
+      const search = query.toLowerCase();
+      const userList = remaining.filter((u) => 
+          (u.user.lname).toLowerCase().includes(search) ||
+          (u.user.fname).toLowerCase().includes(search) ||
+          (u.user.email).toLowerCase().includes(search)
+      )
+      setSuggestions(userList);
+    }, 300);
+    return () => clearTimeout(timeout);
+  },[query, selectedUsers]);
 
-	// Remove selected and suggestion when project is changed
-	useEffect(() =>{
-		setSuggestions([]);
-		setSelectedUsers([]);
-	}, [selectedProjectId]);
+  // Add selected user to array
+  const handleAddUser = ({ user, role } : { user: User, role: string }) => {
+    setSelectedUsers((prev) => [...prev, { user, role }]);
+    setQuery("");
+    setSuggestions([]);
+  };
 
-	// Getting suggested user and removing already selected user
-	useEffect(() => {
-		const timeout = setTimeout(async () => {
-			if(!query || !selectedProjectId){
-				setSuggestions([]);
-				return;
-			}
-			const members = projects.find((p) => p.id === selectedProjectId)?.members || [];
-			const selectedIds = selectedUsers.map((s) => s.user.id);
-			const remaining = members.filter((m) => !selectedIds.includes(m.user.id));
-			const search = query.toLowerCase();
-			const userList = remaining.filter((u) => 
-				(u.user.lname).toLowerCase().includes(search) ||
-				(u.user.fname).toLowerCase().includes(search) ||
-				(u.user.email).toLowerCase().includes(search)
-			)
-			setSuggestions(userList);
-		}, 300);
-		return () => clearTimeout(timeout);
-	}, [query, selectedUsers]);
+  // Remove user from array
+  const handleRemoveUser = (index: number) => {
+    const updated = [...selectedUsers];
+    updated.splice(index, 1);
+    setSelectedUsers(updated);
+  };
 
-	// Add selected user to array
-	const handleAddUser = ({ user, role } : { user: User, role: string }) => {
-		setSelectedUsers((prev) => [...prev, { user, role }]);
-		setQuery("");
-		setSuggestions([]);
-	};
-
-	// Remove user from array
-	const handleRemoveUser = (index: number) => {
-		const updated = [...selectedUsers];
-		updated.splice(index, 1);
-		setSelectedUsers(updated);
-	};
-
-	// Handle form submission
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-    // Validate project
-    if(!selectedProjectId){
-      toast.error("Must select a project to assign task to.");
-      return;
-    }
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     // Validate member
     if(selectedUsers.length === 0){
       toast.error("Must select at least one user to assign task to.");
       return;
     }
-    
-    // Get selected project due date
-    const project = projects.find(p => p.id === selectedProjectId);
-    const deadline = project?.dueDate;
-    if(deadline){
-      const projDue = new Date(deadline);
-      const taskDue = new Date(dueDate);
-      if(taskDue > projDue){
-        toast.error("Task due must be on or before the project deadline.");
-        return;
-      }
+  
+    // Get project due date
+    const deadline = projectData.dueDate;
+    const projDue = new Date(deadline);
+    const taskDue = new Date(dueDate);
+    if(taskDue > projDue){
+      toast.error("Task due must be on or before the project deadline.");
+      return;
     }
-
+    
     // Get raw text of description
     const descriptionRaw = StripHTML(String(description).trim());
 
@@ -156,59 +123,41 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
     }
 
     // Get order of task
-    let lastOrder = 0;
-    if(project){
-      const columnTasks = project.tasks.filter(t => t.position === selectedColumn);
-      if(columnTasks.length > 0){
-        lastOrder = Math.max(...columnTasks.map(t => t.order), 0) + 1;
-      }
-    }
-
-    if(project){
-      try{
-        // Create object of new task
-        const newTask: NewTask = {
-          projectId: project.id,
-          title: title,
-          description: description,
-          dueDate: new Date(dueDate),
-          priority: priority,
-          position: selectedColumn,
-          order: lastOrder,
-          label: label
-        };
-        
-        // Create task
-        const taskId = await createTaskMutation.mutateAsync({ newTask });
-          
-        // Assign task
-        for(const { user } of selectedUsers){
-          const newTaskAssignee: NewTaskAssignee = {
-            taskId: taskId,
-            userId: user.id
-          };
-          await createTaskAssigneeMutation.mutateAsync(newTaskAssignee);
-        }
-      } 
-      catch{
+    const order = columnOrder > 0? columnOrder : 0;
+    
+    // Create object of new task
+    const newTask: NewTask = {
+      projectId: projectData.id,
+      title: title,
+      description: description,
+      dueDate: new Date(dueDate),
+      priority: priority,
+      position: columnIndex,
+      order: order,
+      label: label
+    };
+  
+    // Create task
+    createTaskMutation.mutate({ projectId: projectData.id, newTask: newTask, assignees: selectedUsers.map((s) => s.user.id)},{
+      onError: () => {
         toast.error("Error occurred.");
         closeModal();
         return;
-      }
+      },
+    });
 
-      // Update project  
-      updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() } }, {
-        onSuccess: () => {
-          toast.success("Task created successfully.");
-          closeModal();
-        },
-        onError: () => {
-          toast.error("Error occured.");
-          closeModal();
-        }
-      });
-    }
-	};
+    // Update project  
+    updateProjectMutation.mutate({ projectId: projectData.id, updProject: { updatedAt: new Date() } },{
+      onSuccess: () => {
+        toast.success("Task created successfully.");
+        closeModal();
+      },
+      onError: () => {
+        toast.error("Error occured.");
+        closeModal();
+      }
+    });
+  };
 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
@@ -226,53 +175,6 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Project
-            </label>
-            <select
-              value={selectedProjectId} onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="w-full px-3 py-3 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-            {projects.length === 0 ? (
-                <option disabled>No projects available</option>
-              ) : 
-              (
-                projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))
-              )
-            }
-            </select>
-          </div>
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Columns
-            </label>
-            <select
-              value={selectedColumn} onChange={(e) => setSeletectColumn(Number(e.target.value))}
-              className="w-full px-3 py-3 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-            {projects.length === 0? 
-              (
-                <option disabled>No columns available</option>
-              ) : 
-              (
-                projects
-                .filter((project) => project.id === selectedProjectId)
-                .flatMap((project) =>
-                  project.columnNames.map((pColumn, index) => (
-                    <option key={pColumn} value={index}>
-                      {pColumn}
-                    </option>
-                  ))
-                )
-              )
-            }
-            </select>
-          </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <CheckSquare className="inline w-4 h-4 mr-2"/>
@@ -302,11 +204,10 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
               </label>
               <input
                 value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-							  type="datetime-local"
+                type="datetime-local"
                 className="w-full px-3 py-3 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
-
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 <AlertCircle className="inline w-4 h-4 mr-2"/>
@@ -317,10 +218,10 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
                 className="w-full px-3 py-3 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               >
                 {PriorityArr.map((priority) => (
-								<option key={priority} value={priority}>
-									{priority}
-								</option>
-							))}
+                  <option key={priority} value={priority}>
+                    {priority}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -417,10 +318,10 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
             </button>
             <button
               type="submit"
-              disabled={createTaskMutation.isPending || createTaskAssigneeMutation.isPending || updateProjectMutation.isPending}
+              disabled={createTaskMutation.isPending|| updateProjectMutation.isPending}
               className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl"
             >
-              {createTaskMutation.isPending || createTaskAssigneeMutation.isPending || updateProjectMutation.isPending? "Creating Task..." : "Create Task"}
+              {createTaskMutation.isPending || updateProjectMutation.isPending? "Creating Task..." : "Create Task"}
             </button>
           </div>
         </form>

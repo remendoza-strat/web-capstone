@@ -2,7 +2,7 @@ import React from "react"
 import Link from "next/link"
 import { Calendar, Users, CheckSquare } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
-import { ByRecentProjects, ComputeProgress, DateTimeFormatter, LimitChar, ProgressColor } from "@/lib/utils"
+import { ByRecentProjects, ComputeProgress, DateTimeFormatter, LimitChar } from "@/lib/utils"
 
 export function RecentProjects({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
   // Projects that user is approved
@@ -23,6 +23,14 @@ export function RecentProjects({ userId, userProjs } : { userId: string, userPro
         ...project, memberCount, taskCount, briefDesc, detailedDate, progress, progColor
     };
 	});
+
+  // Get color of progress bar
+  function ProgressColor(progress: number){
+    if (progress >= 80) return "bg-green-500";
+    if (progress >= 50) return "bg-blue-500";
+    if (progress >= 25) return "bg-yellow-500";
+    return "bg-red-500";
+  };
 
   return(
     <div className="p-6 bg-white border border-gray-200 dark:bg-gray-800 rounded-xl dark:border-gray-700">
