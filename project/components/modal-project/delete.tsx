@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useModal } from "@/lib/states"
 import { ProjectData } from "@/lib/customtype"
-import { deleteProject } from "@/lib/hooks/projectMembers"
+import { deleteProject } from "@/lib/db/tanstack"
 
 export function DeleteProject({ userId, projectData } : { userId: string, projectData: ProjectData }){
   // Closing modal

@@ -4,7 +4,7 @@ import { X, Type } from "lucide-react"
 import { projects } from "@/lib/db/schema"
 import { useModal } from "@/lib/states"
 import { ProjectSchema } from "@/lib/validations"
-import { KanbanUpdateProject } from "@/lib/hooks/projectMembers"
+import { KanbanUpdateProject } from "@/lib/db/tanstack"
 
 export function UpdateColumn({ columnIndex, columnNames, projectId } : { columnIndex: number; columnNames: string[]; projectId: string }){
   // Closing modal

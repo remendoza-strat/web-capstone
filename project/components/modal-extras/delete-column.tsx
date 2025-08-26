@@ -4,7 +4,7 @@ import { AlertTriangle, X } from "lucide-react"
 import { useModal } from "@/lib/states"
 import { projects, Task, tasks } from "@/lib/db/schema"
 import { TaskWithAssignees } from "@/lib/customtype"
-import { KanbanDeleteTask, KanbanUpdateProject, KanbanUpdateTask } from "@/lib/hooks/projectMembers"
+import { KanbanDeleteTask, KanbanUpdateProject, KanbanUpdateTask } from "@/lib/db/tanstack"
 
 export function DeleteColumn({ columnIndex, columnNames, boardTasks, projectId } : { columnIndex: number; columnNames: string[]; boardTasks: TaskWithAssignees[]; projectId: string }){
   // Closing modal

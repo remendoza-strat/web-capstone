@@ -4,7 +4,7 @@ import { X, Type, FileText, Calendar } from "lucide-react"
 import { ProjectSchema } from "@/lib/validations"
 import { useModal } from "@/lib/states"
 import { FormatDateDisplay } from "@/lib/utils"
-import { updateProject } from "@/lib/hooks/projectMembers"
+import { updateProject } from "@/lib/db/tanstack"
 import { projects } from "@/lib/db/schema"
 import { ProjectData } from "@/lib/customtype"
 

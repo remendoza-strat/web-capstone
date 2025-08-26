@@ -2,7 +2,7 @@ import { toast } from "sonner"
 import { X, AlertTriangle  } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { ProjectData } from "@/lib/customtype"
-import { deleteProject, kickMember } from "@/lib/hooks/projectMembers"
+import { deleteProject, kickMember } from "@/lib/db/tanstack"
 import { useModal } from "@/lib/states"
 
 export function LeaveProject({ userId, projectData } : { userId: string, projectData: ProjectData }){

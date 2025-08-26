@@ -11,7 +11,7 @@ import type { NewTask, User } from "@/lib/db/schema"
 import type { ProjectData } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
 import { UserAvatar } from "@/components/user-avatar"
-import { KanbanCreateTask, KanbanUpdateProject } from "@/lib/hooks/projectMembers"
+import { KanbanCreateTask, KanbanUpdateProject } from "@/lib/db/tanstack"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});

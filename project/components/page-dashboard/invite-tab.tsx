@@ -3,7 +3,7 @@ import { toast } from "sonner"
 import { Check, X, Clock } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 import { TimeAgo } from "@/lib/utils"
-import { deleteProjectMember, updateProject, updateProjectMember } from "@/lib/hooks/projectMembers"
+import { deleteProjectMember, updateProject, updateProjectMember } from "@/lib/db/tanstack"
 
 export function InviteTab({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
 	// Mutation for operation

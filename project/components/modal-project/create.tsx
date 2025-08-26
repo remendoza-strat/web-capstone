@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import type { NewProject, NewProjectMember } from "@/lib/db/schema"
 import { ProjectSchema } from "@/lib/validations"
 import { useModal } from "@/lib/states"
-import { createProject, createProjectMember } from "@/lib/hooks/projectMembers"
+import { createProject, createProjectMember } from "@/lib/db/tanstack"
 
 export function CreateProject({ userId } : {  userId: string }){
   // Closing modal

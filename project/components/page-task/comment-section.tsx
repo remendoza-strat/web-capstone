@@ -5,7 +5,7 @@ import { MessageCircle, Send, MoreHorizontal, Check, X } from "lucide-react"
 import { CommentsWithUser } from "@/lib/customtype"
 import { UserAvatar } from "@/components/user-avatar"
 import { DateTimeFormatter } from "@/lib/utils"
-import { createComment, deleteComment, updateComment } from "@/lib/hooks/projectMembers"
+import { createComment, deleteComment, updateComment } from "@/lib/db/tanstack"
 import { comments, NewComment } from "@/lib/db/schema"
 
 export function CommentSection(

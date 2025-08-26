@@ -12,7 +12,7 @@ import type { UserProjects } from "@/lib/customtype"
 import { hasPermission } from "@/lib/permissions"
 import { useModal } from "@/lib/states"
 import { UserAvatar } from "@/components/user-avatar"
-import { createTask, createTaskAssignee, updateProject } from "@/lib/hooks/projectMembers"
+import { createTask, createTaskAssignee, updateProject } from "@/lib/db/tanstack"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});

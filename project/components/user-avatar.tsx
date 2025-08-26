@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react"
-import { getUserImage } from "@/lib/hooks/projectMembers"
+import { getUserImage } from "@/lib/db/tanstack"
 
 export function UserAvatar({ clerkId } : { clerkId: string}){
   // Get clerk image link
