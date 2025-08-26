@@ -4,9 +4,9 @@ import { createProjectAction, createProjectMemberAction, createTaskAction, creat
  KanbanUpdateProjectAction, KanbanDeleteTaskAction,
  KanbanCreateTaskAction,
  getTaskDataAction,
- KanbanDeleteTaskAssigneeAction,
  createCommentAction,
  updateCommentAction,
+ deleteTaskAssigneeAction,
  deleteCommentAction} from "../db/actions";
 import { comments, NewComment, NewProject, NewProjectMember, NewTask, NewTaskAssignee, projectMembers, projects, tasks } from "../db/schema";
 import { getUserImageAction } from "../clerk/user-image";
@@ -49,14 +49,6 @@ export function KanbanCreateTask(){
     mutationFn: async ({ projectId, newTask, assignees } : 
       { projectId: string; newTask: NewTask; assignees: string[]; }) => {
       await KanbanCreateTaskAction(projectId, newTask, assignees);
-    }
-  });
-}
-
-export function KanbanDeleteTaskAssignee(){
-  return useMutation({
-    mutationFn: async (taId: string) => {
-      await KanbanDeleteTaskAssigneeAction(taId);
     }
   });
 }
@@ -203,6 +195,14 @@ export function createTaskAssignee(){
   return useMutation({
     mutationFn: async (newTaskAssignee: NewTaskAssignee) => {
       await createTaskAssigneeAction(newTaskAssignee);
+    }
+  });
+}
+
+export function deleteTaskAssignee(){
+  return useMutation({
+    mutationFn: async (taId: string) => {
+      await deleteTaskAssigneeAction(taId);
     }
   });
 }

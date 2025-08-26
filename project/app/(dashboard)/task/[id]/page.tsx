@@ -16,7 +16,7 @@ import ErrorPage from "@/components/pages/error"
 import LoadingPage from "@/components/pages/loading"
 import { UserAvatar } from "@/components/user-avatar"
 import { NewTaskAssignee, tasks } from "@/lib/db/schema"
-import { getTaskData, KanbanUpdateTask, createTaskAssignee, KanbanDeleteTaskAssignee, KanbanUpdateProject, KanbanDeleteTask } from "@/lib/hooks/projectMembers"
+import { getTaskData, KanbanUpdateTask, createTaskAssignee, deleteTaskAssignee, KanbanUpdateProject, KanbanDeleteTask } from "@/lib/hooks/projectMembers"
 import type { User } from "@/lib/db/schema"
 import { TaskSchema } from "@/lib/validations"
 import { CommentSection } from "@/components/page-task/comment-section"
@@ -29,9 +29,9 @@ export default function TaskPage(){
   const router = useRouter();
 
   // Mutation for operations
-  const updateTaskMutation = KanbanUpdateTask();
   const createTaskAssigneeMutation = createTaskAssignee();
-  const deleteTaskAssigneeMutation = KanbanDeleteTaskAssignee();
+  const deleteTaskAssigneeMutation = deleteTaskAssignee();
+  const updateTaskMutation = KanbanUpdateTask();
   const updateProjectMutation = KanbanUpdateProject();
   const deleteTaskMutation = KanbanDeleteTask();
 
@@ -143,6 +143,9 @@ export default function TaskPage(){
         onSuccess: () => {
           toast.success("Task deleted successfully.");
           router.push(`/projects/${taskData.projectId}`);
+        },
+        onError: () => {
+          toast.error("Error occured.");
         }
       });
     }
@@ -200,7 +203,7 @@ export default function TaskPage(){
       // Selected users
       const selectedUserIds = selectedUsers.map((s) => s.user.id);
 
-      // Already task  assignees
+      // Already task assignees
       const currentAssigneeIds = taskData.assignees.map((a) => a.userId);
 
       // New task assignees

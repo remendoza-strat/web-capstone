@@ -89,12 +89,6 @@ export async function KanbanCreateTaskAction
     { action: "update", task: fullTask }
   );
 }
-export async function KanbanDeleteTaskAssigneeAction
-  (taId: string){
-  
-  // Delete assignee
-  await db.delete(taskAssignees).where(eq(taskAssignees.id, taId));
-}
 
 // GET ACTIONS
 export async function getUserIdAction(clerkId: string){
@@ -153,6 +147,9 @@ export async function deleteProjectAction(projectId: string){
 }
 export async function deleteProjectMemberAction(pmId: string){
   await deleteQueries.deleteProjectMember(pmId);
+}
+export async function deleteTaskAssigneeAction(taId: string){
+  await deleteQueries.deleteTaskAssignee(taId);
 }
 export async function deleteCommentAction(cId: string){
   await deleteQueries.deleteComment(cId);
