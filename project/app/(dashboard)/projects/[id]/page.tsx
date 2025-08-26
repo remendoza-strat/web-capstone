@@ -22,7 +22,7 @@ import { TeamView } from "@/components/team-view"
 
 // List tabs
 const tabs = [
-  { id: "kanban", label: "Kanban Board", icon: Kanban },
+  { id: "board", label: "Board", icon: Kanban },
   { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "team", label: "Team", icon: Users }
 ];
@@ -155,7 +155,7 @@ export default function ProjectPage(){
               ))}
             </div>
             <div className="mt-4">
-              {activeTab === "kanban" && <KanbanBoard userId={userId} editProject={editProject} addTask={addTask} editTask={editTask} projectData={projectData}/>}
+              {activeTab === "board" && <KanbanBoard userId={userId} editProject={editProject} addTask={addTask} editTask={editTask} projectData={projectData}/>}
               {activeTab === "calendar" && <div><CalendarView tasks={projectData.tasks}/></div>}
               {activeTab === "team" && <div><TeamView members={projectData.members}/></div>}
             </div>
