@@ -21,14 +21,14 @@ export function CommentSection(
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
   // Mutation for operations
-  const createCommentMutation = createComment();
-	const updateCommentMutation = updateComment();
+  const createCommentMutation = createComment(taskId);
+	const updateCommentMutation = updateComment(taskId);
   const deleteCommentMutation = deleteComment(taskId);
   
   // Comments storage
   const [commentsList, setCommentsList] = useState<CommentsWithUser[]>(allComments);
 
-  // Refresh list
+  // Add comments to list
   useEffect(() => {
     setCommentsList(allComments);
   }, [allComments]);
@@ -37,7 +37,11 @@ export function CommentSection(
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // TODO: validate comment
+    // Validate comment
+    if(!inputCreateComment){
+      toast.error("Comment cannot be empty.");
+      return;
+    }
 
     // Object of comment
     const newComment: NewComment = {
@@ -47,7 +51,7 @@ export function CommentSection(
     }
 
     // Create comment
-    createCommentMutation.mutate(newComment,{
+    createCommentMutation.mutate(newComment, {
       onSuccess: () => {
         toast.success("Comment successfully posted.");
         setInputCreateComment("");
@@ -60,14 +64,19 @@ export function CommentSection(
 
   // Update comment
   function updateUserComment(id: string){
-    // TODO: validate comment
+    // Validate comment
+    if(!inputUpdateComment){
+      toast.error("Comment cannot be empty.");
+      return;
+    }
 
+    // Update the comment
     if(id){
       // Object of comment
       const updComment: Partial<typeof comments.$inferInsert> = { content: inputUpdateComment, updatedAt: new Date() };
 
       // Update comment
-      updateCommentMutation.mutate({ cId: id, updComment: updComment },{
+      updateCommentMutation.mutate({ cId: id, updComment: updComment }, {
         onSuccess: () => {
           toast.success("Comment successfully updated.");
           setCommentsList(prev =>
@@ -77,20 +86,19 @@ export function CommentSection(
         onError: () => {
           toast.error("Error occured.");
         }
-      }
-    );
+      });
     }
   }
 
   // Delete comment
   function deleteUserComment(id: string){
-    // TODO: validate comment
-
     if(id){
-      // Update comment
-      deleteCommentMutation.mutate({ cId: id}, {
+      deleteCommentMutation.mutate({cId: id}, {
         onSuccess: () => {
           toast.success("Comment successfully deleted.");
+        },
+        onError: () => {
+          toast.error("Error occured.");
         }
       });
     }
@@ -116,6 +124,7 @@ export function CommentSection(
                 />
                 <button
                   type="submit"
+                  disabled={createCommentMutation.isPending || updateCommentMutation.isPending || deleteCommentMutation.isPending}
                   className="flex items-center justify-center px-5 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-xl"
                 >
                   <Send className="w-4 h-4"/>
@@ -166,6 +175,7 @@ export function CommentSection(
                             </button>
                             <button
                               onClick={() => deleteUserComment(comment.id)}
+                              disabled={createCommentMutation.isPending || updateCommentMutation.isPending || deleteCommentMutation.isPending}
                               type="button"
                               className="w-full px-3 py-2 text-left text-red-600 transition-colors dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 last:rounded-b-xl"
                             >
@@ -185,6 +195,7 @@ export function CommentSection(
                       />
                       <button
                         type="button"
+                        disabled={createCommentMutation.isPending || updateCommentMutation.isPending || deleteCommentMutation.isPending}
 											  onClick={() => updateUserComment(comment.id)}
 											  className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-800">
                         <Check className="w-4 h-4"/>

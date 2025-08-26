@@ -244,26 +244,26 @@ export function deleteProjectMember(userId: string){
   });
 }
 
-export function createComment(){
+export function createComment(taskId: string){
   const queryClient = useQueryClient();
   return useMutation({ 
     mutationFn: async (newComment: NewComment) => {
       await createCommentAction(newComment);
     },
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["task-data", vars.taskId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["task-data", taskId] });
     }
   });
 }
 
-export function updateComment(){
+export function updateComment(taskId: string){
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ cId, updComment } : { cId: string, updComment: Partial<typeof comments.$inferInsert> }) => {
       await updateCommentAction(cId, updComment);
     },
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["task-data", vars.updComment.taskId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["task-data", taskId] });
     }
   });
 }

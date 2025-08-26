@@ -107,50 +107,8 @@ module.exports = {
           600: "#0f4f5f",
           700: "#0a3540",
           800: "#051a20",
-          900: "#c7edf6",
+          900: "#c7edf6",        
         },
-        black_shades: {
-          DEFAULT: "#121212",
-          100: "#191919",
-          200: "#252525"
-        },
-
-
-
-
-        modal_light: {
-          DEFAULT: "#e8e7e8",
-          100: "#f8f8f8"
-        },
-        modal_dark: {
-          DEFAULT: "#121212",
-          100: "#1e1e1e",
-        },
-        modal_blue: {
-          DEFAULT: "#146a7f",
-          100: "#0f4f5f"
-        },
-
-        page_light: {
-          DEFAULT: "#f4f4f4", // page
-          100: "#ffffff"      // card
-        },
-        page_dark: {
-          DEFAULT: "#0e1011",   // page
-          100: "#17191a"        // card
-        },
-        page_gray: {
-          DEFAULT: "#616a77",   // text
-          100: "#d1cfd1",       // border
-           200: "#46494c"
-        },
-        page_blue: {
-          DEFAULT: "#8edaed",   // background
-          100: "#1985a1"        // icon
-        }
-
-
-
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
