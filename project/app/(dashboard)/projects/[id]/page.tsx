@@ -29,7 +29,7 @@ const tabs = [
 
 export default function ProjectPage(){
   // Get current selected tab
-  const [activeTab, setActiveTab] = useState<string>("kanban");
+  const [activeTab, setActiveTab] = useState<string>("board");
 
   // Get project id from parameter
   const params = useParams<{ id: string }>();

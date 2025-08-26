@@ -2,10 +2,11 @@
 import React, { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, FolderOpen, Users, Settings, Moon, Sun, Menu, X, BarChart3, Calendar } from "lucide-react"
+import { Home, FolderOpen, Users, Settings, Menu, X, BarChart3, Calendar } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
 import { ThemeToggle } from "@/components/theme-toggle"
 
+// Links of nav bar
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Projects", href: "/projects", icon: FolderOpen },
@@ -16,7 +17,10 @@ const navigation = [
 ];
 
 export function DashboardLayout({ children } : { children: React.ReactNode }){
+  // Track side bar
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Get current path
   const pathname = usePathname(); 
 
   return(
