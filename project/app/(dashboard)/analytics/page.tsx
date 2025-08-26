@@ -1,79 +1,117 @@
-import { BarChart3, TrendingUp, Users, Clock } from "lucide-react"
+"use client"
+import { useEffect, useState } from "react"
+import { ChevronDown, ChartColumnStacked } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
+import { UserProjects } from "@/lib/customtype"
+import { getUserId, getUserProjects } from "@/lib/db/tanstack"
+import { useUser } from "@clerk/nextjs"
+import ErrorPage from "@/components/pages/error"
+import LoadingPage from "@/components/pages/loading"
+import { PriorityDistribution } from "@/components/page-analytics/priority-distribution"
+import { TaskProgress } from "@/components/page-analytics/task-progress"
+import { RoleDistribution } from "@/components/page-analytics/role-distribution"
+import { ProjectOverview } from "@/components/page-analytics/project-overview"
+import { ProjectStats } from "@/components/page-analytics/project-stats"
 
-export default function AnalyticsPage() {
-  return (
+export default function AnalyticsPage(){
+  // Get current user
+  const { user, isLoaded: userLoaded } = useUser();
+
+  // Choosing project
+  const [showProjectDropdown, setShowProjectDropdown] = useState(false);
+  const [allProjects, setAllProjects] = useState<UserProjects[]>([]);
+  const [selectedProject, setSelectedProject] = useState<UserProjects | null>(null);
+
+  // Get user id
+  const { 
+    data: userId, 
+    isLoading: userIdLoading, 
+    error: userIdError 
+  } = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
+
+  // Get projects with members
+  const {
+    data: projectData, 
+    isLoading: projectDataLoading, 
+    error: projectDataError 
+  } = getUserProjects(userId ?? "", { enabled: Boolean(userId) });
+
+  // Show loading and error
+  const isLoading = !userLoaded || userIdLoading || projectDataLoading;
+  const isError = userIdError || projectDataError;
+
+  // Set initial selected project
+  useEffect(() => {
+    if (!projectData) return;
+    setAllProjects(projectData.filter((p) => p.members.some((m) => m.userId === userId && m.approved)));
+
+    if(!selectedProject){
+      setSelectedProject(allProjects[0]);
+    }
+  }, [projectData]);
+
+  return(
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Analytics</h1>
-          <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-2">
-            Track project performance and team productivity
-          </p>
-        </div>
-
-        {/* Implementation Tasks Banner */}
-        <div className="p-4 border border-yellow-200 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
-          <h3 className="mb-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
-            📊 Analytics Implementation Tasks
-          </h3>
-          <ul className="space-y-1 text-sm text-yellow-700 dark:text-yellow-300">
-            <li>• Task 6.6: Optimize performance and implement loading states</li>
-            <li>• Task 8.5: Set up performance monitoring and analytics</li>
-          </ul>
-        </div>
-
-        {/* Analytics Cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {[
-            { title: "Project Velocity", value: "8.5", unit: "tasks/week", icon: TrendingUp, color: "blue" },
-            { title: "Team Efficiency", value: "92%", unit: "completion rate", icon: BarChart3, color: "green" },
-            { title: "Active Users", value: "24", unit: "this week", icon: Users, color: "purple" },
-            { title: "Avg. Task Time", value: "2.3", unit: "days", icon: Clock, color: "orange" },
-          ].map((metric, index) => (
-            <div
-              key={index}
-              className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className={`w-10 h-10 bg-${metric.color}-100 dark:bg-${metric.color}-900 rounded-lg flex items-center justify-center`}
+      {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
+        <>
+          <div className="mb-8">
+            <h1 className="flex items-center text-3xl font-bold text-gray-900 dark:text-white">
+              <ChartColumnStacked className="w-8 h-8 mr-3 text-blue-600"/>
+              Analytics
+            </h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-300">
+              Insights and metrics for your project performance
+            </p>
+            <div className="flex justify-end mt-4">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowProjectDropdown(!showProjectDropdown)}
+                  className="flex items-center space-x-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-w-[200px] justify-between bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
-                  <metric.icon className={`text-${metric.color}-500`} size={20} />
-                </div>
-              </div>
-              <div className="mb-1 text-2xl font-bold text-outer_space-500 dark:text-platinum-500">{metric.value}</div>
-              <div className="text-sm text-payne's_gray-500 dark:text-french_gray-400 mb-2">{metric.unit}</div>
-              <div className="text-xs font-medium text-outer_space-500 dark:text-platinum-500">{metric.title}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Charts Placeholder */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
-            <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Project Progress</h3>
-            <div className="flex items-center justify-center h-64 rounded-lg bg-platinum-800 dark:bg-outer_space-400">
-              <div className="text-center text-payne's_gray-500 dark:text-french_gray-400">
-                <BarChart3 size={48} className="mx-auto mb-2" />
-                <p>Chart Component Placeholder</p>
-                <p className="text-sm">TODO: Implement with Chart.js or Recharts</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border rounded-lg dark:bg-outer_space-500 border-french_gray-300 dark:border-payne's_gray-400 p-6">
-            <h3 className="mb-4 text-lg font-semibold text-outer_space-500 dark:text-platinum-500">Team Activity</h3>
-            <div className="flex items-center justify-center h-64 rounded-lg bg-platinum-800 dark:bg-outer_space-400">
-              <div className="text-center text-payne's_gray-500 dark:text-french_gray-400">
-                <TrendingUp size={48} className="mx-auto mb-2" />
-                <p>Activity Chart Placeholder</p>
-                <p className="text-sm">TODO: Implement activity timeline</p>
+                  <span className="flex items-center">
+                    <div className="w-3 h-3 mr-2 rounded-full"/>
+                    {selectedProject?.name}
+                  </span>
+                  <ChevronDown className="w-4 h-4"/>
+                </button>
+                {showProjectDropdown && (
+                  <div className="absolute right-0 z-10 mt-1 bg-white border border-gray-200 shadow-lg top-full dark:bg-gray-800 dark:border-gray-700 rounded-xl">
+                    {allProjects.map((project) => (
+                      <button
+                        type="button"
+                        key={project.id}
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setShowProjectDropdown(false);
+                        }}
+                        className="flex items-center w-full px-4 py-3 text-gray-900 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl dark:text-white"
+                      >
+                        {project.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
+        </>
+      )}
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+          <div className="md:col-span-2">
+            <ProjectStats project={selectedProject ?? null}/>
+          </div>
+          <div className="md:col-span-2">
+            <RoleDistribution members={selectedProject?.members ?? []}/>
+          </div>
         </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <PriorityDistribution tasks={selectedProject?.tasks ?? []}/>
+          <TaskProgress project={selectedProject ?? null}/>
+        </div>
+        <ProjectOverview project={selectedProject ?? null}/>
       </div>
     </DashboardLayout>
-  )
+  );
 }

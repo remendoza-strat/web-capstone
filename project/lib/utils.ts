@@ -200,3 +200,35 @@ export const FormatDateDisplay = (date: Date) => {
 
   return localDate.toISOString().slice(0, 16);
 };
+
+// Calculate created task between current and past month
+export function TaskTrack(tasks: Task[]){
+
+  const getMonthRange = (date: Date) => {
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
+    return { start, end };
+  };
+
+  const now = new Date();
+  
+  const { start: thisMonthStart, end: thisMonthEnd } = getMonthRange(now);
+
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const { start: lastMonthStart, end: lastMonthEnd } = getMonthRange(lastMonthDate);
+
+  const lastMonthTasks = tasks.filter(
+    (t) => t.createdAt && new Date(t.createdAt) >= lastMonthStart && new Date(t.createdAt) <= lastMonthEnd
+  );
+
+  const thisMonthTasks = tasks.filter(
+    (t) => t.createdAt && new Date(t.createdAt) >= thisMonthStart && new Date(t.createdAt) <= thisMonthEnd
+  );
+
+  const diff = thisMonthTasks.length - lastMonthTasks.length;
+  
+  return{
+    diff,
+    text: diff >= 0 ? `+${diff}` : `${diff}`
+  };
+}
