@@ -55,7 +55,7 @@ export function StatsCards({ userId, userProjs } : { userId: string, userProjs: 
       {statsData.map((stat, index) => (
         <div
           key={index}
-          className="p-6 transition-all duration-200 bg-white border border-gray-200 dark:bg-gray-800 rounded-xl dark:border-gray-700 hover:shadow-md dark:hover:shadow-lg"
+          className="p-6 transition-all duration-200 bg-white border border-gray-200 dark:bg-gray-800 rounded-xl dark:border-gray-700"
         >
           <div className="flex items-center justify-between">
             <div>

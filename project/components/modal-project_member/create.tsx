@@ -202,7 +202,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                         {suggestions.map((user) => (
                           <li
                             key={user.id}
-                            className="flex items-center px-4 py-3 space-x-3 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl"
+                            className="flex items-center px-4 py-3 space-x-3 transition-colors cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl"
                             onClick={() => handleAddUser(user)}
                           >
                             <div className="flex items-center justify-center w-10 h-10 text-sm font-semibold text-white rounded-full">
@@ -272,7 +272,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                   <button
                     onClick={closeModal}
                     type="button"
-                    className="flex-1 px-4 py-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="flex-1 px-4 py-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Cancel
                   </button>

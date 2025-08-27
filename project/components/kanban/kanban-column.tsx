@@ -52,7 +52,7 @@ export function KanbanColumn
                     onUpdateColumn();
                     setShowMenu(false);
                   }}
-                  className="w-full px-4 py-3 text-left text-gray-700 transition-colors dark:text-gray-300 rounded-t-xl hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="w-full px-4 py-3 text-left text-gray-700 transition-colors dark:text-gray-300 rounded-t-xl hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <Edit2 className="inline w-4 h-4 mr-2"/>
                   Update Column

@@ -15,7 +15,7 @@ export function TeamView({ members } : { members: MembersWithData[] }){
             <button
               type="button"
 							onClick={() => router.push("/team")}
-              className="flex items-center px-6 py-3 space-x-2 font-medium text-gray-700 transition-colors bg-white border border-gray-300 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600"
+              className="flex items-center px-6 py-3 space-x-2 font-medium text-gray-700 transition-colors bg-white border border-gray-300 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600"
             >
               <Settings className="w-5 h-5"/>
               <span>Manage Teams</span>

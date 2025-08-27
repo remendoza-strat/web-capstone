@@ -56,7 +56,7 @@ export default function DashboardPage(){
                   <LayoutDashboard className="w-8 h-8 mr-3 text-blue-600"/>
                   Dashboard
                 </h1>
-                <p className="mt-2 text-gray-600 dark:text-gray-300">Welcome back! Here's what's happening with your projects.</p>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">Here's what's happening with your projects</p>
               </div>
             </div>
           </div>

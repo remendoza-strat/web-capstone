@@ -77,6 +77,17 @@ export function getUserProjects(userId: string, options? : { enabled?: boolean }
   });
 }
 
+export function getUserTasks(userId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["user-tasks", userId],
+    queryFn: async () => {
+      const data = await Actions.getUserTasksAction(userId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!userId
+  });
+}
+
 export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["all-project-members", userId],
