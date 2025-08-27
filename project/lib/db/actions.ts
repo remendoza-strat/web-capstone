@@ -109,6 +109,9 @@ export async function getProjectDataAction(projectId: string){
 export async function getTaskDataAction(taskId: string){
   return await getQueries.getTaskData(taskId);
 }
+export async function getUserTasksAction(userId: string){
+  return await getQueries.getUserTasks(userId);
+}
 
 // CREATE ACTIONS
 export async function createUserAction(newUser: NewUser){
