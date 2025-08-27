@@ -6,14 +6,7 @@ import { Calendar, Views, dateFnsLocalizer, View } from "react-big-calendar"
 import { format, parse, startOfWeek, getDay } from "date-fns"
 import { enUS } from "date-fns/locale"
 import { Task } from "@/lib/db/schema"
-import { StripHTML } from "@/lib/utils"
-
-// Convert date to ph time
-function toPHDate(date: Date | null): Date | null {
-  if (!date) return null;
-  const utc = date.getTime() + date.getTimezoneOffset() * 60000;
-  return new Date(utc + 8 * 60 * 60000);
-}
+import { LimitChar, PhDate, StripHTML } from "@/lib/utils"
 
 // Handle formatting
 const locales = { "en-US" : enUS };
@@ -35,36 +28,59 @@ export function CalendarView({ tasks } : { tasks: Task[] }){
   // Going to task page
   const router = useRouter();
 
-  // Get all tasks
+  // Map tasks to calendar events
   const events = tasks.map((task) => ({
+    id: task.id,
     title: task.title,
-    start: toPHDate(task.dueDate)!,
-    end: toPHDate(task.dueDate)!,
+    start: PhDate(task.dueDate)!,
+    end: PhDate(task.dueDate)!,
     allDay: false,
     description: StripHTML(task.description),
-    id: task.id
+    resource: task
   }));
 
-  // Task card style
-  const eventStyleGetter = () => ({
-    style: {
-      color: "white",
-      borderRadius: "0.5rem",
-      padding: "6px 8px",
-      fontSize: "0.85rem",
-      fontWeight: 500,
-      whiteSpace: "normal",
-      overflow: "visible",
-      height: "auto"
+  // Task card style with color based on priority
+  const eventStyleGetter = (event: any) => {
+    const task = event.resource as Task;
+    let backgroundColor = "#3B82F6";
+    switch(task.priority){
+      case "High":
+        backgroundColor = "#dc2626";
+        break;
+      case "Medium":
+        backgroundColor = "#ea580c";
+        break;
+      case "Low":
+        backgroundColor = "#f59e0b";
+        break;
     }
-  });
+    return{
+      style: {
+        backgroundColor,
+        borderRadius: "0.5rem",
+        border: "none",
+        color: "white",
+        fontSize: "0.85rem",
+        padding: "6px 8px",
+        fontWeight: 500,
+        whiteSpace: "normal",
+        overflow: "visible",
+        height: "auto"
+      }
+    }
+  };
 
   // Task card content
   const CustomEvent = ({ event }: { event: any }) => {
+    const task = event.resource as Task;
     return(
-      <div className="flex flex-col text-sm leading-snug break-words">
-        <strong className="truncate">{event.title}</strong>
-        <span className="text-xs break-words opacity-90">{event.description}</span>
+      <div className="flex flex-col text-sm">
+        <strong className="truncate">
+          {LimitChar(task.title, 25)}
+        </strong>
+        <span className="text-xs opacity-90">
+          {StripHTML(LimitChar(task.description, 40))}
+        </span>
       </div>
     );
   };
@@ -102,9 +118,9 @@ export function CalendarView({ tasks } : { tasks: Task[] }){
           .rbc-agenda-view table { width: 100%; border-collapse: collapse; border-color: rgb(229, 231, 235); }
           .dark .rbc-agenda-view table { border-color: rgb(75, 85, 99); }
           .rbc-agenda-view .rbc-agenda-time-cell,
-          .rbc-agenda-view .rbc-agenda-event-cell { padding: 8px; border-bottom: 1px solid rgb(229, 231, 235); color: black; white-space: normal; }
+          .rbc-agenda-view .rbc-agenda-event-cell { padding: 8px; border-bottom: 1px solid rgb(229, 231, 235); white-space: normal; }
           .dark .rbc-agenda-view .rbc-agenda-time-cell,
-          .dark .rbc-agenda-view .rbc-agenda-event-cell { background-color: rgb(31, 41, 55); border-bottom: 1px solid rgb(75, 85, 99); color: rgb(229, 231, 235); }
+          .dark .rbc-agenda-view .rbc-agenda-event-cell { border-bottom: 1px solid rgb(75, 85, 99); color: rgb(229, 231, 235); }
           .rbc-month-row .rbc-row-content { 
             height: auto !important; 
             min-height: 180px;
@@ -119,7 +135,6 @@ export function CalendarView({ tasks } : { tasks: Task[] }){
             overflow: visible !important;
             border-radius: 0.5rem;
             font-size: 0.9rem;
-            background-color: #3B82F6 !important;
             color: white !important;
           }
           .rbc-day-slot .rbc-event,

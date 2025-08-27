@@ -13,9 +13,9 @@ export function PriorityDistribution({ tasks } : { tasks?: Task[] | null }){
   // Setup data
   const data = allTasks.length > 0? 
         [
-          { name: "High Priority", value: highCount, color: "#ef4444" },
-          { name: "Medium Priority", value: medCount, color: "#eab308" },
-          { name: "Low Priority", value: lowCount, color: "#22c55e" }
+          { name: "High Priority", value: highCount, color: "#dc2626" },
+          { name: "Medium Priority", value: medCount, color: "#ea580c" },
+          { name: "Low Priority", value: lowCount, color: "#f59e0b" }
         ]
       : [{ name: "No Tasks", value: 1, color: "#9ca3af" }];
 
