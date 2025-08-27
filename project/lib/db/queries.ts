@@ -53,7 +53,7 @@ export const getQueries = {
   getUserTasks: async (userId: string) => {
     const result = await db.query.taskAssignees.findMany({
       where: (ta, { eq }) => eq(ta.userId, userId),
-      with: { task: true}
+      with: { task: {with: {project: true}}}
     });
     return result;
   },

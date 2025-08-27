@@ -60,7 +60,7 @@ export default function CalendarPage(){
               </div>
               <div className="flex-[1] min-w-0 flex flex-col">
                 <div className="overflow-y-auto h-[60vh] xl:h-[90vh] p-4">
-                  <UpcomingTasks tasks={allTasks ?? []}/>
+                  <UpcomingTasks tasks={userTasks ?? []}/>
                 </div>
               </div>
             </div>

@@ -44,3 +44,9 @@ export interface ProjectData extends Project{
 export interface CommentsWithUser extends Comment{
   user: User;
 }
+export interface TaskWithProject extends Task{
+  project: Project;
+}
+export interface UserTask extends TaskAssignee{
+  task: TaskWithProject;
+}
