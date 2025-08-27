@@ -252,7 +252,7 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
                   {suggestions.map((user) => (
                     <li
                       key={user.user.id}
-                      className="flex items-center px-4 py-3 space-x-3 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl"
+                      className="flex items-center px-4 py-3 space-x-3 transition-colors cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl"
                       onClick={() => handleAddUser(user)}
                     >
                       <div className="flex items-center justify-center w-8 h-8 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
@@ -312,7 +312,7 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
             <button
               type="button"
               onClick={closeModal}
-              className="flex-1 px-4 py-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="flex-1 px-4 py-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Cancel
             </button>

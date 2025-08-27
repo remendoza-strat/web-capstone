@@ -169,7 +169,7 @@ export function CommentSection(
                                 setEditingCommentId(comment.id);
                                 setShowCommentMenu(null);
                               }}
-                              className="w-full px-3 py-2 text-left text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 first:rounded-t-xl"
+                              className="w-full px-3 py-2 text-left text-gray-700 transition-colors dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl"
                             >
                               Edit
                             </button>

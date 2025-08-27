@@ -108,7 +108,7 @@ export default function ProjectPage(){
                   <button
                     type="button"
                     onClick={() => openModal("updateProject")}
-                    className="flex items-center px-4 py-2 space-x-2 font-medium text-gray-700 transition-colors bg-white border border-gray-300 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600"
+                    className="flex items-center px-4 py-2 space-x-2 font-medium text-gray-700 transition-colors bg-white border border-gray-300 dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600"
                   >
                     <Edit2 className="w-4 h-4"/>
                     <span>Update</span>
@@ -145,7 +145,7 @@ export default function ProjectPage(){
                     flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-200
                     ${activeTab === tab.id
                       ? "bg-blue-600 text-white shadow-md"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"}
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"}
                   `}
                 >
                   <tab.icon className="w-5 h-5"/>

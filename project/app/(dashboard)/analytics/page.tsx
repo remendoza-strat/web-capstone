@@ -67,7 +67,7 @@ export default function AnalyticsPage(){
                 <button
                   type="button"
                   onClick={() => setShowProjectDropdown(!showProjectDropdown)}
-                  className="flex items-center space-x-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-w-[200px] justify-between bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  className="flex items-center space-x-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors min-w-[200px] justify-between bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <span className="flex items-center">
                     <div className="w-3 h-3 mr-2 rounded-full"/>
@@ -85,7 +85,7 @@ export default function AnalyticsPage(){
                           setSelectedProject(project);
                           setShowProjectDropdown(false);
                         }}
-                        className="flex items-center w-full px-4 py-3 text-gray-900 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl dark:text-white"
+                        className="flex items-center w-full px-4 py-3 text-gray-900 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl dark:text-white"
                       >
                         {project.name}
                       </button>

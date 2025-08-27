@@ -21,7 +21,7 @@ export function QuickActions(){
         <button
           type="button"
           onClick={() => openModal("createMember")}
-          className="flex items-center w-full px-4 py-3 space-x-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl"
+          className="flex items-center w-full px-4 py-3 space-x-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl"
         >
           <Users className="w-5 h-5"/>
           <span>Add Team Member</span>
@@ -29,7 +29,7 @@ export function QuickActions(){
         <button
           type="button"
           onClick={() => openModal("createTask")}
-          className="flex items-center w-full px-4 py-3 space-x-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl"
+          className="flex items-center w-full px-4 py-3 space-x-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl"
         >
           <CheckSquare className="w-5 h-5"/>
           <span>Create New Task</span>

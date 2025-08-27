@@ -111,7 +111,7 @@ export function InviteTab({ userId, userProjs } : { userId: string, userProjs: U
 										type="button"
 										disabled={isProcessing}
 										onClick={() => rejectInvite(invitation.pmId ?? "", invitation.projId)}
-										className="flex items-center justify-center flex-1 px-3 py-2 space-x-1 text-sm font-medium text-gray-700 transition-colors border border-gray-300 rounded-xl dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+										className="flex items-center justify-center flex-1 px-3 py-2 space-x-1 text-sm font-medium text-gray-700 transition-colors border border-gray-300 rounded-xl dark:border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
 									>
 										<X className="w-4 h-4"/>
 										<span>{deleteProjectMemberMutation.isPending? "Rejecting..." : "Reject"}</span>
