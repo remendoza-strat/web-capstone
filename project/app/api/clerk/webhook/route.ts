@@ -1,7 +1,7 @@
 import { Webhook } from "svix"
 import { NextResponse } from "next/server"
 import { NewUser } from "@/lib/db/schema"
-import { createUserAction } from "@/lib/db/actions"
+import { createUserAction, updateUserAction } from "@/lib/db/actions"
 
 // Payload from user.created webhook
 type ClerkUserCreatedEvent = {
@@ -14,6 +14,16 @@ type ClerkUserCreatedEvent = {
   }
 };
 
+// Payload from user.updated webhook
+type ClerkUserUpdatedEvent = {
+  type: "user.updated";
+  data: {
+    id: string;
+    first_name: string;
+    last_name: string;
+  }
+}
+
 export async function POST(req: Request){
   // Get raw request body
   const payload = await req.text();
@@ -22,7 +32,7 @@ export async function POST(req: Request){
   const svix = new Webhook(process.env.CLERK_WEBHOOK_SECRET!);
   
   // Variable for webhook data
-  let evt: ClerkUserCreatedEvent;
+  let evt: ClerkUserCreatedEvent | ClerkUserUpdatedEvent;
 
   // Verify the webhook payload
   try{
@@ -30,7 +40,7 @@ export async function POST(req: Request){
       "svix-id": req.headers.get("svix-id")!,
       "svix-timestamp": req.headers.get("svix-timestamp")!,
       "svix-signature": req.headers.get("svix-signature")!
-    }) as ClerkUserCreatedEvent;
+    }) as any;
   } 
   catch(err){
     return new NextResponse("Webhook verification failed", { status: 400 });
@@ -59,6 +69,15 @@ export async function POST(req: Request){
 
     // New user is created
     return new NextResponse("User created", { status: 200 });
+  }
+
+  if(evt.type === "user.updated"){
+    // Get data
+    const { id, first_name, last_name } = evt.data;
+
+    await updateUserAction(id, {fname: first_name, lname: last_name});
+
+    return new NextResponse("User updated", { status: 200 });
   }
 
   // Proceed if event type is not handled

@@ -114,6 +114,10 @@ export const updateQueries = {
     await db.update(comments).set({...updComment}).where(eq(comments.id, cId));
   },
 
+  updateUser: async (clerkId: string, updUser: Partial<typeof users.$inferInsert>) => {
+    await db.update(users).set({...updUser}).where(eq(users.clerkId, clerkId));
+  },
+
 }
 
 export const deleteQueries = {
@@ -132,6 +136,10 @@ export const deleteQueries = {
 
   deleteComment: async (cId: string) => {
     await db.delete(comments).where(eq(comments.id, cId));
+  },
+
+  deleteUser: async (clerkId: string) => {
+    await db.delete(users).where(eq(users.clerkId, clerkId));
   },
 
   deleteAllTaskAssignee: async (projectId: string, userId: string) => {

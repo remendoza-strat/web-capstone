@@ -1,7 +1,7 @@
 "use server"
 import { createQueries, deleteQueries, getQueries, updateQueries } from "@/lib/db/queries"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment, comments } from "@/lib/db/schema"
-import { projects, taskAssignees, tasks } from "@/lib/db/schema"
+import { projects, taskAssignees, tasks, users } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
 import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
@@ -143,6 +143,9 @@ export async function updateProjectMemberAction(pmId: string, updPm: Partial<typ
 export async function updateCommentAction(cId: string, updComment: Partial<typeof comments.$inferInsert>){
   await updateQueries.updateComment(cId, updComment);
 }
+export async function updateUserAction(clerkId: string, updUser: Partial<typeof users.$inferInsert>){
+  await updateQueries.updateUser(clerkId, updUser);
+}
 
 // DELETE ACTIONS
 export async function deleteProjectAction(projectId: string){
@@ -156,6 +159,9 @@ export async function deleteTaskAssigneeAction(taId: string){
 }
 export async function deleteCommentAction(cId: string){
   await deleteQueries.deleteComment(cId);
+}
+export async function deleteUserAction(clerkId: string){
+  await deleteQueries.deleteUser(clerkId);
 }
 export async function deleteAllTaskAssigneeAction(projectId: string, userId: string){
   await deleteQueries.deleteAllTaskAssignee(projectId, userId);
