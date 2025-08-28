@@ -7,8 +7,6 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import LoadingPage from "@/components/pages/loading";
 import { useUser, useClerk } from "@clerk/nextjs";
 
-import { createUserAction } from "@/lib/db/actions";
-
 export default function UserPage() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
@@ -25,7 +23,6 @@ export default function UserPage() {
   // Password fields
   const [currentPass, setCurrentPass] = useState("");
   const [newPass, setNewPass] = useState("");
-  const [confirmPass, setConfirmPass] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -49,34 +46,78 @@ export default function UserPage() {
       setImageUrl(user.imageUrl);
       toast.success("Profile image updated.");
     } 
-    catch(err){
-      toast.error("Failed to update image.");
+    catch(err: any){
+      const message =
+        err?.errors?.[0]?.longMessage || 
+        err?.message ||                  
+        "Failed to update password";
+      toast.error(message);
     }
   }
 
   async function saveProfile() {
-    if (!user) return;
-
-    // TODO: change zod validation
-    if(!fname.trim() || !lname.trim()){
-      toast.error("All fields are required.");
-      return;
-    }
+    if (!user?.id) return;
     try{
       await user.update({ firstName: fname, lastName: lname });
-      toast.success("Profile updated.");
+      toast.success("Profile info updated.");
     } 
-    catch(err){
-      toast.error("Failed to update profile.");
+    catch(err: any){
+      const message =
+        err?.errors?.[0]?.longMessage || 
+        err?.message ||                  
+        "Failed to update password";
+      toast.error(message);
     }
   }
 
-  async function deleteAccount(){
-    console.log("delete acc");
-  }
-  const changePassword = async () => {
-    console.log("change pass");
+  async function changePassword(){
+    if (!newPass) return;
+    try {
+      const res = await fetch("/api/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: newPass }),
+      });
+      if (res.ok) console.log(res.ok);
+       console.log(res);
+       
+    } 
+    catch (err: any) {
+      console.log(err)
+    }
   };
+  
+  async function deleteAccount() {
+    if (!user) return;
+
+    const confirmed = confirm(
+      "Are you sure you want to delete your account? This cannot be undone."
+    );
+    if (!confirmed) return;
+
+
+    try {
+      const res = await fetch("/api/clerk/webhook", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+      }
+
+      const data = await res.json();
+      toast.success(data.message);
+      router.push("/");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to delete account.");
+    } finally {
+
+    }
+  }
 
   return(
     <DashboardLayout>
@@ -212,23 +253,12 @@ export default function UserPage() {
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    value={confirmPass}
-                    onChange={(e) => setConfirmPass(e.target.value)}
-                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
               </div>
 
               <div className="flex justify-end mt-6">
                 <button
                   type="button"
-                  onClick={() => changePassword()}
+                  onClick={(e) => changePassword()}
                   className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50"
                 >
                   <Lock className="w-5 h-5" />
