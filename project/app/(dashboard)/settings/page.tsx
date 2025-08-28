@@ -6,13 +6,24 @@ import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import LoadingPage from "@/components/pages/loading";
 import { useUser, useClerk } from "@clerk/nextjs";
+import { useModal } from "@/lib/states";
+import { DeleteUser } from "@/components/modal-user/delete";
 
-export default function UserPage() {
+export default function UserPage(){
+  // Redirecting user
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+
+  // Current user
+  const { user, isLoaded: isLoaded } = useUser();
+
+  // Logout user
   const { signOut } = useClerk();
 
+  // Switching tabs
   const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
+
+  // Modal state
+  const { isOpen, modalType, openModal } = useModal();
 
   // Profile fields
   const [fname, setFname] = useState("");
@@ -21,9 +32,10 @@ export default function UserPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   // Password fields
-  const [currentPass, setCurrentPass] = useState("");
   const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
 
+  // Image handling
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Add data to fields
@@ -37,90 +49,88 @@ export default function UserPage() {
   }, [isLoaded, user]);
 
   // Handle change of profile image
-  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!user) return;
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>){
+    // Check if there is signed in user
+    if(!user){
+      toast.error("No user signed in.");
+      return;
+    }
+
+    // Get file
     const file = e.target.files?.[0];
-    if (!file) return;
+
+    // Check if there is selected file
+    if(!file){
+      toast.error("No file selected.");
+      return;
+    }
+
+    // Try to update profile image
     try{
       await user.setProfileImage({ file });
       setImageUrl(user.imageUrl);
       toast.success("Profile image updated.");
     } 
     catch(err: any){
-      const message =
-        err?.errors?.[0]?.longMessage || 
-        err?.message ||                  
-        "Failed to update password";
+      const message = err?.errors?.[0]?.longMessage || err?.message || "Failed to update password";
       toast.error(message);
     }
   }
 
-  async function saveProfile() {
-    if (!user?.id) return;
+  // Handle update profile information
+  async function saveProfile(){
+    // Check if there is signed in user
+    if(!user){
+      toast.error("No user signed in.");
+      return;
+    }
+
+    // Update user info
     try{
       await user.update({ firstName: fname, lastName: lname });
       toast.success("Profile info updated.");
     } 
     catch(err: any){
-      const message =
-        err?.errors?.[0]?.longMessage || 
-        err?.message ||                  
-        "Failed to update password";
+      const message = err?.errors?.[0]?.longMessage || err?.message || "Failed to update password";
       toast.error(message);
     }
   }
 
   async function changePassword(){
-    if (!newPass) return;
-    try {
+    // Check if there is signed in user
+    if(!user){
+      toast.error("No user signed in.");
+      return;
+    }
+
+    // Check if there is input password
+    if((newPass.trim()).length === 0 || (confirmPass.trim()).length === 0){
+      toast.error("Complete password fields");
+      return;
+    }
+
+    try{
       const res = await fetch("/api/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newPassword: newPass }),
       });
-      if (res.ok) console.log(res.ok);
-       console.log(res);
-       
+      if(res.ok){
+        toast.success("Password updated.");
+      }
+      else{
+        toast.error("Error in updating.")
+      }
     } 
-    catch (err: any) {
-      console.log(err)
+    catch(err: any){
+      toast.error(err);
     }
   };
   
-  async function deleteAccount() {
-    if (!user) return;
-
-    const confirmed = confirm(
-      "Are you sure you want to delete your account? This cannot be undone."
-    );
-    if (!confirmed) return;
-
-
-    try {
-      const res = await fetch("/api/clerk/webhook", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
-      }
-
-      const data = await res.json();
-      toast.success(data.message);
-      router.push("/");
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Failed to delete account.");
-    } finally {
-
-    }
-  }
 
   return(
     <DashboardLayout>
+      {isOpen && modalType === "deleteUser" && user?.id && <DeleteUser userId={user.id}/>}
       {!isLoaded? <LoadingPage/> : (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-3xl p-4 mx-auto lg:p-8">
@@ -233,23 +243,23 @@ export default function UserPage() {
               <div className="grid grid-cols-1 gap-6">
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    value={currentPass}
-                    onChange={(e) => setCurrentPass(e.target.value)}
-                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     New Password
                   </label>
                   <input
                     type="password"
                     value={newPass}
                     onChange={(e) => setNewPass(e.target.value)}
+                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPass}
+                    onChange={(e) => setConfirmPass(e.target.value)}
                     className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                   />
                 </div>
@@ -278,7 +288,7 @@ export default function UserPage() {
             </button>
             <button
               type="button"
-              onClick={deleteAccount}
+              onClick={() => openModal("deleteUser")}
               className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-red-600 hover:bg-red-700 rounded-xl disabled:opacity-50"
             >
               <Trash2 className="w-5 h-5" />
