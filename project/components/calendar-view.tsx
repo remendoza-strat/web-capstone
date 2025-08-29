@@ -76,10 +76,10 @@ export function CalendarView({ tasks } : { tasks: Task[] }){
     return(
       <div className="flex flex-col text-sm">
         <strong className="truncate">
-          {LimitChar(task.title, 25)}
+          {LimitChar(event.title, 25)}
         </strong>
         <span className="text-xs opacity-90">
-          {StripHTML(LimitChar(task.description, 40))}
+          {LimitChar(event.description, 40)}
         </span>
       </div>
     );
