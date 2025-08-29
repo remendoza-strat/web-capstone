@@ -63,7 +63,7 @@ export function DeleteProject({ userId, projectData } : { userId: string, projec
                 Are you sure?
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                This action cannot be undone. You are about to delete <strong>"{projectData.name}"</strong>. This will permanently remove the project and all its associated data.
+                You are about to delete <strong>"{projectData.name}"</strong> project. This action will permanently delete the project and all its data.
               </p>
             </div>
           </div>

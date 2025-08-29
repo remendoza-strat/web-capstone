@@ -107,7 +107,7 @@ export function DeleteUser(){
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
-      <div className="w-full max-w-md bg-white shadow-2xl max-h-[90vh] dark:bg-gray-800 rounded-2xl">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
          {isLoading? (<LoadingPage/>) : isError? (<ErrorPage code={404} message="Fetching data error"/>) : 
          (
           <>
@@ -151,7 +151,7 @@ export function DeleteUser(){
                   type="submit"
                   className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-red-600 hover:bg-red-700 rounded-xl"
                 >
-                  Delete User
+                  Delete Account
                 </button>
               </div>
             </form>

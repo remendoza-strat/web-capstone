@@ -87,7 +87,7 @@ export function CreateProject({ userId } : {  userId: string }){
       <div className="w-full max-w-md bg-white shadow-2xl dark:bg-gray-800 rounded-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Create New Project
+            Create Project
             </h2>
           <button
             type="button"

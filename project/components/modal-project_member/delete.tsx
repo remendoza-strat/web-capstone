@@ -79,7 +79,7 @@ export function DeleteProjectMember(
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="mb-6">
             <div className="flex items-center mb-4 space-x-3">
               <UserAvatar clerkId={member.user.clerkId}/>
@@ -91,7 +91,7 @@ export function DeleteProjectMember(
             </div>
             <div className="p-4 border border-red-200 rounded-xl bg-red-50 dark:bg-red-900/20 dark:border-red-800">
               <p className="text-sm text-red-800 dark:text-red-200">
-                <strong>Warning:</strong> This action cannot be undone. The member will be permanently removed from all projects and lose access to its data.
+                <strong>Warning:</strong> This action cannot be undone. The member will be permanently removed from the project and will lose access to its data.
               </p>
             </div>
           </div>
@@ -99,16 +99,15 @@ export function DeleteProjectMember(
             <button
               type="button"
               onClick={closeModal}
-              className="flex-1 px-4 py-2 text-gray-700 transition-colors border border-gray-300 rounded-xl dark:border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="flex-1 px-4 py-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={deleteProjectMutation.isPending || kickMemberMutation.isPending}
-              className="flex items-center justify-center flex-1 px-4 py-2 space-x-2 text-white transition-colors bg-red-600 rounded-xl hover:bg-red-700"
+              className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-red-600 hover:bg-red-700 rounded-xl"
             >
-              <Trash2 className="w-4 h-4"/>
               <span>{deleteProjectMutation.isPending || kickMemberMutation.isPending? "Kicking Member..." : "Kick Member"}</span>
             </button>
           </div>

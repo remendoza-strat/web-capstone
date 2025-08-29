@@ -215,7 +215,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Create New Task
+            Create Task
           </h2>
           <button
             type="button"
