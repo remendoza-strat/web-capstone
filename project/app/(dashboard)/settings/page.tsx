@@ -34,6 +34,12 @@ export default function SettingsPage(){
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
 
+  // Loading states
+  const [isUpdateImage, setIsUpdateImage] = useState(false);
+  const [isUpdateUser, setIsUpdateUser] = useState(false);
+  const [isChangePassword, setIsChangePassword] = useState(false);
+  const [disableButtons, setDisableButtons] = useState(false);
+
   // Image handling
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -46,6 +52,10 @@ export default function SettingsPage(){
       setImageUrl(user.imageUrl ?? null);
     }
   }, [isLoaded, user]);
+
+  useEffect(() => {
+    setDisableButtons(isUpdateImage || isUpdateUser || isChangePassword);
+  }, [isUpdateImage, isUpdateUser, isChangePassword])
 
   // Logout current user
   function logoutUser(){
@@ -75,12 +85,14 @@ export default function SettingsPage(){
 
     // Update user info
     try{
+      setIsUpdateUser(true);
       await user.update({ firstName: fname, lastName: lname });
       toast.success("Profile information updated.");
     } 
     catch{
       toast.error("Updating information error.");
     }
+    setIsUpdateUser(false);
   }
 
   // Update user icon
@@ -102,12 +114,14 @@ export default function SettingsPage(){
 
     // Update user image
     try{
+      setIsUpdateImage(true);
       await user.setProfileImage({ file });
       toast.success("Profile image updated.");
     } 
     catch{
       toast.error("Updating image error.");
     }
+    setIsUpdateImage(false);
   }
 
   // Change user password
@@ -137,6 +151,7 @@ export default function SettingsPage(){
 
     // Update user password
     try{
+      setIsChangePassword(true);
       const res = await fetch("/api/user/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,6 +159,8 @@ export default function SettingsPage(){
       });
       if(res.ok){
         toast.success("Password changed.");
+        setNewPass("");
+        setConfirmPass("");
       }
       else{
         const data = await res.json();
@@ -153,6 +170,7 @@ export default function SettingsPage(){
     catch{
       toast.error("Changing password error.");
     }
+    setIsChangePassword(false);
   };
 
   return(
@@ -175,6 +193,7 @@ export default function SettingsPage(){
                 )}
                 <button
                   type="button"
+                  disabled={disableButtons}
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute p-1 text-white rounded-full bottom-2 right-2 bg-black/60"
                 >
@@ -183,6 +202,7 @@ export default function SettingsPage(){
               </div>
               <input
                 type="file"
+                disabled={disableButtons}
                 ref={fileInputRef}
                 accept="image/*"
                 className="hidden"
@@ -256,11 +276,12 @@ export default function SettingsPage(){
                 <div className="flex justify-end mt-6">
                   <button
                     type="button"
+                    disabled={disableButtons}
                     onClick={() => updateProfile(fname, lname)}
                     className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50"
                   >
                     <Save className="w-5 h-5"/>
-                    <span>Save Changes</span>
+                    <span>{isUpdateUser? "Saving Changes..." : "Save Changes"}</span>
                   </button>
                 </div>
               </div>
@@ -294,11 +315,12 @@ export default function SettingsPage(){
                 <div className="flex justify-end mt-6">
                   <button
                     type="button"
+                    disabled={disableButtons}
                     onClick={() => changePassword(newPass, confirmPass)}
                     className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50"
                   >
                     <Lock className="w-5 h-5"/>
-                    <span>Change Password</span>
+                    <span>{isChangePassword? "Changing Password..." : "Change Password"}</span>
                   </button>
                 </div>
               </div>
