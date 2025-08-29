@@ -295,7 +295,7 @@ export default function TaskPage(){
               onClick={() => router.push(`/projects/${taskData.projectId}`)} 
               className="flex items-center px-4 py-2 space-x-2 text-gray-600 transition-colors dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
-              <ArrowLeft className="w-6 h-6 text-gray-500 transition-colors rounded-lg dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"/>
+              <ArrowLeft className="w-6 h-6 text-gray-500 transition-colors rounded-xl dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"/>
               <span>Back to Board</span>
             </button>
             {allowed ? (
@@ -523,7 +523,7 @@ export default function TaskPage(){
                         <button
                           type="button"
                           onClick={() => handleRemoveUser(assignee.user.id)}
-                          className="p-2 text-red-600 transition-colors rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 dark:text-red-400 hover:scale-110"
+                          className="p-2 text-red-600 transition-colors rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 dark:text-red-400 hover:scale-110"
                         >
                           <UserMinus className="w-5 h-5"/>
                         </button>

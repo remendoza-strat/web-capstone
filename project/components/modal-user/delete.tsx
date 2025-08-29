@@ -123,7 +123,7 @@ export function DeleteUser(){
               <button
                 type="button"
                 onClick={closeModal}
-                className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
               </button>

@@ -39,7 +39,7 @@ export function KanbanColumn
             <button
               type="button"
               onClick={() => setShowMenu(!showMenu)}
-              className="p-1 transition-colors rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="p-1 transition-colors rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               <MoreHorizontal className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
             </button>

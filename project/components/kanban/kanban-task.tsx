@@ -41,7 +41,7 @@ export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignee
           <h4 className="mb-2 font-medium text-gray-900 dark:text-white">
             {task.title}
           </h4>
-          <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             {LimitChar(StripHTML(task.description), 70)}
           </p>
         </div>

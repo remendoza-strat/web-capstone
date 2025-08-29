@@ -45,7 +45,7 @@ export function RecentProjects({ userId, userProjs } : { userId: string, userPro
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h4 className="mb-1 font-semibold text-gray-900 dark:text-white">{project.name}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{project.briefDesc}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{project.briefDesc}</p>
                 </div>
               </div>
               <div className="flex items-center mb-3 space-x-4 text-sm text-gray-600 dark:text-gray-300">

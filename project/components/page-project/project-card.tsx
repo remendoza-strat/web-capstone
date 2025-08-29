@@ -59,7 +59,7 @@ export function ProjectCard({ project } : { project: UserProjects }){
 								<span>{projStatus.toUpperCase()}</span>
 							</span>
 						</div>
-						<p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300 line-clamp-2">
+						<p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
 							{briefDesc}
 						</p>
 					</div>

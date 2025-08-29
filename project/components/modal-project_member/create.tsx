@@ -157,7 +157,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
                 </button>
@@ -260,7 +260,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                             <button
                               type="button"
                               onClick={() => handleRemoveUser(index)}
-                              className="p-2 transition-colors rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+                              className="p-2 transition-colors rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30"
                             >
                               <Trash2 className="w-4 h-4 text-red-500 dark:text-red-400"/>
                             </button>
@@ -281,7 +281,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                   <button
                     type="submit"
                     disabled={createMutation.isPending}
-                    className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-xl"
+                    className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 rounded-xl"
                   >
                     {createMutation.isPending? 
                       "Adding Member..."
