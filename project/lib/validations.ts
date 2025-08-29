@@ -101,3 +101,43 @@ export const TaskSchema = z.object({
     )),
 
 });
+
+
+
+
+
+
+
+
+
+// User data input validation
+export const UserSchema = z.object({
+
+  // First name validation
+  fname: z
+    .string().trim()
+    .min(1, "First name: Cannot be empty."),
+
+  // Last name validation
+  lname: z
+    .string().trim()
+    .min(1, "Last name: Cannot be empty."),
+
+  // Password validation
+  pword: z
+    .string().trim()
+    .min(8, "Password: Must be at least 8 characters.")
+    .max(72, "Password: Must be at most 72 characters.")
+    .refine((val) => !/\s/.test(val), "Password: Must not contain spaces.")
+    .refine((val) => /[a-z]/.test(val), "Password: Must include at least one lowercase letter.")
+    .refine((val) => /[A-Z]/.test(val), "Password: Must include at least one uppercase letter.")
+    .refine((val) => /\d/.test(val), "Password: Must include at least one number.")
+    .refine((val) => /[^A-Za-z0-9]/.test(val), "Password: Must include at least one symbol (e.g., !@#$%)."),
+  
+});
+
+// Validate updating first name and last name
+export const NameSchema = UserSchema.pick({ fname: true, lname: true });
+
+// Validate updating password
+export const PasswordSchema = UserSchema.pick({ pword: true });
