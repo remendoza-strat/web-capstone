@@ -1,5 +1,5 @@
 "use client"
-import { X, Search, Trash2 } from "lucide-react"
+import { X, Search, Trash2, Type, UsersRound } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import type { NewProjectMember, User } from "@/lib/db/schema"
@@ -165,7 +165,8 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
               <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Project
+                    <Type className="inline w-4 h-4 mr-2"/>
+                    Project Name
                   </label>
                   <select
                     className="w-full px-3 py-3 text-gray-900 bg-white border border-gray-300 cursor-pointer dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
@@ -187,7 +188,8 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                 </div>
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Search Users
+                    <UsersRound className="inline w-4 h-4 mr-2"/>
+                    Users
                   </label>
                   <div className="relative">
                     <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500"/>

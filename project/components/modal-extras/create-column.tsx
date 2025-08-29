@@ -1,6 +1,6 @@
 import { toast } from "sonner"
 import React, { useState } from "react"
-import { X, Type } from "lucide-react"
+import { X, Type, ChartNoAxesColumn } from "lucide-react"
 import { projects } from "@/lib/db/schema"
 import { useModal } from "@/lib/states"
 import { ProjectSchema } from "@/lib/validations"
@@ -70,7 +70,7 @@ export function CreateColumn({ columnNames, projectId } : { columnNames: string[
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              <Type className="inline w-4 h-4 mr-2"/>
+              <ChartNoAxesColumn className="inline w-4 h-4 mr-2"/>
               Column Name
             </label>
             <input

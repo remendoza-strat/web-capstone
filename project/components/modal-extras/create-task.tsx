@@ -1,7 +1,7 @@
 "use client"
 import "react-quill-new/dist/quill.snow.css"
 import dynamic from "next/dynamic"
-import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search } from "lucide-react"
+import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search, UsersRound } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import { TaskSchema } from "@/lib/validations"
@@ -238,7 +238,8 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Task Assignees
+              <UsersRound className="inline w-4 h-4 mr-2"/>
+              Assignees
             </label>
             <div className="relative">
               <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500"/>
