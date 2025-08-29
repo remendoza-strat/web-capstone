@@ -175,7 +175,7 @@ export default function SettingsPage(){
 
   return(
     <DashboardLayout>
-      {isOpen && modalType === "deleteUser" && user?.id && <DeleteUser userId={user.id}/>}
+      {isOpen && modalType === "deleteUser" && user?.id && <DeleteUser/>}
       {!isLoaded? <LoadingPage/> : (
         <div className="bg-gray-50 dark:bg-gray-900">
           <div className="max-w-3xl p-2 mx-auto lg:p-8">
