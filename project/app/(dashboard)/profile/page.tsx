@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation"
 import { Save, LogOut, UserCircle2, Camera, Trash2, Lock } from "lucide-react"
 import { toast } from "sonner"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import LoadingPage from "@/components/pages/loading"
+import LoadingPage from "@/components/util-pages/loading-page"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { useModal } from "@/lib/states"
 import { DeleteUser } from "@/components/modal-user/delete"
 import { NameSchema, PasswordSchema } from "@/lib/validations"
 
-export default function SettingsPage(){
+export default function ProfilePage(){
   // Signout and change route
   const { signOut } = useClerk();
   const router = useRouter();

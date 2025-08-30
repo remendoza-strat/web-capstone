@@ -11,13 +11,13 @@ import { Role } from "@/lib/customtype"
 import { DateTimeFormatter } from "@/lib/utils"
 import { getUserId, getProjectData } from "@/lib/db/tanstack"
 import { UpdateProject } from "@/components/modal-project/update"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
+import ErrorPage from "@/components/util-pages/error-page"
+import LoadingPage from "@/components/util-pages/loading-page"
 import { DeleteProject } from "@/components/modal-project/delete"
 import { LeaveProject } from "@/components/modal-extras/leave-project"
-import { KanbanBoard } from "@/components/kanban/kanban-board"
-import { CalendarView } from "@/components/calendar-view"
-import { TeamView } from "@/components/team-view"
+import { KanbanBoard } from "@/components/page-project/kanban/kanban-board"
+import { CalendarView } from "@/components/page-project/calendar-view"
+import { TeamView } from "@/components/page-project/team-view"
 
 // List tabs
 const tabs = [

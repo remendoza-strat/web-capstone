@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Edit2, MoreHorizontal, Plus, Trash2 } from "lucide-react"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { KanbanTask } from "@/components/kanban/kanban-task"
+import { KanbanTask } from "@/components/page-project/kanban/kanban-task"
 import { TaskWithAssignees } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
 

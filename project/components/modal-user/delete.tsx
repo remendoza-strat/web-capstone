@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useModal } from "@/lib/states";
 import { deleteProject, getUserId, getUserProjects, kickMember } from "@/lib/db/tanstack";
 import { useClerk, useUser } from "@clerk/nextjs";
-import LoadingPage from "../pages/loading";
-import ErrorPage from "../pages/error";
+import LoadingPage from "../util-pages/loading-page";
+import ErrorPage from "../util-pages/error-page";
 
 export function DeleteUser(){
   // Get user

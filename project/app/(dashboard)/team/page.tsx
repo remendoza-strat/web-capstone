@@ -11,8 +11,8 @@ import { hasPermission } from "@/lib/permissions"
 import { CreateProjectMember } from "@/components/modal-project_member/create"
 import { UpdateProjectMember } from "@/components/modal-project_member/update"
 import { DeleteProjectMember } from "@/components/modal-project_member/delete"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
+import ErrorPage from "@/components/util-pages/error-page"
+import LoadingPage from "@/components/util-pages/loading-page"
 
 export default function TeamPage(){
   // Add member modal

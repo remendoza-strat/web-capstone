@@ -19,7 +19,7 @@ export function getUserId(clerkId: string, options? : { enabled?: boolean }){
     queryKey: ["users", clerkId],
     queryFn: async () => {
       const data = await Actions.getUserIdAction(clerkId);
-      return data;
+      return data ?? null;
     },
     enabled: options?.enabled ?? !!clerkId
   });

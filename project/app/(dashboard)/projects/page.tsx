@@ -6,11 +6,11 @@ import { RoleArr, UserProjects } from "@/lib/customtype"
 import { getUserId, getUserProjects } from "@/lib/db/tanstack"
 import { useUser } from "@clerk/nextjs"
 import { useModal } from "@/lib/states"
-import { ProjectCard } from "@/components/page-project/project-card"
+import { ProjectCard } from "@/components/page-projects/project-card"
 import { ProjectsByStatus, ProjectsByDueDate, ProjectsByRole } from "@/lib/utils"
 import { CreateProject } from "@/components/modal-project/create"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
+import ErrorPage from "@/components/util-pages/error-page"
+import LoadingPage from "@/components/util-pages/loading-page"
 
 export default function ProjectsPage(){
   // Create project modal

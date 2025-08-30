@@ -9,8 +9,8 @@ import { hasPermission } from "@/lib/permissions"
 import { createProjectMember, getAllUsers } from "@/lib/db/tanstack"
 import { UserAvatar } from "@/components/user-avatar"
 import { useModal } from "@/lib/states"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
+import ErrorPage from "@/components/util-pages/error-page"
+import LoadingPage from "@/components/util-pages/loading-page"
 
 export function CreateProjectMember({ userId, projectsData, onProjectSelect } : { userId: string; projectsData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
   // Modal closing

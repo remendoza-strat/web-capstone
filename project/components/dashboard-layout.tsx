@@ -74,9 +74,9 @@ export function DashboardLayout({ children } : { children: React.ReactNode }){
         </nav>
         <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
           <Link
-            href="/settings"
+            href="/profile"
             className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-              pathname.startsWith("/settings")
+              pathname.startsWith("/profile")
                 ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
             }`}

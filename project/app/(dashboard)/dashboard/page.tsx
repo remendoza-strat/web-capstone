@@ -11,8 +11,8 @@ import { CreateProjectMember } from "@/components/modal-project_member/create"
 import { CreateProject } from "@/components/modal-project/create"
 import { CreateTask } from "@/components/modal-task/create"
 import { InviteTab } from "@/components/page-dashboard/invite-tab"
-import LoadingPage from "@/components/pages/loading"
-import ErrorPage from "@/components/pages/error"
+import LoadingPage from "@/components/util-pages/loading-page"
+import ErrorPage from "@/components/util-pages/error-page"
 
 export default function DashboardPage(){
   // Opening modal

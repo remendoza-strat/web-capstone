@@ -4,10 +4,10 @@ import { CalendarCheck } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { useUser } from "@clerk/nextjs"
 import { getUserId, getUserTasks } from "@/lib/db/tanstack"
-import LoadingPage from "@/components/pages/loading"
-import ErrorPage from "@/components/pages/error"
+import LoadingPage from "@/components/util-pages/loading-page"
+import ErrorPage from "@/components/util-pages/error-page"
 import { Task } from "@/lib/db/schema"
-import { CalendarView } from "@/components/calendar-view"
+import { CalendarView } from "@/components/page-project/calendar-view"
 import { UpcomingTasks } from "@/components/page-calendar/upcoming-tasks"
 
 export default function CalendarPage(){
