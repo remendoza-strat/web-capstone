@@ -14,10 +14,6 @@ import RecentProjects from "@/components/page-dashboard/recent-projects"
 import InviteTab from "@/components/page-dashboard/invite-tab"
 import QuickActions from "@/components/page-dashboard/quick-actions"
 
-
-
-
-
 export default function DashboardPage(){
   // Opening modal
   const { isOpen, modalType } = useModal();
@@ -33,7 +29,7 @@ export default function DashboardPage(){
         } 
   = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
 
-  // Get projects with members
+  // Get user projects
   const {
           data: userProjs, 
           isLoading: userProjsLoading, 
@@ -49,11 +45,11 @@ export default function DashboardPage(){
   return(
     <DashboardLayout>
       {isLoading ? (<LoadingPage/>) : 
-      isError ? (<ErrorPage code={400} message={(userIdError)?.message || (userProjsError)?.message || "Fetching data error."} />) : 
+      isError ? (<ErrorPage code={400} message={isError.message || "Fetching data error."}/>) : 
         (
           <> 
             {isOpen && modalType === "createProject" && userId && <CreateProject userId={userId}/>}
-            {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={userProjs ?? []}/>}
+            {isOpen && modalType === "createProjectMember" && userId && <CreateProjectMember userId={userId} projectsData={userProjs ?? []}/>}
             {isOpen && modalType === "createTask" && userId && <CreateTask userId={userId} projectsData={userProjs ?? []}/>}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">

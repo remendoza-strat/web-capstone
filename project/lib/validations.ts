@@ -1,6 +1,7 @@
 import { z } from "zod"
+import { RoleArr } from "./customtype";
 
-// Project data input validation
+// Project data validation
 export const ProjectSchema = z.object({
 
   // Name validation
@@ -43,6 +44,19 @@ export const ProjectSchema = z.object({
       }
     )),
 
+  // Column count validation
+  columnCount: z
+    .number()
+    .int("Column Count: Must be an integer.")
+    .min(3, "Column Count: Must be at least 3."),
+
+  // Column names validation
+  columnNames: z
+  .array(
+    z.string().trim().min(3, "Column Names: Each name must be at least 3 characters.")
+  )
+  .min(3, "Column Names: Must provide at least 3 column names."),
+
   // Column name validation
   columnName: z
     .string().trim()
@@ -50,6 +64,44 @@ export const ProjectSchema = z.object({
     .max(50, "Column Name: Must not exceed 50 characters."),
   
 });
+export const ClientCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true});
+export const ServerCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true, columnCount: true, columnNames: true });
+
+// Project member data schema
+export const ProjectMemberSchema = z.object({
+  projectId: z
+    .uuid("Project ID: Must be a valid UUID."),
+
+  userId: z
+    .uuid("User ID: Must be a valid UUID."),
+
+  role: z
+  .enum(RoleArr, "Role: Must be a valid project role."),
+
+  approved: z
+  .boolean()
+  .refine((val) => typeof val === "boolean", {
+    message: "Approved: Must be true or false."}),
+
+});
+export const ServerCreateProjectMemberSchema = ProjectMemberSchema.pick({ projectId: true, userId: true, role: true, approved: true});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Task data input validation
 export const TaskSchema = z.object({
@@ -101,14 +153,6 @@ export const TaskSchema = z.object({
     )),
 
 });
-
-
-
-
-
-
-
-
 
 // User data input validation
 export const UserSchema = z.object({

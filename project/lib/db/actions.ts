@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
 import { auth } from "@clerk/nextjs/server"
 import { validate as isUuid } from "uuid"
+import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema } from "../validations"
 
 
 
@@ -57,11 +58,64 @@ export async function getUserProjectsAction(userId: string){
 
 }
 
+export async function createProjectAction(newProject: NewProject){
+  
+  // Validate data
+  const result = ServerCreateProjectSchema.safeParse({
+    name: newProject.name,
+    description: newProject.description,
+    dueDate: newProject.dueDate,
+    columnCount: newProject.columnCount,
+    columnNames: newProject.columnNames
+  });
+  if(!result.success){
+    return { success: false, message: result.error.issues[0].message };
+  }
 
+  // Get clerkId of current user
+  const { userId: currentId } = await auth();
 
+	// Check authenticated
+	if(!currentId){
+    return { success: false, message: "Unauthorized action." };
+  }
 
+  // Return projectId
+  const projectId = await createQueries.createProject(newProject);
+	return { success: true, projectId };
+  
+}
 
+export async function createProjectMemberAction(newProjectMember: NewProjectMember){
 
+  // Validate data
+  const result = ServerCreateProjectMemberSchema.safeParse({
+    projectId: newProjectMember.projectId,
+    userId: newProjectMember.userId,
+    role: newProjectMember.role,
+    approved: newProjectMember.approved
+  });
+  if(!result.success){
+    return { success: false, message: result.error.issues[0].message };
+  }
+
+  // Check if user exist
+  const userExist = await getQueries.getClerkId(newProjectMember.userId);
+  if(!userExist){
+    return { success: false, message: "User not found." };
+  }
+
+  // Check if project exist
+  const projectExist = await getQueries.getProjectData(newProjectMember.projectId);
+  if(!projectExist){
+    return { success: false, message: "Project not found." };
+  }
+
+  // Create project member
+  await createQueries.createProjectMember(newProjectMember);
+  return { success: true };
+
+}
 
 
 
@@ -182,18 +236,14 @@ export async function getUserTasksAction(userId: string){
 export async function createUserAction(newUser: NewUser){
   return await createQueries.createUser(newUser);
 }
-export async function createProjectAction(newProject: NewProject){
-  return await createQueries.createProject(newProject);
-}
+
 export async function createTaskAction(newTask: NewTask){
   return await createQueries.createTask(newTask);
 }
 export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){
   await createQueries.createTaskAssignee(newTaskAssignee);
 }
-export async function createProjectMemberAction(newProjectMember: NewProjectMember){
-  await createQueries.createProjectMember(newProjectMember);
-}
+
 export async function createCommentAction(newComment: NewComment){
   await createQueries.createComment(newComment);
 }

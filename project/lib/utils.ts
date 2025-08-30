@@ -6,12 +6,14 @@ export function StripHTML(html: string){
   return html.replace(/<[^>]+>/g, "").trim();
 }
 
+
+
+
 // Sort projects by most recent updated
 export function ByRecentProjects(projects: UserProjects[]){
-  const recent = [...projects].sort((a, b) =>
+  return [...projects].sort((a, b) =>
     new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
   );
-  return recent;
 }
 
 // Cut sentence based on characters count
@@ -58,18 +60,22 @@ export function ComputeProgress(tasks: Task[], columnCount: number){
 
   for(const t of tasks){
     const position = t.position;
-    const column = columnCount;
 
     if(position === (columnCount - 1)){
       total += 100;
     }
     else{
-      total += Math.round((position/column) * 100);
+      total += Math.round((position/columnCount) * 100);
     }
   }
 
   return Math.round(total/taskCount);
 }
+
+
+
+
+
 
 // Get status of the project
 export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){

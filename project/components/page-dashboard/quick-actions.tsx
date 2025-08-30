@@ -1,6 +1,5 @@
-import React from "react"
-import { Plus, Users, CheckSquare } from "lucide-react"
 import { useModal } from "@/lib/states"
+import { Plus, Users, CheckSquare } from "lucide-react"
 
 export default function QuickActions(){
   // Opening modal
@@ -20,7 +19,7 @@ export default function QuickActions(){
         </button>
         <button
           type="button"
-          onClick={() => openModal("createMember")}
+          onClick={() => openModal("createProjectMember")}
           className="flex items-center w-full px-4 py-3 space-x-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl"
         >
           <Users className="w-5 h-5"/>

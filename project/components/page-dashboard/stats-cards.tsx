@@ -1,6 +1,5 @@
-import React from "react"
-import { BarChart3, AlertTriangle, CheckSquare, FolderOpen } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
+import { BarChart3, AlertTriangle, CheckSquare, FolderOpen } from "lucide-react"
 
 export default function StatsCards({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
   // Projects that user is approved

@@ -38,7 +38,28 @@ export function getUserProjects(userId: string, options: { enabled: boolean }){
   });
 }
 
+export function createProject(){
+  return useMutation({
+    mutationFn: async ({ newProject } : { newProject: Schema.NewProject }) => {
+      const result = await Actions.createProjectAction(newProject);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.projectId;
+    }
+  });
+}
 
+export function createProjectMember(){
+  return useMutation({
+    mutationFn: async ({ newProjectMember } : { newProjectMember: Schema.NewProjectMember }) => {
+      const result = await Actions.createProjectMemberAction(newProjectMember);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
 
 
 
@@ -155,18 +176,7 @@ export function getAllUsers(){
   });
 }
 
-export function createProjectMember(userId: string){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ newProjectMember } : { newProjectMember: Schema.NewProjectMember }) => {
-      await Actions.createProjectMemberAction(newProjectMember);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
-      queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
-    }
-  });
-}
+
 
 export function updateProjectMember(userId: string){
   const queryClient = useQueryClient();
@@ -211,19 +221,6 @@ export function kickMember(userId: string){
         return old.filter((p: any) => p.id !== vars.projectId);
       });
       queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
-    }
-  });
-}
-
-export function createProject(userId: string){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ newProject } : { newProject: Schema.NewProject }) => {
-      const data = await Actions.createProjectAction(newProject);
-      return data ?? null;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
     }
   });
 }
