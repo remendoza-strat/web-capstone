@@ -2,7 +2,7 @@ import React from "react"
 import { BarChart3, AlertTriangle, CheckSquare, FolderOpen } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 
-export function StatsCards({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
+export default function StatsCards({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
   // Projects that user is approved
   const approved = userProjs.filter((p) => p.members.some((m) => m.userId === userId && m.approved));
 

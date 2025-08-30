@@ -5,7 +5,7 @@ import { UserProjects } from "@/lib/customtype"
 import { TimeAgo } from "@/lib/utils"
 import { deleteProjectMember, updateProject, updateProjectMember } from "@/lib/db/tanstack"
 
-export function InviteTab({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
+export default function InviteTab({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
 	// Mutation for operation
 	const updateProjectMemberMutation = updateProjectMember(userId);
 	const updateProjectMutation = updateProject(userId);

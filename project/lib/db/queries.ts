@@ -12,6 +12,13 @@ export const getQueries = {
     return result?.id;
   },
 
+  getClerkId: async (userId: string) => {
+    const result = await db.query.users.findFirst({
+      where: eq(users.id, userId)
+    });
+    return result?.clerkId;
+  },
+
   getUserProjectsWithMembers: async (userId: string) => {
     const result = await db.query.projectMembers.findMany({
       where: (pm, {and, eq}) => and(pm.approved, eq(pm.userId, userId)),

@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { CalendarCheck } from "lucide-react"
-import { DashboardLayout } from "@/components/dashboard-layout"
+import DashboardLayout from "@/components/dashboard-layout"
 import { useUser } from "@clerk/nextjs"
 import { getUserId, getUserTasks } from "@/lib/db/tanstack"
 import LoadingPage from "@/components/util-pages/loading-page"

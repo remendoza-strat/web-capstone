@@ -16,7 +16,7 @@ const navigation = [
   { name: "Calendar", href: "/calendar", icon: Calendar }
 ];
 
-export function DashboardLayout({ children } : { children: React.ReactNode }){
+export default function DashboardLayout({ children } : { children: React.ReactNode }){
   // Get current user
   const { user } = useUser();
   

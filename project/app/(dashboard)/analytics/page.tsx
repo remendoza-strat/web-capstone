@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { ChevronDown, ChartNoAxesCombined } from "lucide-react"
-import { DashboardLayout } from "@/components/dashboard-layout"
+import DashboardLayout from "@/components/dashboard-layout"
 import { UserProjects } from "@/lib/customtype"
 import { getUserId, getUserProjects } from "@/lib/db/tanstack"
 import { useUser } from "@clerk/nextjs"

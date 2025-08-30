@@ -12,7 +12,7 @@ import { useModal } from "@/lib/states"
 import ErrorPage from "@/components/util-pages/error-page"
 import LoadingPage from "@/components/util-pages/loading-page"
 
-export function CreateProjectMember({ userId, projectsData, onProjectSelect } : { userId: string; projectsData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
+export default function CreateProjectMember({ userId, projectsData, onProjectSelect } : { userId: string; projectsData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
   // Modal closing
   const { closeModal } = useModal();
 

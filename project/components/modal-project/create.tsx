@@ -7,7 +7,7 @@ import { ProjectSchema } from "@/lib/validations"
 import { useModal } from "@/lib/states"
 import { createProject, createProjectMember } from "@/lib/db/tanstack"
 
-export function CreateProject({ userId } : {  userId: string }){
+export default function CreateProject({ userId } : {  userId: string }){
   // Closing modal
   const { closeModal } = useModal();
     

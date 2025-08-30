@@ -6,6 +6,77 @@ import { db } from "@/lib/db/connection"
 import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
+import { auth } from "@clerk/nextjs/server"
+import { validate as isUuid } from "uuid"
+
+
+
+
+
+
+export async function getUserIdAction(clerkId: string){
+
+	// Get clerkId of current user
+  const { userId: currentId } = await auth();
+
+	// Check if current user clerkId and passed clerkId matches
+  if(currentId !== clerkId){
+    return { success: false, message: "Unauthorized action." };
+  }
+
+	// Return userId
+  const userId = await getQueries.getUserId(clerkId);
+  return { success: true, userId };
+
+}
+
+export async function getUserProjectsAction(userId: string){
+
+  // Check format of userId
+  if(!isUuid(userId)){
+    return { success: false, message: "Invalid id." };
+  }
+
+	// Try to get clerkId with userId
+  const clerkId = await getQueries.getClerkId(userId);
+  if(!clerkId){
+    return { success: false, message: "User not found." };
+  }
+
+	// Get clerkId of current user
+  const { userId: currentId } = await auth();
+
+	// Check if clerkId of passed userId matches current clerkId
+	if(currentId !== clerkId){
+    return { success: false, message: "Unauthorized action." };
+  }
+
+	// Return userProjects
+  const userProjects = await getQueries.getUserProjects(userId);
+	return { success: true, userProjects };
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // KANBAN ACTIONS
 export async function KanbanUpdateTaskAction
@@ -91,17 +162,11 @@ export async function KanbanCreateTaskAction
 }
 
 // GET ACTIONS
-export async function getUserIdAction(clerkId: string){
-  return await getQueries.getUserId(clerkId);
-}
 export async function getUserProjectsWithMembersAction(userId: string){
   return await getQueries.getUserProjectsWithMembers(userId);
 }
 export async function getAllUsersAction(){
   return await getQueries.getAllUsers();
-}
-export async function getUserProjectsAction(userId: string){
-  return await getQueries.getUserProjects(userId);
 }
 export async function getProjectDataAction(projectId: string){
   return await getQueries.getProjectData(projectId);

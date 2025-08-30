@@ -2,7 +2,7 @@ import React from "react"
 import { Plus, Users, CheckSquare } from "lucide-react"
 import { useModal } from "@/lib/states"
 
-export function QuickActions(){
+export default function QuickActions(){
   // Opening modal
   const { openModal } = useModal();
 

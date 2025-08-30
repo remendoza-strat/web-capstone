@@ -4,7 +4,7 @@ import { Calendar, Users, CheckSquare } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 import { ByRecentProjects, ComputeProgress, DateTimeFormatter, LimitChar } from "@/lib/utils"
 
-export function RecentProjects({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
+export default function RecentProjects({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
   // Projects that user is approved
   const approved = userProjs.filter((p) => p.members.some((m) => m.userId === userId && m.approved));
   

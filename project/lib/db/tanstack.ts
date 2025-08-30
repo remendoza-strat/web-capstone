@@ -3,22 +3,57 @@ import { getUserImageAction } from "@/lib/clerk/user-image"
 import * as Actions from "@/lib/db/actions"
 import * as Schema from "@/lib/db/schema"
 
+
+
+
+
+
+
+
+export function getUserId(clerkId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["user-id", clerkId],
+    queryFn: async () => {
+      const result = await Actions.getUserIdAction(clerkId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.userId;
+    },
+    enabled: options.enabled
+  });
+}
+
+export function getUserProjects(userId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["user-projects", userId],
+    queryFn: async () => {
+      const result = await Actions.getUserProjectsAction(userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.userProjects;
+    },
+    enabled: options.enabled
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
 export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["member-icon", clerkId],
     queryFn: async () => {
       const data = await getUserImageAction(clerkId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!clerkId
-  });
-}
-
-export function getUserId(clerkId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["users", clerkId],
-    queryFn: async () => {
-      const data = await Actions.getUserIdAction(clerkId);
       return data ?? null;
     },
     enabled: options?.enabled ?? !!clerkId
@@ -63,17 +98,6 @@ export function KanbanCreateTask(){
       { projectId: string; newTask: Schema.NewTask; assignees: string[]; }) => {
       await Actions.KanbanCreateTaskAction(projectId, newTask, assignees);
     }
-  });
-}
-
-export function getUserProjects(userId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["user-projects", userId],
-    queryFn: async () => {
-      const data = await Actions.getUserProjectsAction(userId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!userId
   });
 }
 

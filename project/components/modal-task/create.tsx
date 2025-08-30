@@ -17,7 +17,7 @@ import { createTask, createTaskAssignee, updateProject } from "@/lib/db/tanstack
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
 
-export function CreateTask({ userId, projectsData } : { userId: string; projectsData: UserProjects[] }){
+export default function CreateTask({ userId, projectsData } : { userId: string; projectsData: UserProjects[] }){
   // Closing modal
   const { closeModal } = useModal();
 
