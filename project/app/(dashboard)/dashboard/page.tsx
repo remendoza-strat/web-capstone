@@ -23,17 +23,16 @@ export default function DashboardPage(){
 
   // Get user id
   const { 
-          data: userId, 
-          isLoading: userIdLoading, 
-          error: userIdError 
-        } 
-  = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
+    data: userId, 
+    isLoading: userIdLoading, 
+    error: userIdError 
+  } = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
 
   // Get user projects
   const {
-          data: userProjs, 
-          isLoading: userProjsLoading, 
-          error: userProjsError 
+    data: userProjs, 
+    isLoading: userProjsLoading, 
+    error: userProjsError 
   } = getUserProjects(userId ?? "", { enabled: Boolean(userId) });
 
   // Show loading

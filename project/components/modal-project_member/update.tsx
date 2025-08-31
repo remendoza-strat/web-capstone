@@ -1,26 +1,30 @@
 "use client"
-import React, { useState } from "react"
-import { toast } from "sonner"
 import { ProjectMemberUser, Role, RoleArr } from "@/lib/customtype"
-import { projectMembers } from "@/lib/db/schema"
-import { updateProjectMember } from "@/lib/db/tanstack"
 import { useModal } from "@/lib/states"
+import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { updateMemberRole } from "@/lib/db/tanstack"
+import { projectMembers } from "@/lib/db/schema"
+import { toast } from "sonner"
 import { X, UserCog } from "lucide-react"
 import UserAvatar from "@/components/user-avatar"
 
-export function UpdateProjectMember(
+export default function UpdateProjectMember(
   { userId, member, members, onProjectSelect } : 
   { userId: string, member: ProjectMemberUser, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
   
   // Closing modal
   const {closeModal } = useModal();
 
+  // Refresh data
+  const queryClient = useQueryClient();
+
   // Initial and new role
   const initialRole = member.role;
   const [role, setRole] = useState<Role>(member.role); 
 
   // Update member
-  const updateMutation = updateProjectMember(userId);
+  const updateMutation = updateMemberRole();
   
   // Handle update
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,17 +46,20 @@ export function UpdateProjectMember(
     }
 
     // Setup data to update
-    const updPm: Partial<typeof projectMembers.$inferInsert> = { role: role }
+    const updPm: Partial<typeof projectMembers.$inferInsert> = {
+      projectId: member.projectId, role: role 
+    }
       
     // Update member  
-    updateMutation.mutate({ pmId: member.id, updPm }, {
+    updateMutation.mutate({ pmId: member.id, updPm: updPm, userId: userId }, {
       onSuccess: () => {
         toast.success("Project member role updated successfully.");
         closeModal();
         onProjectSelect?.(member.projectId);
+        queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
       },
       onError: () => {
-        toast.error("Error occured.");
+        toast.error("Error updating project member role.");
         closeModal();
       }
     });

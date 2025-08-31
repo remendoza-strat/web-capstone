@@ -12,15 +12,6 @@ import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreat
 import { hasPermission, Permissions } from "../permissions"
 
 
-// Invalid ID.
-// User not found.
-// Unauthorized action.
-// Project not found.
-// Task not found.
-
-
-
-
 
 
 
@@ -183,22 +174,6 @@ export async function UserPermission(userId: string, projectId: string, action: 
   return {success: true};
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -514,16 +489,45 @@ export async function getUserTasksAction(userId: string){
   
 }
 
+export async function getUserProjectsWithMembersAction(userId: string){
+  
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
 
+  // Return userProjectsMembers
+  const userProjectsMembers = await getQueries.getUserProjectsWithMembers(userId);
+  return { success: true, userProjectsMembers};
 
+}
 
+export async function updateMemberRoleAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>, userId: string){
 
+  // Validate project member
+  const checkMember = await ValidProjecMember(pmId);
+  if(!checkMember.exist?.userId){
+    return { success: false, message: checkMember.message };
+  }
 
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
 
+  // Validate user permission
+  const checkPermission = await UserPermission(userId, checkMember.exist.projectId, "editMember");
+  if(!checkPermission.success){
+    return { success: false, message: checkPermission.message };
+  }
 
+  // Update role
+  await updateQueries.updateProjectMember(pmId, updPm);
+  return { success : true };
 
-
-
+}
 
 
 
@@ -614,9 +618,7 @@ export async function KanbanCreateTaskAction
 }
 
 // GET ACTIONS
-export async function getUserProjectsWithMembersAction(userId: string){
-  return await getQueries.getUserProjectsWithMembers(userId);
-}
+
 export async function getProjectDataAction(projectId: string){
   return await getQueries.getProjectData(projectId);
 }

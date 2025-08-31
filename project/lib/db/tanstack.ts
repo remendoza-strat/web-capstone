@@ -7,9 +7,6 @@ import * as Schema from "@/lib/db/schema"
 
 
 
-
-
-
 export function getUserId(clerkId: string, options: { enabled: boolean }){
   return useQuery({
     queryKey: ["user-id", clerkId],
@@ -155,7 +152,30 @@ export function getUserTasks(userId: string, options: { enabled: boolean }){
   });
 }
 
+export function getUserProjectsWithMembers(userId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["project-members", userId],
+    queryFn: async () => {
+      const result = await Actions.getUserProjectsWithMembersAction(userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.userProjectsMembers;
+    },
+    enabled: options.enabled
+  });
+}
 
+export function updateMemberRole(){
+  return useMutation({
+    mutationFn: async ({ pmId, updPm, userId } : { pmId: string, updPm: Partial<typeof Schema.projectMembers.$inferInsert>, userId: string }) => {
+      const result = await Actions.updateMemberRoleAction(pmId, updPm, userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
 
 
 
@@ -215,16 +235,6 @@ export function KanbanCreateTask(){
 
 
 
-export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["all-project-members", userId],
-    queryFn: async () => {
-      const data = await Actions.getUserProjectsWithMembersAction(userId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!userId
-  });
-}
 
 export function getProjectData(projectId: string, options? : { enabled?: boolean }){
   return useQuery({

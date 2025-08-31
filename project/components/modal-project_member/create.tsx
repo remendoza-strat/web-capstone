@@ -141,6 +141,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
       closeModal();
       onProjectSelect?.(selectedProjectId);
       queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+      queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
     } 
     catch(err){
       const error = err as { message?: string };
