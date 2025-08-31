@@ -1,10 +1,10 @@
 "use client"
-import { Mail, Calendar, Edit2, UserX  } from "lucide-react"
-import { ProjectMemberUser } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
+import { ProjectMemberUser } from "@/lib/customtype"
+import { Mail, Calendar, Edit2, UserX, Shield, Clock  } from "lucide-react"
 import UserAvatar from "@/components/user-avatar"
 
-export function MemberCard(
+export default function MemberCard(
   { userId, canEdit, member, onUpdateClick, onDeleteClick } :
   { userId: string, canEdit: boolean, member: ProjectMemberUser; onUpdateClick?: (member: ProjectMemberUser) => void; onDeleteClick?: (member: ProjectMemberUser) => void; }){
  
@@ -64,7 +64,10 @@ export function MemberCard(
               member.approved ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
             }`}
           >
-            {member.approved ? "Approved" : "Pending"}
+            <div className="flex flex-row">
+              {member.approved? <Shield className="w-3 h-3 mr-1"/> : <Clock className="w-3 h-3 mr-1"/>}
+              {member.approved ? "Approved" : "Pending"}
+            </div>
           </span>
         </div>
       </div>

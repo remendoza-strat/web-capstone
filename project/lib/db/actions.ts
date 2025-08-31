@@ -161,8 +161,14 @@ export async function ValidUser(userId: string){
 }
 
 // Checking for:
+// are ids formar correct?
 // can user perform the action?
 export async function UserPermission(userId: string, projectId: string, action: keyof Permissions){
+
+  // Check formats
+  if(!isUuid(userId) || !isUuid(projectId)){
+    return { success: false, message: "Invalid ID." };
+  }
   
   // Validate user permission
   const getUser = await getQueries.getMember(userId, projectId);
@@ -529,6 +535,66 @@ export async function updateMemberRoleAction(pmId: string, updPm: Partial<typeof
 
 }
 
+export async function deleteProjectAction(projectId: string, userId: string){
+  
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
+  
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
+
+  // Validate user permission
+  const checkPermission = await UserPermission(userId, projectId, "editProject");
+  if(!checkPermission.success){
+    return { success: false, message: checkPermission.message };
+  }
+  
+  // Delete project
+  await deleteQueries.deleteProject(projectId);
+  return { success: true };
+
+}
+
+export async function kickMemberAction(pmId: string, projectId: string, memberId: string, userId: string){
+  
+  // Validate project member
+  const checkMember = await ValidProjecMember(pmId);
+  if(!checkMember.exist?.userId){
+    return { success: false, message: checkMember.message };
+  }
+
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
+
+  // Validate user
+  const checkUser = await ValidUser(memberId);
+  if(!checkUser.success){
+    return { success: false, message: checkUser.message };
+  }
+
+  // Validate user permission
+  const checkPermission = await UserPermission(userId, projectId, "editMember");
+  if(!checkPermission.success){
+    return { success: false, message: checkPermission.message };
+  }
+
+  // Kick the user from project
+  await deleteQueries.deleteProjectMember(pmId);
+  await deleteQueries.deleteAllTaskAssignee(projectId, memberId);
+  await deleteQueries.deleteAllComment(projectId, memberId)
+  return { success: true }
+
+}
+
 
 
 
@@ -616,42 +682,23 @@ export async function KanbanCreateTaskAction
     { action: "update", task: fullTask }
   );
 }
-
-// GET ACTIONS
-
 export async function getProjectDataAction(projectId: string){
   return await getQueries.getProjectData(projectId);
 }
 export async function getTaskDataAction(taskId: string){
   return await getQueries.getTaskData(taskId);
 }
-
-
-// CREATE ACTIONS
 export async function createUserAction(newUser: NewUser){
   return await createQueries.createUser(newUser);
 }
-
-
-
-
 export async function createCommentAction(newComment: NewComment){
   await createQueries.createComment(newComment);
 }
-
-// UPDATE ACTIONS
-
-
 export async function updateCommentAction(cId: string, updComment: Partial<typeof comments.$inferInsert>){
   await updateQueries.updateComment(cId, updComment);
 }
 export async function updateUserAction(clerkId: string, updUser: Partial<typeof users.$inferInsert>){
   await updateQueries.updateUser(clerkId, updUser);
-}
-
-// DELETE ACTIONS
-export async function deleteProjectAction(projectId: string){
-  await deleteQueries.deleteProject(projectId);
 }
 export async function deleteTaskAssigneeAction(taId: string){
   await deleteQueries.deleteTaskAssignee(taId);

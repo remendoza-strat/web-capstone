@@ -130,7 +130,7 @@ export function deleteProjectMember(){
 export function updateProjectMember(){
   return useMutation({
     mutationFn: async ({ pmId, updPm } : { pmId: string, updPm: Partial<typeof Schema.projectMembers.$inferInsert> }) => {
-      const result =  await Actions.updateProjectMemberAction(pmId, updPm);
+      const result = await Actions.updateProjectMemberAction(pmId, updPm);
       if(!result.success){
         throw { message: result.message };
       }
@@ -170,6 +170,28 @@ export function updateMemberRole(){
   return useMutation({
     mutationFn: async ({ pmId, updPm, userId } : { pmId: string, updPm: Partial<typeof Schema.projectMembers.$inferInsert>, userId: string }) => {
       const result = await Actions.updateMemberRoleAction(pmId, updPm, userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
+
+export function deleteProject(){
+  return useMutation({
+    mutationFn: async ({ projectId, userId } : { projectId: string, userId: string }) => {
+      const result = await Actions.deleteProjectAction(projectId, userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
+
+export function kickMember(){
+  return useMutation({
+    mutationFn: async ({ pmId, projectId, memberId, userId } : { pmId: string, projectId: string, memberId: string, userId: string }) => {
+      const result = await Actions.kickMemberAction(pmId, projectId, memberId, userId);
       if(!result.success){
         throw { message: result.message };
       }
@@ -264,39 +286,6 @@ export function getTaskData(taskId: string, options? : { enabled?: boolean }){
 
 
 
-export function deleteProject(userId: string){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ projectId } : { projectId: string }) => {
-      await Actions.deleteProjectAction(projectId);
-    },
-    onSuccess: (_, vars) => {
-      queryClient.setQueryData(["user-projects", userId], (old: any) => {
-        if (!old) return old;
-        return old.filter((p: any) => p.id !== vars.projectId);
-      });
-      queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
-    }
-  });
-}
-
-export function kickMember(userId: string){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ pmId, projectId, userId } : { pmId: string, projectId: string, userId: string }) => {
-      await Actions.deleteProjectMemberAction(pmId);
-      await Actions.deleteAllTaskAssigneeAction(projectId, userId);
-      await Actions.deleteAllCommentAction(projectId, userId)
-    },
-    onSuccess: (_, vars) => {
-      queryClient.setQueryData(["user-projects", userId], (old: any) => {
-        if (!old) return old;
-        return old.filter((p: any) => p.id !== vars.projectId);
-      });
-      queryClient.invalidateQueries({ queryKey: ["all-project-members", userId] });
-    }
-  });
-}
 
 export function deleteTaskAssignee(){
   return useMutation({

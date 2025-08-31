@@ -47,7 +47,8 @@ export default function UpdateProjectMember(
 
     // Setup data to update
     const updPm: Partial<typeof projectMembers.$inferInsert> = {
-      projectId: member.projectId, role: role 
+      projectId: member.projectId, 
+      role: role 
     }
       
     // Update member  

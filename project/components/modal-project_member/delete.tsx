@@ -1,8 +1,9 @@
-import { toast } from "sonner"
-import { X, AlertTriangle, Trash2  } from "lucide-react"
 import { ProjectMemberUser } from "@/lib/customtype"
-import { deleteProject, kickMember } from "@/lib/db/tanstack"
 import { useModal } from "@/lib/states"
+import { useQueryClient } from "@tanstack/react-query"
+import { deleteProject, kickMember } from "@/lib/db/tanstack"
+import { toast } from "sonner"
+import { X, AlertTriangle  } from "lucide-react"
 import UserAvatar from "@/components/user-avatar"
 
 export default function DeleteProjectMember(
@@ -11,48 +12,55 @@ export default function DeleteProjectMember(
   
   // Closing modal
   const {closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
   
-  // Delete or kick member
-  const deleteProjectMutation = deleteProject(userId);
-  const kickMemberMutation = kickMember(userId);
+  // Delete project or kick member
+  const deleteProjectMutation = deleteProject();
+  const kickMemberMutation = kickMember();
 
   // Handle submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function handleSubmit(e: React.FormEvent){
+    e.preventDefault()
 
-    // Kick self and delete project
-    if(members.length === 1){
-      deleteProjectMutation.mutate({ projectId: member.projectId }, {
-        onSuccess: () => {
-          toast.success("Project left and deleted successfully.");
-          closeModal();
-          onProjectSelect?.(member.projectId);
-        },
-        onError: () => {
-          toast.error("Error occured.");
-          closeModal();
-        }
-      });
-      return;
-    }
+    // Approved member checking and kicking
+    if(member.approved){
+      const approvedMembers = members.filter((m) => m.approved);
+      const pMs = approvedMembers.filter((m) => m.role === "Project Manager");
 
-    // Prevent project with no project manager
-    const pmCount = (members.filter((m) => m.role === "Project Manager" && m.approved)).length;
-    if(member.role === "Project Manager" && member.approved && pmCount === 1){
-      toast.error("Project needs at least one approved project manager.");
-      closeModal();
-      return;
+      if(approvedMembers.length === 1){
+        deleteProjectMutation.mutate({ projectId: member.projectId, userId: userId }, {
+          onSuccess: () => {
+            toast.success("Project left and deleted successfully.");
+            closeModal();
+            onProjectSelect?.(member.projectId);
+            queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
+          },
+          onError: () => {
+            toast.error("Error leaving the project.");
+            closeModal();
+          }
+        })
+        return;
+      }
+      if(member.role === "Project Manager" && pMs.length === 1 && approvedMembers.length > 1) {
+        toast.error("Project needs at least one approved project manager.");
+        closeModal();
+        return;
+      }
     }
 
     // Kick member
-    kickMemberMutation.mutate({pmId: member.id, projectId: member.projectId, userId: member.user.id}, {
+    kickMemberMutation.mutate({ pmId: member.id, projectId: member.projectId, memberId: member.userId, userId: userId }, {
       onSuccess: () => {
         toast.success("User successfully kicked.");
         closeModal();
         onProjectSelect?.(member.projectId);
+        queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
       },
       onError: () => {
-        toast.error("Error occured.");
+        toast.error("Error kicking the user.");
         closeModal();
       }
     });
