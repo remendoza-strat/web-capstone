@@ -500,7 +500,19 @@ export async function updateProjectMemberAction(pmId: string, updPm: Partial<typ
 
 }
 
+export async function getUserTasksAction(userId: string){
+ 
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
 
+  // Return userTasks
+  const userTasks = await getQueries.getUserTasks(userId);
+  return { success: true, userTasks };
+  
+}
 
 
 
@@ -611,9 +623,7 @@ export async function getProjectDataAction(projectId: string){
 export async function getTaskDataAction(taskId: string){
   return await getQueries.getTaskData(taskId);
 }
-export async function getUserTasksAction(userId: string){
-  return await getQueries.getUserTasks(userId);
-}
+
 
 // CREATE ACTIONS
 export async function createUserAction(newUser: NewUser){

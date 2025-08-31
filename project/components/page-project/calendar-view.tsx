@@ -1,11 +1,11 @@
 "use client"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import "react-big-calendar/lib/css/react-big-calendar.css"
+import { enUS } from "date-fns/locale"
 import { Calendar, Views, dateFnsLocalizer, View } from "react-big-calendar"
 import { format, parse, startOfWeek, getDay } from "date-fns"
-import { enUS } from "date-fns/locale"
 import { Task } from "@/lib/db/schema"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { LimitChar, PhDate, StripHTML } from "@/lib/utils"
 
 // Handle formatting
@@ -18,7 +18,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-export function CalendarView({ tasks } : { tasks: Task[] }){
+export default function CalendarView({ tasks } : { tasks: Task[] }){
   // Which view display
   const [view, setView] = useState<View>(Views.MONTH);
 
@@ -32,8 +32,8 @@ export function CalendarView({ tasks } : { tasks: Task[] }){
   const events = tasks.map((task) => ({
     id: task.id,
     title: task.title,
-    start: PhDate(task.dueDate)!,
-    end: PhDate(task.dueDate)!,
+    start: PhDate(task.dueDate),
+    end: PhDate(task.dueDate),
     allDay: false,
     description: StripHTML(task.description),
     resource: task
@@ -72,7 +72,6 @@ export function CalendarView({ tasks } : { tasks: Task[] }){
 
   // Task card content
   const CustomEvent = ({ event }: { event: any }) => {
-    const task = event.resource as Task;
     return(
       <div className="flex flex-col text-sm">
         <strong className="truncate">
@@ -157,6 +156,50 @@ export function CalendarView({ tasks } : { tasks: Task[] }){
           }
           .dark .rbc-time-content .rbc-time-slot {
             color: rgb(229, 231, 235);
+          }
+          @media (max-width: 768px) {
+            .rbc-toolbar {
+              flex-direction: column;
+              gap: 8px;
+              text-align: center;
+            }
+            .rbc-toolbar-label {
+              font-size: 1rem;
+            }
+            .rbc-toolbar button {
+              padding: 6px 10px;
+              font-size: 0.85rem;
+            }
+            .rbc-header {
+              font-size: 0.85rem;
+              padding: 8px 4px;
+            }
+            .rbc-date-cell {
+              font-size: 0.8rem;
+              padding: 4px;
+            }
+            .rbc-month-row .rbc-row-content { 
+              min-height: 100px !important;
+            }
+            .rbc-event {
+              font-size: 0.75rem !important;
+              padding: 4px 6px !important;
+              line-height: 1.1rem !important;
+            }
+            .rbc-agenda-view table {
+              display: block;
+              overflow-x: auto;
+              white-space: nowrap;
+            }
+          }
+          @media (max-width: 480px) {
+            .rbc-toolbar { font-size: 0.8rem; }
+            .rbc-toolbar button { padding: 4px 8px; }
+            .rbc-toolbar-label { font-size: 0.9rem; }
+            .rbc-event {
+              font-size: 0.7rem !important;
+              padding: 2px 4px !important;
+            }
           }
         `}
       </style>

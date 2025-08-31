@@ -141,14 +141,19 @@ export function updateProjectMember(){
   });
 }
 
-
-
-
-
-
-
-
-
+export function getUserTasks(userId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["user-tasks", userId],
+    queryFn: async () => {
+      const result = await Actions.getUserTasksAction(userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.userTasks;
+    },
+    enabled: options.enabled
+  });
+}
 
 
 
@@ -208,16 +213,7 @@ export function KanbanCreateTask(){
   });
 }
 
-export function getUserTasks(userId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["user-tasks", userId],
-    queryFn: async () => {
-      const data = await Actions.getUserTasksAction(userId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!userId
-  });
-}
+
 
 export function getUserProjectsWithMembers(userId: string, options? : { enabled?: boolean }){
   return useQuery({

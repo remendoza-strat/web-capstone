@@ -1,11 +1,10 @@
 "use client"
+import { UserTask } from "@/lib/customtype"
+import { DateTimeFormatter, LimitChar, StripHTML } from "@/lib/utils"
 import Link from "next/link"
 import { List, Flag, Tag, Calendar, BarChart3, FolderOpen, AlertTriangle, CheckCircle } from "lucide-react"
-import { DateTimeFormatter, LimitChar, StripHTML } from "@/lib/utils"
-import { UserTask } from "@/lib/customtype"
 
-export function UpcomingTasks({ tasks } : { tasks: UserTask[] }){
-
+export default function UpcomingTasks({ tasks } : { tasks: UserTask[] }){
   // Get color of priority
   function PriorityColor(priority: string){
     if (priority === "High") return "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400";
@@ -19,8 +18,8 @@ export function UpcomingTasks({ tasks } : { tasks: UserTask[] }){
       const id = t.task.id;
       const label = t.task.label;
       const priority = t.task.priority;
-      const title = t.task.title;
-      const description = LimitChar(StripHTML(t.task.description), 120);
+      const title = LimitChar(t.task.title, 20);
+      const description = LimitChar(StripHTML(t.task.description), 100);
       const deadline = DateTimeFormatter(t.task.dueDate);
       const name = t.task.project.name;
       const progress = Math.round((t.task.position / t.task.project.columnCount) * 100);
