@@ -72,10 +72,21 @@ export const ProjectSchema = z.object({
     .string().trim()
     .min(3, "Column Name: Must be at least 3 characters.")
     .max(50, "Column Name: Must not exceed 50 characters."),
-  
+
+  // Update At validation
+  updatedAt: z
+    .preprocess((val) => {
+      if(typeof val === "string" || val instanceof Date){
+        const parsed = new Date(val);
+        return isNaN(parsed.getTime()) ? undefined : parsed;
+      } return undefined}, 
+    z
+      .date({ message: "Updated At: Must be a valid date." }))
+
 });
 export const ClientCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true});
 export const ServerCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true, columnCount: true, columnNames: true });
+export const ServerUpdateProjectTimeSchema = ProjectSchema.pick({ updatedAt: true });
 
 // Project member data schema
 export const ProjectMemberSchema = z.object({

@@ -87,7 +87,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
       }
     }, 300);
     return () => clearTimeout(timeout);
-  }, [query, selectedUsers, selectedProjectId]);
+  }, [query, selectedUsers]);
 
   // Add selected user to array
   const handleAddUser = (user: User) => {

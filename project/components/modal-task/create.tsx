@@ -1,18 +1,18 @@
 "use client"
 import "react-quill-new/dist/quill.snow.css"
 import dynamic from "next/dynamic"
-import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search, ChartNoAxesColumn, Type, UsersRound } from "lucide-react"
-import { toast } from "sonner"
-import { useState, useEffect } from "react"
-import { ClientCreateTaskSchema } from "@/lib/validations"
-import { StripHTML } from "@/lib/utils"
-import { Priority, PriorityArr } from "@/lib/customtype"
-import type { NewTask, NewTaskAssignee, User} from "@/lib/db/schema"
-import type { UserProjects } from "@/lib/customtype"
-import { hasPermission } from "@/lib/permissions"
+import { type UserProjects, Priority, PriorityArr } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
-import UserAvatar from "@/components/user-avatar"
+import { hasPermission } from "@/lib/permissions"
+import { useQueryClient } from "@tanstack/react-query"
+import type { NewTask, NewTaskAssignee, User } from "@/lib/db/schema"
+import { useState, useEffect } from "react"
 import { createTask, createTaskAssignee, updateProject } from "@/lib/db/tanstack"
+import { toast } from "sonner"
+import { StripHTML } from "@/lib/utils"
+import { ClientCreateTaskSchema } from "@/lib/validations"
+import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search, ChartNoAxesColumn, Type, UsersRound } from "lucide-react"
+import UserAvatar from "@/components/user-avatar"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
@@ -25,6 +25,9 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
 	const projects: UserProjects[] = projectsData
 		.filter((project) => project.members.some((member) => member.userId === userId && member.approved && hasPermission(member.role, "addTask")))
     .map((project) => ({...project, members: project.members.filter((member) => member.approved)}));
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
 	// Hook for project
 	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
@@ -45,7 +48,7 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
   // Mutations to perform
   const createTaskMutation = createTask();
   const createTaskAssigneeMutation = createTaskAssignee();
-  const updateProjectMutation = updateProject(userId);
+  const updateProjectMutation = updateProject();
 
 	// Set initial selected project
 	useEffect(() =>{
@@ -113,6 +116,7 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
     
     // Get selected project due date
     const project = projects.find(p => p.id === selectedProjectId);
+    if (!project) return;
     const deadline = project?.dueDate;
     if(deadline){
       const projDue = new Date(deadline);
@@ -142,59 +146,57 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
 
     // Get order of task
     let lastOrder = 0;
-    if(project){
-      const columnTasks = project.tasks.filter(t => t.position === selectedColumn);
-      if(columnTasks.length > 0){
-        lastOrder = Math.max(...columnTasks.map(t => t.order), 0) + 1;
-      }
+    const columnTasks = project.tasks.filter(t => t.position === selectedColumn);
+    if(columnTasks.length > 0){
+      lastOrder = Math.max(...columnTasks.map(t => t.order), 0) + 1;
     }
-
-    if(project){
-      try{
-        // Create object of new task
-        const newTask: NewTask = {
-          projectId: project.id,
-          title: title,
-          description: description,
-          dueDate: new Date(dueDate),
-          priority: priority,
-          position: selectedColumn,
-          order: lastOrder,
-          label: label
-        };
+    
+    try{
+      // Create object of new task
+      const newTask: NewTask = {
+        projectId: project.id,
+        title: title,
+        description: description,
+        dueDate: new Date(dueDate),
+        priority: priority,
+        position: selectedColumn,
+        order: lastOrder,
+        label: label
+      };
+      
+      // Create task
+      const taskId = await createTaskMutation.mutateAsync({ newTask: newTask, userId: userId});
+      if (!taskId) return;
         
-        // Create task
-        const taskId = await createTaskMutation.mutateAsync({ newTask, userId});
-        if (!taskId) return;
-          
-        // Assign task
-        for(const { user } of selectedUsers){
-          const newTaskAssignee: NewTaskAssignee = {
-            taskId: taskId,
-            userId: user.id
-          };
-          await createTaskAssigneeMutation.mutateAsync({newTaskAssignee, userId, projectId: project.id});
-        }
-      } 
-
-      catch(err){
-            const error = err as { message?: string };
-            toast.error(error.message ?? "Error creating project member.");
-            closeModal();
-          }
-
-      // Update project  
-      updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() } }, {
-        onSuccess: () => {
-          toast.success("Task created successfully.");
-          closeModal();
-        },
-        onError: () => {
-          toast.error("Error occured.");
-          closeModal();
-        }
-      });
+      // Assign task
+      for(const { user } of selectedUsers){
+        const newTaskAssignee: NewTaskAssignee = {
+          taskId: taskId,
+          userId: user.id
+        };
+        await createTaskAssigneeMutation.mutateAsync({ newTaskAssignee: newTaskAssignee, userId: userId, projectId: project.id });
+      }
+    } 
+    catch(err){
+      const error = err as { message?: string };
+      toast.error(error.message ?? "Error creating task.");
+      closeModal();
+      return;
     }
+
+    // Update project  
+    updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() } , userId: userId}, {
+      onSuccess: () => {
+        toast.success("Task created successfully.");
+        closeModal();
+        queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+      },
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error creating task.");
+        closeModal();
+      }
+    });
 	};
 
   return(

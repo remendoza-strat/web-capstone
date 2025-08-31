@@ -108,9 +108,16 @@ export function createTaskAssignee(){
   });
 }
 
-
-
-
+export function updateProject(){
+  return useMutation({
+    mutationFn: async ({ projectId, updProject, userId } : { projectId: string; updProject: Partial<typeof Schema.projects.$inferInsert>, userId: string }) => {
+      const result = await Actions.updateProjectAction(projectId, updProject, userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
 
 
 
@@ -286,18 +293,7 @@ export function deleteTaskAssignee(){
 
 
 
-export function updateProject(userId: string){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ projectId, updProject } : { projectId: string; updProject: Partial<typeof Schema.projects.$inferInsert> }) => {
-      return await Actions.updateProjectAction(projectId, updProject);
-    },
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
-      queryClient.invalidateQueries({ queryKey: ["project-data", vars.projectId] });
-    }
-  });
-}
+
 
 export function deleteProjectMember(userId: string){
   const queryClient = useQueryClient();

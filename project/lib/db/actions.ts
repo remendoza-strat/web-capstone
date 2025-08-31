@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
 import { auth } from "@clerk/nextjs/server"
 import { validate as isUuid } from "uuid"
-import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema } from "../validations"
+import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema, ServerUpdateProjectTimeSchema } from "../validations"
 import { hasPermission, Permissions } from "../permissions"
 
 
@@ -407,6 +407,37 @@ export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee,
 
 }
 
+export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, userId: string){
+
+  if("updatedAt" in updProject){
+
+    // Validate data
+    const result = ServerUpdateProjectTimeSchema.safeParse({
+      updatedAt: updProject.updatedAt
+    });
+    if(!result.success){
+      return { success: false, message: result.error.issues[0].message };
+    }
+
+    // Validate project
+    const checkProject = await ValidProject(projectId);
+    if(!checkProject.success){
+      return { success: false, message: checkProject.message };
+    }
+
+    // Validate user permission
+    const checkPermission = await UserPermission(userId, projectId, "addTask");
+    if(!checkPermission.success){
+      return { success: false, message: checkPermission.message };
+    }
+    
+  }
+
+  // Update project
+  await updateQueries.updateProject(projectId, updProject);
+  return {success: true};
+
+}
 
 
 
@@ -523,9 +554,7 @@ export async function createCommentAction(newComment: NewComment){
 }
 
 // UPDATE ACTIONS
-export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
-  await updateQueries.updateProject(projectId, updProject);
-}
+
 export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
   await updateQueries.updateProjectMember(pmId, updPm);
 }
