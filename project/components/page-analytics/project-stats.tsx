@@ -1,9 +1,9 @@
 "use client"
-import { TrendingUp, TrendingDown, Activity, AlertTriangle, LibraryBig } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 import { TaskTrack } from "@/lib/utils"
+import { TrendingUp, TrendingDown, Activity, AlertTriangle, LibraryBig } from "lucide-react"
 
-export function ProjectStats({ project } : { project?: UserProjects | null }){
+export default function ProjectStats({ project } : { project?: UserProjects | null }){
   // Get data
   const tasks = project?.tasks ?? [];
   const columns = project?.columnCount?? 0;
@@ -23,7 +23,7 @@ export function ProjectStats({ project } : { project?: UserProjects | null }){
 
   // Active tasks card data
   const activeTasks = tasks.filter(
-    (t) => new Date() <= new Date(t.dueDate) && t.position !== done
+    (t) => new Date() < new Date(t.dueDate) && t.position !== done
   ).length;
 
   return(
@@ -38,7 +38,7 @@ export function ProjectStats({ project } : { project?: UserProjects | null }){
         <div className="flex flex-col space-y-2">
           <div>
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Total Tasks
+              Total
             </p>
             <p className="text-3xl font-bold text-gray-900 dark:text-white">
               {tasks.length}

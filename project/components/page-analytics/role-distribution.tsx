@@ -1,9 +1,9 @@
 "use client"
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts"
-import { Users } from "lucide-react"
 import { MembersWithData, RoleArr } from "@/lib/customtype"
+import { Users } from "lucide-react"
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts"
 
-export function RoleDistribution({ members }: { members: MembersWithData[] }){
+export default function RoleDistribution({ members }: { members: MembersWithData[] }){
   // Get count per role
   const roleData = RoleArr.map((role) => ({
     role,
