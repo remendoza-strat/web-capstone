@@ -9,6 +9,152 @@ import { projectMembers } from './schema';
 import { auth } from "@clerk/nextjs/server"
 import { validate as isUuid } from "uuid"
 import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema } from "../validations"
+import { hasPermission, Permissions } from "../permissions"
+
+
+// Invalid ID.
+// User not found.
+// Unauthorized action.
+// Project not found.
+
+
+
+
+
+
+
+// Checking for:
+// is parameter clerkId === current clerkId?
+export async function ClerkIdMatcher(clerkId: string){
+
+  // Get clerkId of current user
+  const { userId: currentId } = await auth();
+
+	// Check if current user clerkId and passed clerkId matches
+  if(currentId !== clerkId){
+    return { success: false, message: "Unauthorized action." };
+  }
+
+  // Return true
+  return {success: true};
+
+}
+
+// Checking for:
+// is userId format correct?
+// does userId's clerkId exist in db?
+// ClerkIdMatcher()
+export async function UserIdValidator(userId: string){
+
+  // Check format of userId
+  if(!isUuid(userId)){
+    return { success: false, message: "Invalid ID." };
+  }
+
+	// Try to get clerkId with userId
+  const clerkId = await getQueries.getClerkId(userId);
+  if(!clerkId){
+    return { success: false, message: "User not found." };
+  }
+
+  // Validate clerkId
+  const check = await ClerkIdMatcher(clerkId);
+  if(!check.success){
+    return { success: false, message: check.message };
+  }
+
+  // Return true
+  return { success: true };
+
+}
+
+// Checking for:
+// is user authenticated?
+export async function UserAuthValidation(){
+
+  // Get clerkId of current user
+  const { userId: currentId } = await auth();
+
+	// Check if authenticated
+	if(!currentId){
+    return { success: false, message: "Unauthorized action." };
+  }
+
+  // Return true
+  return { success: true};
+
+}
+
+// Checking for:
+// is projectId format correct?
+// does the project exist?
+export async function ValidProject(projectId: string){
+  
+  // Check projectId format
+   if(!isUuid(projectId)){
+    return { success: false, message: "Invalid ID." };
+  }
+
+  // Check if project exist
+  const exist = await getQueries.getProject(projectId);
+  if(!exist){
+    return { success: false, message: "Project not found." };
+  }
+
+  // Return true
+  return { success: true };
+
+}
+
+// Checking for:
+// is userId format correct?
+// does the user exist?
+export async function ValidUser(userId: string){
+
+  // Check userId format
+  if(!isUuid(userId)){
+    return { success: false, message: "Invalid ID." };
+  }
+  
+  // Check if user exist
+  const exist = await getQueries.getClerkId(userId);
+  if(!exist){
+    return { success: false, message: "User not found." };
+  }
+
+  // Return true
+  return {success: true};
+}
+
+// Checking for:
+// can user perform the action?
+export async function UserPermission(userId: string, projectId: string, action: keyof Permissions){
+  
+  // Validate user permission
+  const getUser = await getQueries.getMember(userId, projectId);
+  if(!getUser || !hasPermission(getUser.role, action)){
+    return { success: false, message: "Unauthorized action." }; 
+  }
+
+  // Return true
+  return {success: true};
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17,12 +163,10 @@ import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema } from "../v
 
 export async function getUserIdAction(clerkId: string){
 
-	// Get clerkId of current user
-  const { userId: currentId } = await auth();
-
-	// Check if current user clerkId and passed clerkId matches
-  if(currentId !== clerkId){
-    return { success: false, message: "Unauthorized action." };
+  // Validate clerkId
+  const check = await ClerkIdMatcher(clerkId);
+  if(!check.success){
+    return { success: false, message: check.message };
   }
 
 	// Return userId
@@ -33,23 +177,10 @@ export async function getUserIdAction(clerkId: string){
 
 export async function getUserProjectsAction(userId: string){
 
-  // Check format of userId
-  if(!isUuid(userId)){
-    return { success: false, message: "Invalid id." };
-  }
-
-	// Try to get clerkId with userId
-  const clerkId = await getQueries.getClerkId(userId);
-  if(!clerkId){
-    return { success: false, message: "User not found." };
-  }
-
-	// Get clerkId of current user
-  const { userId: currentId } = await auth();
-
-	// Check if clerkId of passed userId matches current clerkId
-	if(currentId !== clerkId){
-    return { success: false, message: "Unauthorized action." };
+  // Validate userId
+  const check = await UserIdValidator(userId);
+  if(!check.success){
+    return { success: false, message: check.message };
   }
 
 	// Return userProjects
@@ -72,18 +203,16 @@ export async function createProjectAction(newProject: NewProject){
     return { success: false, message: result.error.issues[0].message };
   }
 
-  // Get clerkId of current user
-  const { userId: currentId } = await auth();
-
-	// Check authenticated
-	if(!currentId){
-    return { success: false, message: "Unauthorized action." };
+  // Validate user authentication
+  const check = await UserAuthValidation();
+  if(!check.success){
+    return { success: false, message: check.message };
   }
 
   // Return projectId
   const projectId = await createQueries.createProject(newProject);
 	return { success: true, projectId };
-  
+
 }
 
 export async function createProjectMemberAction(newProjectMember: NewProjectMember){
@@ -99,16 +228,16 @@ export async function createProjectMemberAction(newProjectMember: NewProjectMemb
     return { success: false, message: result.error.issues[0].message };
   }
 
-  // Check if user exist
-  const userExist = await getQueries.getClerkId(newProjectMember.userId);
-  if(!userExist){
-    return { success: false, message: "User not found." };
+  // Validate project
+  const checkProject = await ValidProject(newProjectMember.projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
   }
 
-  // Check if project exist
-  const projectExist = await getQueries.getProjectData(newProjectMember.projectId);
-  if(!projectExist){
-    return { success: false, message: "Project not found." };
+  // Validate userId
+  const checkUserId = await UserIdValidator(newProjectMember.userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
   }
 
   // Create project member
@@ -117,7 +246,62 @@ export async function createProjectMemberAction(newProjectMember: NewProjectMemb
 
 }
 
+export async function addProjectMemberAction(newProjectMember: NewProjectMember, userId: string){
 
+  // Validate data
+  const result = ServerCreateProjectMemberSchema.safeParse({
+    projectId: newProjectMember.projectId,
+    userId: newProjectMember.userId,
+    role: newProjectMember.role,
+    approved: newProjectMember.approved
+  });
+  if(!result.success){
+    return { success: false, message: result.error.issues[0].message };
+  }
+
+  // Validate project
+  const checkProject = await ValidProject(newProjectMember.projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
+
+  // Validate user
+  const checkUser = await ValidUser(newProjectMember.userId);
+  if(!checkUser.success){
+    return { success: false, message: checkUser.message };
+  }
+
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
+
+  // Validate user permission
+  const checkPermission = await UserPermission(userId, newProjectMember.projectId, "addMember");
+  if(!checkPermission.success){
+    return { success: false, message: checkPermission.message };
+  }
+
+  // Create project member
+  await createQueries.createProjectMember(newProjectMember);
+  return { success: true };
+
+}
+
+export async function getAllUsersAction(){
+
+  // Validate user authentication
+  const check = await UserAuthValidation();
+  if(!check.success){
+    return { success: false, message: check.message };
+  }
+
+  // Return allUsers
+  const allUsers = await getQueries.getAllUsers();
+  return { success: true, allUsers };
+
+}
 
 
 
@@ -218,9 +402,6 @@ export async function KanbanCreateTaskAction
 // GET ACTIONS
 export async function getUserProjectsWithMembersAction(userId: string){
   return await getQueries.getUserProjectsWithMembers(userId);
-}
-export async function getAllUsersAction(){
-  return await getQueries.getAllUsers();
 }
 export async function getProjectDataAction(projectId: string){
   return await getQueries.getProjectData(projectId);

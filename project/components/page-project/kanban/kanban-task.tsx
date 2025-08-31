@@ -5,7 +5,7 @@ import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { DateTimeFormatter, LimitChar } from "@/lib/utils"
 import { TaskWithAssignees } from "@/lib/customtype"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 import { StripHTML } from "@/lib/utils"
 
 export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignees; userId: string; editTask: boolean; }){

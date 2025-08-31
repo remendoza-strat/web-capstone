@@ -11,7 +11,7 @@ import type { NewTask, NewTaskAssignee, User} from "@/lib/db/schema"
 import type { UserProjects } from "@/lib/customtype"
 import { hasPermission } from "@/lib/permissions"
 import { useModal } from "@/lib/states"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 import { createTask, createTaskAssignee, updateProject } from "@/lib/db/tanstack"
 
 // Dynamic import of react quill

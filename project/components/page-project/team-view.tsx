@@ -1,7 +1,7 @@
 import { Mail, Shield, Clock, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { MembersWithData } from "@/lib/customtype"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 
 export function TeamView({ members } : { members: MembersWithData[] }){
   // Going to team page

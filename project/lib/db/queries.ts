@@ -41,6 +41,24 @@ export const getQueries = {
     return result;
   },
 
+  getProject: async (projectId: string) => {
+    const result = await db.query.projects.findFirst({
+      where: (p, {eq}) => eq(p.id, projectId)
+    });
+    return result;
+  },
+
+  getMember: async (userId: string, projectId: string) => {
+    const result = await db.query.projectMembers.findFirst({
+      where: (pm, { eq, and }) => and(
+        eq(pm.userId, userId),
+        eq(pm.projectId, projectId),
+        eq(pm.approved, true)
+      )
+    });
+    return result;
+  },
+
   getProjectData: async (projectId: string) => {
     const result = await db.query.projects.findFirst({
       where: (p, {eq}) => eq(p.id, projectId),

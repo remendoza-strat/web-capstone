@@ -1,20 +1,23 @@
 "use client"
-import { X, Search, Trash2, Type, UsersRound } from "lucide-react"
-import { toast } from "sonner"
+import UserAvatar from "@/components/user-avatar"
+import { useModal } from "@/lib/states"
+import { useQueryClient } from "@tanstack/react-query"
 import { useState, useEffect } from "react"
 import type { NewProjectMember, User } from "@/lib/db/schema"
-import { Role, RoleArr } from "@/lib/customtype"
-import type { ProjectsWithMembers } from "@/lib/customtype"
+import { Role, RoleArr, type ProjectsWithMembers } from "@/lib/customtype"
 import { hasPermission } from "@/lib/permissions"
-import { createProjectMember, getAllUsers } from "@/lib/db/tanstack"
-import { UserAvatar } from "@/components/user-avatar"
-import { useModal } from "@/lib/states"
-import ErrorPage from "@/components/util-pages/error-page"
+import { addProjectMember, getAllUsers } from "@/lib/db/tanstack"
+import { toast } from "sonner"
 import LoadingPage from "@/components/util-pages/loading-page"
+import ErrorPage from "@/components/util-pages/error-page"
+import { X, Search, Trash2, Type, UsersRound } from "lucide-react"
 
 export default function CreateProjectMember({ userId, projectsData, onProjectSelect } : { userId: string; projectsData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
   // Modal closing
   const { closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
   // Hook for selected project
   const [selectedProjectId, setSelectedProjectId] = useState("");
@@ -29,7 +32,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
     .filter((project) => project.members.some((member) => member.userId === userId && member.approved && hasPermission(member.role, "addMember")));
 
   // Create project member
-  const createMutation = createProjectMember(userId);
+  const createMutation = addProjectMember();
 
   // Get all users
   const {
@@ -84,7 +87,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
       }
     }, 300);
     return () => clearTimeout(timeout);
-  }, [query, selectedUsers]);
+  }, [query, selectedUsers, selectedProjectId]);
 
   // Add selected user to array
   const handleAddUser = (user: User) => {
@@ -132,14 +135,16 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
           role: role,
           approved: false,
         };
-        await createMutation.mutateAsync({ newProjectMember });
+        await createMutation.mutateAsync({ newProjectMember, userId });
       }
       toast.success("Project membership invitation sent.");
       closeModal();
       onProjectSelect?.(selectedProjectId);
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
     } 
-    catch(error){
-      toast.error("Error occurred.");
+    catch(err){
+      const error = err as { message?: string };
+      toast.error(error.message ?? "Error creating project member.");
       closeModal();
     }
   };
@@ -147,7 +152,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
-        {allUsersLoading? (<LoadingPage/>) : allUsersError? (<ErrorPage code={404} message="Fetching data error"/>) :
+        {allUsersLoading? (<LoadingPage/>) : allUsersError? (<ErrorPage code={400} message={allUsersError.message || "Fetching data error."}/>) :
           (
             <>
               <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">

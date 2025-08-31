@@ -61,9 +61,29 @@ export function createProjectMember(){
   });
 }
 
+export function addProjectMember(){
+  return useMutation({
+    mutationFn: async ({ newProjectMember, userId } : { newProjectMember: Schema.NewProjectMember, userId: string }) => {
+      const result = await Actions.addProjectMemberAction(newProjectMember, userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
 
-
-
+export function getAllUsers(){
+  return useQuery({
+    queryKey: ["all-users"],
+    queryFn: async () => {
+      const result = await Actions.getAllUsersAction();
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.allUsers;
+    }
+  });
+}
 
 
 
@@ -166,15 +186,7 @@ export function getTaskData(taskId: string, options? : { enabled?: boolean }){
   });
 }
 
-export function getAllUsers(){
-  return useQuery({
-    queryKey: ["all-users"],
-    queryFn: async () => {
-      const data = await Actions.getAllUsersAction();
-      return data ?? null;
-    }
-  });
-}
+
 
 
 

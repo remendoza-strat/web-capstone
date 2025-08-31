@@ -10,7 +10,7 @@ import { Priority, PriorityArr } from "@/lib/customtype"
 import type { NewTask, User } from "@/lib/db/schema"
 import type { ProjectData } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 import { KanbanCreateTask, KanbanUpdateProject } from "@/lib/db/tanstack"
 
 // Dynamic import of react quill

@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Calendar, Users, CheckSquare, AlertTriangle, CheckCircle, Play } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 import { ComputeProgress, DateTimeFormatter, LimitChar, ProjectStatus } from "@/lib/utils"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 
 export function ProjectCard({ project } : { project: UserProjects }){
 	// Icon display

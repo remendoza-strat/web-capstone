@@ -2,7 +2,7 @@
 import { Mail, Calendar, Edit2, UserX  } from "lucide-react"
 import { ProjectMemberUser } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 
 export function MemberCard(
   { userId, canEdit, member, onUpdateClick, onDeleteClick } :

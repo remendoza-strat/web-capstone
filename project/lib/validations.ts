@@ -1,6 +1,15 @@
 import { z } from "zod"
 import { RoleArr } from "./customtype";
 
+
+
+
+
+
+
+
+
+
 // Project data validation
 export const ProjectSchema = z.object({
 
@@ -16,7 +25,8 @@ export const ProjectSchema = z.object({
     .min(10, "Description: Must be at least 10 characters."),
 
   // Due date validation
-  dueDate: z.preprocess(
+  dueDate: z
+    .preprocess(
     (val) => {
       if(typeof val === "string" || val instanceof Date){
         const parsed = new Date(val);
@@ -52,10 +62,10 @@ export const ProjectSchema = z.object({
 
   // Column names validation
   columnNames: z
-  .array(
-    z.string().trim().min(3, "Column Names: Each name must be at least 3 characters.")
-  )
-  .min(3, "Column Names: Must provide at least 3 column names."),
+    .array(z.string().trim()
+      .min(3, "Column Name: Must be at least 3 characters.")
+      .max(50, "Column Name: Must not exceed 50 characters."))
+    .min(3, "Column Names: Must provide at least 3 column names."),
 
   // Column name validation
   columnName: z
@@ -69,22 +79,36 @@ export const ServerCreateProjectSchema = ProjectSchema.pick({ name: true, descri
 
 // Project member data schema
 export const ProjectMemberSchema = z.object({
+
+  // Project ID validation
   projectId: z
     .uuid("Project ID: Must be a valid UUID."),
 
+  // User ID validation
   userId: z
     .uuid("User ID: Must be a valid UUID."),
 
+  // Role validaiton
   role: z
-  .enum(RoleArr, "Role: Must be a valid project role."),
+    .enum(RoleArr, "Role: Must be a valid project role."),
 
+  // Approved validation
   approved: z
-  .boolean()
-  .refine((val) => typeof val === "boolean", {
-    message: "Approved: Must be true or false."}),
+    .boolean()
+    .refine((val) => typeof val === "boolean", {message: "Approved: Must be true or false."}),
 
 });
 export const ServerCreateProjectMemberSchema = ProjectMemberSchema.pick({ projectId: true, userId: true, role: true, approved: true});
+
+
+
+
+
+
+
+
+
+
 
 
 

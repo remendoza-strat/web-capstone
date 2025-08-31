@@ -6,7 +6,7 @@ import { projectMembers } from "@/lib/db/schema"
 import { updateProjectMember } from "@/lib/db/tanstack"
 import { useModal } from "@/lib/states"
 import { X, UserCog } from "lucide-react"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 
 export function UpdateProjectMember(
   { userId, member, members, onProjectSelect } : 

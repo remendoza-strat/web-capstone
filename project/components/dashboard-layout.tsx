@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { Home, FolderOpen, Users, Menu, X, BarChart3, Calendar } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 import ThemeToggle from "@/components/theme-toggle"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 
 // Links of nav bar
 const navigation = [
