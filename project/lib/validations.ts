@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { RoleArr } from "./customtype";
+import { PriorityArr, RoleArr } from "./customtype";
 
 
 
@@ -100,35 +100,12 @@ export const ProjectMemberSchema = z.object({
 });
 export const ServerCreateProjectMemberSchema = ProjectMemberSchema.pick({ projectId: true, userId: true, role: true, approved: true});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Task data input validation
 export const TaskSchema = z.object({
+
+  // Project ID validation
+  projectId: z
+    .uuid("Project ID: Must be a valid UUID."),
 
   // Title validation
   title: z
@@ -148,7 +125,8 @@ export const TaskSchema = z.object({
     .max(50, "Label: Must not exceed 50 characters."),
   
   // Due date validation
-  dueDate: z.preprocess(
+  dueDate: z
+    .preprocess(
     (val) => {
       if(typeof val === "string" || val instanceof Date){
         const parsed = new Date(val);
@@ -176,7 +154,66 @@ export const TaskSchema = z.object({
       }
     )),
 
+  // Position validation
+  position: z
+    .number()
+    .int("Position: Must be an integer."),
+  
+  // Order validation
+  order: z
+    .number()
+    .int("Order: Must be an integer."),
+
+  // Priority validation
+  priority: z
+    .enum(PriorityArr, "Priority: Must be a valid project priority."),
+  
 });
+export const ClientCreateTaskSchema = TaskSchema.pick({ title: true, description: true, dueDate: true, label: true });
+export const ServerCreateTaskSchema = TaskSchema.pick({ projectId: true, title: true, description: true, dueDate: true, priority: true, position: true, 
+  order: true, label: true});
+
+// Task assignee data schema
+export const TaskAssigneeSchema = z.object({
+
+  // Task ID validation
+  taskId: z
+    .uuid("Project ID: Must be a valid UUID."),
+
+  // User ID validation
+  userId: z
+    .uuid("User ID: Must be a valid UUID."),
+
+});
+export const ServerCreateTaskAssigneeSchema = TaskAssigneeSchema.pick({ taskId: true, userId: true });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // User data input validation
 export const UserSchema = z.object({

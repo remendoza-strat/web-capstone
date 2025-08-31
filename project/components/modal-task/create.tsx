@@ -4,7 +4,7 @@ import dynamic from "next/dynamic"
 import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search, ChartNoAxesColumn, Type, UsersRound } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
-import { TaskSchema } from "@/lib/validations"
+import { ClientCreateTaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
 import { Priority, PriorityArr } from "@/lib/customtype"
 import type { NewTask, NewTaskAssignee, User} from "@/lib/db/schema"
@@ -43,7 +43,7 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
 	const [label, setLabel] = useState("");
 
   // Mutations to perform
-  const createTaskMutation = createTask(userId);
+  const createTaskMutation = createTask();
   const createTaskAssigneeMutation = createTaskAssignee();
   const updateProjectMutation = updateProject(userId);
 
@@ -127,32 +127,17 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
     const descriptionRaw = StripHTML(String(description).trim());
 
     // Validate input
-    const result = TaskSchema.safeParse({
+    const result = ClientCreateTaskSchema.safeParse({
       title: title,
       description: descriptionRaw,
       label: label,
       dueDate: new Date(dueDate)
     });
 
-    // Display errors
+    // Display error from validation
     if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.title?.[0]){
-        toast.error(errors.title[0]);
-        return;
-      }
-      if(errors.description?.[0]){
-        toast.error(errors.description[0]);
-        return;
-      }
-      if(errors.label?.[0]){
-        toast.error(errors.label[0]);
-        return;
-      }
-      if(errors.dueDate?.[0]){
-        toast.error(errors.dueDate[0]);
-        return;
-      } 
+      toast.error(result.error.issues[0].message);
+      return;
     }
 
     // Get order of task
@@ -179,7 +164,8 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
         };
         
         // Create task
-        const taskId = await createTaskMutation.mutateAsync({ newTask });
+        const taskId = await createTaskMutation.mutateAsync({ newTask, userId});
+        if (!taskId) return;
           
         // Assign task
         for(const { user } of selectedUsers){
@@ -187,14 +173,15 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
             taskId: taskId,
             userId: user.id
           };
-          await createTaskAssigneeMutation.mutateAsync(newTaskAssignee);
+          await createTaskAssigneeMutation.mutateAsync({newTaskAssignee, userId, projectId: project.id});
         }
       } 
-      catch{
-        toast.error("Error occurred.");
-        closeModal();
-        return;
-      }
+
+      catch(err){
+            const error = err as { message?: string };
+            toast.error(error.message ?? "Error creating project member.");
+            closeModal();
+          }
 
       // Update project  
       updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() } }, {

@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
 import { auth } from "@clerk/nextjs/server"
 import { validate as isUuid } from "uuid"
-import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema } from "../validations"
+import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema } from "../validations"
 import { hasPermission, Permissions } from "../permissions"
 
 
@@ -16,6 +16,7 @@ import { hasPermission, Permissions } from "../permissions"
 // User not found.
 // Unauthorized action.
 // Project not found.
+// Task not found.
 
 
 
@@ -99,6 +100,27 @@ export async function ValidProject(projectId: string){
   const exist = await getQueries.getProject(projectId);
   if(!exist){
     return { success: false, message: "Project not found." };
+  }
+
+  // Return true
+  return { success: true };
+
+}
+
+// Checking for:
+// is taskId format correct?
+// does the task exist?
+export async function ValidTask(taskId: string){
+  
+  // Check taskId format
+   if(!isUuid(taskId)){
+    return { success: false, message: "Invalid ID." };
+  }
+
+  // Check if task exist
+  const exist = await getQueries.getTask(taskId);
+  if(!exist){
+    return { success: false, message: "Task not found." };
   }
 
   // Return true
@@ -303,12 +325,87 @@ export async function getAllUsersAction(){
 
 }
 
+export async function createTaskAction(newTask: NewTask, userId: string){
 
+  // Validate data
+  const result = ServerCreateTaskSchema.safeParse({
+    projectId: newTask.projectId,
+    title: newTask.title,
+    description: newTask.description,
+    dueDate: newTask.dueDate,
+    priority: newTask.priority,
+    position: newTask.position,
+    order: newTask.order,
+    label: newTask.label
+  });
+  if(!result.success){
+    return { success: false, message: result.error.issues[0].message };
+  }
+  
+  // Validate project
+  const checkProject = await ValidProject(newTask.projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
 
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
 
+  // Validate user permission
+  const checkPermission = await UserPermission(userId, newTask.projectId, "addTask");
+  if(!checkPermission.success){
+    return { success: false, message: checkPermission.message };
+  }
 
+  // Return taskId
+  const taskId = await createQueries.createTask(newTask);
+  return { success: true, taskId};
+  
+}
 
+export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee, userId: string, projectId: string){
+  
+  // Validate data
+  const result = ServerCreateTaskAssigneeSchema.safeParse({
+    taskId: newTaskAssignee.taskId,
+    userId: newTaskAssignee.userId
+  });
+  if(!result.success){
+    return { success: false, message: result.error.issues[0].message };
+  }
 
+  // Validate task
+  const checkTask = await ValidTask(newTaskAssignee.taskId);
+  if(!checkTask.success){
+    return { success: false, message: checkTask.message };
+  }
+
+  // Validate user
+  const checkUser = await ValidUser(newTaskAssignee.userId);
+  if(!checkUser.success){
+    return { success: false, message: checkUser.message };
+  }
+  
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
+
+  // Validate user permission
+  const checkPermission = await UserPermission(userId, projectId, "addTask");
+  if(!checkPermission.success){
+    return { success: false, message: checkPermission.message };
+  }
+
+  // Create task assignee
+  await createQueries.createTaskAssignee(newTaskAssignee);
+  return { success: true };
+
+}
 
 
 
@@ -418,12 +515,8 @@ export async function createUserAction(newUser: NewUser){
   return await createQueries.createUser(newUser);
 }
 
-export async function createTaskAction(newTask: NewTask){
-  return await createQueries.createTask(newTask);
-}
-export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee){
-  await createQueries.createTaskAssignee(newTaskAssignee);
-}
+
+
 
 export async function createCommentAction(newComment: NewComment){
   await createQueries.createComment(newComment);

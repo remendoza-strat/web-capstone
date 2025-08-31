@@ -239,9 +239,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
                           className="flex items-center justify-between gap-3 p-3 border border-gray-200 bg-gray-50 dark:bg-gray-700 rounded-xl dark:border-gray-600"
                         >
                           <div className="flex items-center flex-1 min-w-0 space-x-3">
-                            <div className="flex items-center justify-center w-10 h-10 text-sm font-semibold text-white rounded-full">
-                              <UserAvatar clerkId={selected.user.clerkId}/>
-                            </div>
+                            <UserAvatar clerkId={selected.user.clerkId}/>
                             <div className="flex-1 min-w-0">
                               <div className="font-medium text-gray-900 truncate dark:text-white">
                                 {selected.user.fname} {selected.user.lname}

@@ -48,6 +48,13 @@ export const getQueries = {
     return result;
   },
 
+  getTask: async (taskId: string) => {
+    const result = await db.query.tasks.findFirst({
+      where: (t, {eq}) => eq(t.id, taskId)
+    });
+    return result;
+  },
+
   getMember: async (userId: string, projectId: string) => {
     const result = await db.query.projectMembers.findFirst({
       where: (pm, { eq, and }) => and(

@@ -85,6 +85,45 @@ export function getAllUsers(){
   });
 }
 
+export function createTask(){
+  return useMutation({
+    mutationFn: async ({ newTask, userId } : { newTask: Schema.NewTask, userId: string }) => {
+      const result = await Actions.createTaskAction(newTask, userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.taskId;
+    }
+  });
+}
+
+export function createTaskAssignee(){
+  return useMutation({
+    mutationFn: async ({ newTaskAssignee, userId, projectId } : { newTaskAssignee: Schema.NewTaskAssignee, userId: string, projectId: string })  => {
+      const result = await Actions.createTaskAssigneeAction(newTaskAssignee, userId, projectId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -237,14 +276,6 @@ export function kickMember(userId: string){
   });
 }
 
-export function createTaskAssignee(){
-  return useMutation({
-    mutationFn: async (newTaskAssignee: Schema.NewTaskAssignee) => {
-      await Actions.createTaskAssigneeAction(newTaskAssignee);
-    }
-  });
-}
-
 export function deleteTaskAssignee(){
   return useMutation({
     mutationFn: async (taId: string) => {
@@ -253,17 +284,7 @@ export function deleteTaskAssignee(){
   });
 }
 
-export function createTask(userId: string){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ newTask } : { newTask: Schema.NewTask }) => {
-      return await Actions.createTaskAction(newTask);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
-    }
-  });
-}
+
 
 export function updateProject(userId: string){
   const queryClient = useQueryClient();
