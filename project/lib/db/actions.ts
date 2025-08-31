@@ -59,9 +59,9 @@ export async function UserIdValidator(userId: string){
   }
 
   // Validate clerkId
-  const check = await ClerkIdMatcher(clerkId);
-  if(!check.success){
-    return { success: false, message: check.message };
+  const checkClerk = await ClerkIdMatcher(clerkId);
+  if(!checkClerk.success){
+    return { success: false, message: checkClerk.message };
   }
 
   // Return true
@@ -129,6 +129,27 @@ export async function ValidTask(taskId: string){
 }
 
 // Checking for:
+// is pmId format correct?
+// does the project member exist?
+export async function ValidProjecMember(pmId: string){
+  
+  // Check pmId format
+   if(!isUuid(pmId)){
+    return { success: false, message: "Invalid ID." };
+  }
+
+  // Check if project member exist
+  const exist = await getQueries.getProjectMember(pmId);
+  if(!exist){
+    return { success: false, message: "Project member not found." };
+  }
+
+  // Return true
+  return { success: true, exist };
+
+}
+
+// Checking for:
 // is userId format correct?
 // does the user exist?
 export async function ValidUser(userId: string){
@@ -186,9 +207,9 @@ export async function UserPermission(userId: string, projectId: string, action: 
 export async function getUserIdAction(clerkId: string){
 
   // Validate clerkId
-  const check = await ClerkIdMatcher(clerkId);
-  if(!check.success){
-    return { success: false, message: check.message };
+  const checkClerk = await ClerkIdMatcher(clerkId);
+  if(!checkClerk.success){
+    return { success: false, message: checkClerk.message };
   }
 
 	// Return userId
@@ -200,9 +221,9 @@ export async function getUserIdAction(clerkId: string){
 export async function getUserProjectsAction(userId: string){
 
   // Validate userId
-  const check = await UserIdValidator(userId);
-  if(!check.success){
-    return { success: false, message: check.message };
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
   }
 
 	// Return userProjects
@@ -226,9 +247,9 @@ export async function createProjectAction(newProject: NewProject){
   }
 
   // Validate user authentication
-  const check = await UserAuthValidation();
-  if(!check.success){
-    return { success: false, message: check.message };
+  const checkAuth = await UserAuthValidation();
+  if(!checkAuth.success){
+    return { success: false, message: checkAuth.message };
   }
 
   // Return projectId
@@ -314,9 +335,9 @@ export async function addProjectMemberAction(newProjectMember: NewProjectMember,
 export async function getAllUsersAction(){
 
   // Validate user authentication
-  const check = await UserAuthValidation();
-  if(!check.success){
-    return { success: false, message: check.message };
+  const checkAuth = await UserAuthValidation();
+  if(!checkAuth.success){
+    return { success: false, message: checkAuth.message };
   }
 
   // Return allUsers
@@ -342,7 +363,7 @@ export async function createTaskAction(newTask: NewTask, userId: string){
     return { success: false, message: result.error.issues[0].message };
   }
   
-  // Validate project
+    // Validate project
   const checkProject = await ValidProject(newTask.projectId);
   if(!checkProject.success){
     return { success: false, message: checkProject.message };
@@ -425,10 +446,10 @@ export async function updateProjectAction(projectId: string, updProject: Partial
       return { success: false, message: checkProject.message };
     }
 
-    // Validate user permission
-    const checkPermission = await UserPermission(userId, projectId, "addTask");
-    if(!checkPermission.success){
-      return { success: false, message: checkPermission.message };
+    // Validate user authentication
+    const checkAuth = await UserAuthValidation();
+    if(!checkAuth.success){
+      return { success: false, message: checkAuth.message };
     }
     
   }
@@ -438,6 +459,59 @@ export async function updateProjectAction(projectId: string, updProject: Partial
   return {success: true};
 
 }
+
+export async function deleteProjectMemberAction(pmId: string){
+  
+  // Validate project member
+  const checkMember = await ValidProjecMember(pmId);
+  if(!checkMember.exist?.userId){
+    return { success: false, message: checkMember.message };
+  }
+
+  // Validate userId
+  const checkUserId = await UserIdValidator(checkMember.exist?.userId);
+  if(!checkUserId.success){
+    return { checkUserId: false, message: checkMember.message };
+  }
+
+  // Delete project member
+  await deleteQueries.deleteProjectMember(pmId);
+  return { success: true };
+
+}
+
+export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
+
+  // Validate project member
+  const checkMember = await ValidProjecMember(pmId);
+  if(!checkMember.exist?.userId){
+    return { success: false, message: checkMember.message };
+  }
+
+  // Validate userId
+  const checkUserId = await UserIdValidator(checkMember.exist?.userId);
+  if(!checkUserId.success){
+    return { checkUserId: false, message: checkMember.message };
+  }
+
+  // Accept invitation
+  await updateQueries.updateProjectMember(pmId, updPm);
+  return { success : true };
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -555,9 +629,7 @@ export async function createCommentAction(newComment: NewComment){
 
 // UPDATE ACTIONS
 
-export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
-  await updateQueries.updateProjectMember(pmId, updPm);
-}
+
 export async function updateCommentAction(cId: string, updComment: Partial<typeof comments.$inferInsert>){
   await updateQueries.updateComment(cId, updComment);
 }
@@ -568,9 +640,6 @@ export async function updateUserAction(clerkId: string, updUser: Partial<typeof 
 // DELETE ACTIONS
 export async function deleteProjectAction(projectId: string){
   await deleteQueries.deleteProject(projectId);
-}
-export async function deleteProjectMemberAction(pmId: string){
-  await deleteQueries.deleteProjectMember(pmId);
 }
 export async function deleteTaskAssigneeAction(taId: string){
   await deleteQueries.deleteTaskAssignee(taId);

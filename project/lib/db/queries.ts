@@ -55,6 +55,13 @@ export const getQueries = {
     return result;
   },
 
+  getProjectMember: async (pmId: string) => {
+    const result = await db.query.projectMembers.findFirst({
+      where: (pm, {eq}) => eq(pm.id, pmId)
+    });
+    return result;
+  },
+
   getMember: async (userId: string, projectId: string) => {
     const result = await db.query.projectMembers.findFirst({
       where: (pm, { eq, and }) => and(

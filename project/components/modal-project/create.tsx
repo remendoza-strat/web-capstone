@@ -50,40 +50,37 @@ export default function CreateProject({ userId } : {  userId: string }){
       columnNames: ["Backlog", "This Week", "In Progress", "To Review", "Done"]
     };
 
-    // Project id for making project
-    let projectId: string | undefined;
-
-    // Create project
     try{
-      projectId = await createProjectMutation.mutateAsync({ newProject });
+      // Create project
+      const projectId = await createProjectMutation.mutateAsync({ newProject });
+      if (!projectId) return;
+
+      // Create project member
+      const newProjectMember: NewProjectMember = {
+        projectId: projectId,
+        userId: userId,
+        role: "Project Manager",
+        approved: true
+      };
+
+      // Create user as project member
+      createProjectMemberMutation.mutate({ newProjectMember }, {
+        onSuccess: () => {
+          toast.success("Project created successfully.");
+          queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+          closeModal();
+        },
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error creating project member.");
+          closeModal();
+        }
+      });
     } 
     catch(err){
       const error = err as { message?: string };
       toast.error(error.message ?? "Error creating project.");
-      closeModal();
-      return;
-    }
-    if(!projectId) return;
-     
-    // Create object of new project member
-    const newProjectMember: NewProjectMember = {
-      projectId: projectId,
-      userId: userId,
-      role: "Project Manager",
-      approved: true
-    }
-
-    // Create project member
-    try{
-      await createProjectMemberMutation.mutateAsync({ newProjectMember });
-      toast.success("Project created successfully.");
-      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
-      closeModal();
-    } 
-    catch(err){
-      const error = err as { message?: string };
-      toast.error(error.message ?? "Error creating project member.");
-      closeModal();
+      closeModal(); 
     }
   };
 

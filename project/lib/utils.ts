@@ -72,7 +72,27 @@ export function ComputeProgress(tasks: Task[], columnCount: number){
   return Math.round(total/taskCount);
 }
 
+// Days since membership invitation is sent
+export const TimeAgo = (date?: Date | string | null) => {
+  if (!date) return "Unknown";
 
+  const parsedDate = typeof date === "string"
+    ? new Date(date.replace(" ", "T"))
+    : date;
+
+  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
+    return "Invalid date";
+  }
+
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
+
+  if (diffInHours < 1) return "Just now";
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}d ago`;
+};
 
 
 
@@ -206,28 +226,6 @@ export function TaskTrack(tasks: Task[]){
     text: diff >= 0 ? `+${diff}` : `${diff}`
   };
 }
-
-// Days since membership invitation is sent
-export const TimeAgo = (date?: Date | string | null) => {
-  if (!date) return "Unknown";
-
-  const parsedDate = typeof date === "string"
-    ? new Date(date.replace(" ", "T"))
-    : date;
-
-  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
-    return "Invalid date";
-  }
-
-  const now = new Date();
-  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
-
-  if (diffInHours < 1) return "Just now";
-  if (diffInHours < 24) return `${diffInHours}h ago`;
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays}d ago`;
-};
 
 // Convert date to PH timezone for display
 export const FormatDateDisplay = (date: Date) => {
