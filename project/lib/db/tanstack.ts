@@ -238,6 +238,37 @@ export function leaveProject(){
 
 
 
+
+// KANBAN QUERIES
+export function KanbanUpdateProject(){
+  return useMutation({
+    mutationFn: async ({ projectId, updProject } : 
+      { projectId: string; updProject: Partial<typeof Schema.projects.$inferInsert> }) => {
+      const result = await Actions.KanbanUpdateProjectAction(projectId, updProject);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    },
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["member-icon", clerkId],
@@ -263,14 +294,7 @@ export function KanbanUpdateTask(){
   });
 }
 
-export function KanbanUpdateProject(){
-  return useMutation({
-    mutationFn: async ({ projectId, updProject } : 
-      { projectId: string; updProject: Partial<typeof Schema.projects.$inferInsert> }) => {
-      await Actions.KanbanUpdateProjectAction(projectId, updProject);
-    },
-  });
-}
+
 
 export function KanbanDeleteTask(){
   return useMutation({

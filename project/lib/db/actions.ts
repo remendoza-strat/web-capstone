@@ -662,6 +662,40 @@ export async function leaveProjectAction(pmId: string, projectId: string, member
 
 
 // KANBAN ACTIONS
+export async function KanbanUpdateProjectAction
+  (projectId: string, updProject: Partial<typeof projects.$inferInsert>){
+
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
+
+  // Update the project
+  const updatedProject = await db
+    .update(projects)
+    .set(updProject)
+    .where(eq(projects.id, projectId))
+    .returning();
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "project", project: updatedProject[0] }
+  );
+
+  // Return success
+  return { success : true }
+
+}
+
+
+
+
+
+
+
 export async function KanbanUpdateTaskAction
   (projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>){
     
@@ -681,23 +715,7 @@ export async function KanbanUpdateTaskAction
     { action: "update", task: fullTask }
   );
 }
-export async function KanbanUpdateProjectAction
-  (projectId: string, updProject: Partial<typeof projects.$inferInsert>){
-    
-  // Update the project
-  const updatedProject = await db
-    .update(projects)
-    .set(updProject)
-    .where(eq(projects.id, projectId))
-    .returning();
 
-  // Broadcast
-  await pusherServer.trigger(
-    `kanban-channel-${projectId}`,
-    "kanban-update",
-    { action: "project", project: updatedProject[0] }
-  );
-}
 export async function KanbanDeleteTaskAction
   (projectId: string, taskId: string){
 
@@ -743,6 +761,23 @@ export async function KanbanCreateTaskAction
     { action: "update", task: fullTask }
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export async function getTaskDataAction(taskId: string){
   return await getQueries.getTaskData(taskId);
 }

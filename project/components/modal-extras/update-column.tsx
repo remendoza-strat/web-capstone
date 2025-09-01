@@ -1,14 +1,18 @@
-import { toast } from "sonner"
-import React, { useState } from "react"
-import { X, Type, ChartNoAxesColumn } from "lucide-react"
-import { projects } from "@/lib/db/schema"
 import { useModal } from "@/lib/states"
-import { ProjectSchema } from "@/lib/validations"
+import { useQueryClient } from "@tanstack/react-query"
 import { KanbanUpdateProject } from "@/lib/db/tanstack"
+import { ClientColumnNameSchema } from "@/lib/validations"
+import { projects } from "@/lib/db/schema"
+import { toast } from "sonner"
+import { useState } from "react"
+import { X, ChartNoAxesColumn } from "lucide-react"
 
-export function UpdateColumn({ columnIndex, columnNames, projectId } : { columnIndex: number; columnNames: string[]; projectId: string }){
+export default function UpdateColumn({ columnIndex, columnNames, projectId } : { columnIndex: number; columnNames: string[]; projectId: string }){
   // Closing modal
   const { closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
   // Get column name
   const [columnName, setColumnName] = useState(columnNames[columnIndex]);
@@ -21,15 +25,12 @@ export function UpdateColumn({ columnIndex, columnNames, projectId } : { columnI
     e.preventDefault();
 
     // Validate input
-    const result = ProjectSchema.safeParse({ columnName });
+    const result = ClientColumnNameSchema.safeParse({ columnName: columnName });
   
     // Display error from validation
     if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.columnName?.[0]){
-        toast.error(errors.columnName[0]);
-        return;
-      }
+      toast.error(result.error.issues[0].message);
+      return;
     }
       
     // Update list of column names
@@ -46,10 +47,12 @@ export function UpdateColumn({ columnIndex, columnNames, projectId } : { columnI
     updateMutation.mutate({ projectId: projectId, updProject }, {
       onSuccess: () => {
         toast.success("Column updated successfully.");
+        queryClient.invalidateQueries({ queryKey: ["project-data", projectId] });
         closeModal();
       },
-      onError: () => {
-        toast.error("Error occured.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error updating project.");
         closeModal();
       }
     });
