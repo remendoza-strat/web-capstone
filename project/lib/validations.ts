@@ -85,6 +85,7 @@ export const ProjectSchema = z.object({
 
 });
 export const ClientCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true});
+export const ClientUpdateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true});
 export const ServerCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true, columnCount: true, columnNames: true });
 export const ServerUpdateProjectTimeSchema = ProjectSchema.pick({ updatedAt: true });
 

@@ -411,29 +411,29 @@ export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee,
 
 export async function updateProjectTimeAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
 
-    // Validate data
-    const result = ServerUpdateProjectTimeSchema.safeParse({
-      updatedAt: updProject.updatedAt
-    });
-    if(!result.success){
-      return { success: false, message: result.error.issues[0].message };
-    }
+  // Validate data
+  const result = ServerUpdateProjectTimeSchema.safeParse({
+    updatedAt: updProject.updatedAt
+  });
+  if(!result.success){
+    return { success: false, message: result.error.issues[0].message };
+  }
 
-    // Validate project
-    const checkProject = await ValidProject(projectId);
-    if(!checkProject.success){
-      return { success: false, message: checkProject.message };
-    }
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
 
-    // Validate user authentication
-    const checkAuth = await UserAuthValidation();
-    if(!checkAuth.success){
-      return { success: false, message: checkAuth.message };
-    }
-    
-  // Update project
-  await updateQueries.updateProject(projectId, updProject);
-  return {success: true};
+  // Validate user authentication
+  const checkAuth = await UserAuthValidation();
+  if(!checkAuth.success){
+    return { success: false, message: checkAuth.message };
+  }
+  
+// Update project
+await updateQueries.updateProject(projectId, updProject);
+return {success: true};
 
 }
 
@@ -591,6 +591,43 @@ export async function kickMemberAction(pmId: string, projectId: string, memberId
 
 }
 
+export async function getProjectDataAction(projectId: string){
+
+  // Validate user authentication
+  const checkAuth = await UserAuthValidation();
+  if(!checkAuth.success){
+    return { success: false, message: checkAuth.message };
+  }
+  
+  // Return projectData
+  const projectData = await getQueries.getProjectData(projectId);
+  return { success : true, projectData };
+
+}
+
+export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, userId: string){
+
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
+
+  // Validate user permission
+  const checkPermission = await UserPermission(userId, projectId, "editProject");
+  if(!checkPermission.success){
+    return { success: false, message: checkPermission.message };
+  }
+  
+  // Update project
+  await updateQueries.updateProject(projectId, updProject);
+  return {success: true};
+
+}
+
+
+
+
 
 
 
@@ -677,9 +714,6 @@ export async function KanbanCreateTaskAction
     "kanban-update",
     { action: "update", task: fullTask }
   );
-}
-export async function getProjectDataAction(projectId: string){
-  return await getQueries.getProjectData(projectId);
 }
 export async function getTaskDataAction(taskId: string){
   return await getQueries.getTaskData(taskId);

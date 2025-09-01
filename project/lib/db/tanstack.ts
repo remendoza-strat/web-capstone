@@ -199,6 +199,30 @@ export function kickMember(){
   });
 }
 
+export function getProjectData(projectId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["project-data", projectId],
+    queryFn: async () => {
+      const result = await Actions.getProjectDataAction(projectId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.projectData;
+    },
+    enabled: options.enabled
+  });
+}
+
+export function updateProject(){
+  return useMutation({
+    mutationFn: async ({ projectId, updProject, userId } : { projectId: string; updProject: Partial<typeof Schema.projects.$inferInsert>; userId: string }) => {
+      const result = await Actions.updateProjectAction(projectId, updProject, userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
 
 
 
@@ -255,20 +279,6 @@ export function KanbanCreateTask(){
   });
 }
 
-
-
-
-export function getProjectData(projectId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["project-data", projectId],
-    queryFn: async () => {
-      const data = await Actions.getProjectDataAction(projectId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!projectId
-  });
-}
-
 export function getTaskData(taskId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["task-data", taskId],
@@ -294,10 +304,6 @@ export function deleteTaskAssignee(){
     }
   });
 }
-
-
-
-
 
 
 

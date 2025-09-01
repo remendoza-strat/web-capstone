@@ -10,7 +10,7 @@ import { hasPermission } from "@/lib/permissions"
 import { Role } from "@/lib/customtype"
 import { DateTimeFormatter } from "@/lib/utils"
 import { getUserId, getProjectData } from "@/lib/db/tanstack"
-import { UpdateProject } from "@/components/modal-project/update"
+import UpdateProject from "@/components/modal-project/update"
 import ErrorPage from "@/components/util-pages/error-page"
 import LoadingPage from "@/components/util-pages/loading-page"
 import { DeleteProject } from "@/components/modal-project/delete"
@@ -45,28 +45,26 @@ export default function ProjectPage(){
     return <ErrorPage code={404} message="Invalid project ID"/>;
   }
 
-  // Get user id with clerk id
-  const {
-          data: userId,
-          isLoading: userIdLoading,
-          error: userIdError
-        }
-  = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
+  // Get user id
+  const { 
+    data: userId, 
+    isLoading: userIdLoading, 
+    error: userIdError 
+  } = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
 
-  // Get project data with project id
+  // Get user projects
   const {
-          data: projectData,
-          isLoading: projectDataLoading,
-          error: projectDataError
-        } 
-  = getProjectData(projectId, { enabled: Boolean(projectId) });
+    data: projectData, 
+    isLoading: projectDataLoading, 
+    error: projectDataError 
+  } = getProjectData(projectId ?? "", { enabled: Boolean(projectId) });
 
   // Show loading page if still processing
   if (!userLoaded || userIdLoading || projectDataLoading) return <LoadingPage/>;
 
   // Display error for queries
   if (userIdError || !userId) return <ErrorPage code={403} message="User not found"/>;
-  if (projectDataError || !projectData) return <ErrorPage code={404} message="Project not found"/>;
+  if (projectDataError || !projectData) return <ErrorPage code={404} message={projectDataError?.message || "Fetching data error."}/>;
 
   // Check if the user is member of the project
   const isMember = projectData.members.some((m) => m.userId === userId && m.approved) ?? false;
