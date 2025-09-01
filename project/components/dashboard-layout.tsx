@@ -2,10 +2,9 @@
 import React, { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, FolderOpen, Users, Menu, X, BarChart3, Calendar } from "lucide-react"
+import { Home, FolderOpen, Users, Menu, X, BarChart3, Calendar, UserCircle2 } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
 import ThemeToggle from "@/components/theme-toggle"
-import UserAvatar from "@/components/user-avatar"
 
 // Links of nav bar
 const navigation = [
@@ -81,10 +80,27 @@ export default function DashboardLayout({ children } : { children: React.ReactNo
                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
-            <div className="mr-2">
-              {user?.id ? (<UserAvatar clerkId={user.id}/>) : (<Users className="w-5 h-5 mr-3"/>) }
+          <div className="mr-2">
+            <div className="w-10 h-10">
+              {user?.imageUrl ? (
+                <img
+                  src={user.imageUrl}
+                  className="object-cover w-full h-full rounded-full"
+                />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full text-gray-400">
+                  <UserCircle2 className="w-16 h-16"/>
+                </div>
+              )}
             </div>
-            <span>{user?.id ? (<p>{user.firstName} {user.lastName}</p>) : (<p> </p>) }</span>
+          </div>
+          <span>
+            {user?.id ? (
+              <p>{user.firstName} {user.lastName}</p>
+            ) : (
+              <p>&nbsp;</p>
+            )}
+          </span>
           </Link>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { DateTimeFormatter } from "@/lib/utils"
 import { createComment, deleteComment, updateComment } from "@/lib/db/tanstack"
 import { comments, NewComment } from "@/lib/db/schema"
 
-export function CommentSection(
+export default function CommentSection(
   { clerkId, userId, taskId, editComment, allComments } : 
   { clerkId: string; userId: string; taskId: string; editComment: boolean; allComments: CommentsWithUser[]; }){
 

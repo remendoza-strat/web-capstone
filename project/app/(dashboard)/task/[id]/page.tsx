@@ -18,7 +18,7 @@ import { NewTaskAssignee, tasks } from "@/lib/db/schema"
 import { getUserId, getTaskData, KanbanUpdateTask, KanbanUpdateProject, KanbanDeleteTask, KanbanCreateAssignee, KanbanDeleteAssignee } from "@/lib/db/tanstack"
 import type { User } from "@/lib/db/schema"
 import { ClientCreateTaskSchema } from "@/lib/validations"
-import { CommentSection } from "@/components/page-task/comment-section"
+import CommentSection from "@/components/page-task/comment-section"
 import { useQueryClient } from "@tanstack/react-query"
 
 // Dynamic import of react quill
