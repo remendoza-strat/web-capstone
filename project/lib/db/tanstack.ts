@@ -224,6 +224,17 @@ export function updateProject(){
   });
 }
 
+export function leaveProject(){
+  return useMutation({
+    mutationFn: async ({ pmId, projectId, memberId } : { pmId: string, projectId: string, memberId: string }) => {
+      const result = await Actions.leaveProjectAction(pmId, projectId, memberId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
+
 
 
 

@@ -625,6 +625,34 @@ export async function updateProjectAction(projectId: string, updProject: Partial
 
 }
 
+export async function leaveProjectAction(pmId: string, projectId: string, memberId: string){
+  
+  // Validate project member
+  const checkMember = await ValidProjecMember(pmId);
+  if(!checkMember.exist?.userId){
+    return { success: false, message: checkMember.message };
+  }
+
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
+
+  // Validate user
+  const checkUser = await ValidUser(memberId);
+  if(!checkUser.success){
+    return { success: false, message: checkUser.message };
+  }
+
+  // Leave the project
+  await deleteQueries.deleteProjectMember(pmId);
+  await deleteQueries.deleteAllTaskAssignee(projectId, memberId);
+  await deleteQueries.deleteAllComment(projectId, memberId)
+  return { success: true }
+
+}
+
 
 
 

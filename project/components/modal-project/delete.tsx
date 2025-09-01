@@ -1,36 +1,40 @@
 "use client"
-import React from "react"
-import { X, AlertTriangle } from "lucide-react"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
-import { useModal } from "@/lib/states"
 import { ProjectData } from "@/lib/customtype"
+import { useModal } from "@/lib/states"
+import { useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import { deleteProject } from "@/lib/db/tanstack"
+import { toast } from "sonner"
+import { X, AlertTriangle } from "lucide-react"
 
-export function DeleteProject({ userId, projectData } : { userId: string, projectData: ProjectData }){
+export default function DeleteProject({ userId, projectData } : { userId: string, projectData: ProjectData }){
   // Closing modal
   const { closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
 	// Route for when deleted
 	const router = useRouter();
 
 	// Deleting project
-	const deleteMutation = deleteProject(userId);
+	const deleteMutation = deleteProject();
 
 	// Handle form submission
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 	
 		// Delete project
-		deleteMutation.mutate({ projectId: projectData.id }, {
+		deleteMutation.mutate({ projectId: projectData.id, userId: userId }, {
 			onSuccess: () => {
 				toast.success("Project deleted successfully.");
 				router.push("/projects");
+        queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
 				closeModal();
 		
 			},
 			onError: () => {
-				toast.error("Error occured.");
+				toast.error("Error deleting project.");
 				closeModal();
 			}
 		});
