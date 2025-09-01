@@ -1,14 +1,14 @@
 "use client"
+import { CSS } from "@dnd-kit/utilities"
+import { TaskWithAssignees } from "@/lib/customtype"
+import { useSortable } from "@dnd-kit/sortable"
 import Link from "next/link"
 import { GripVertical, Calendar, Flag, Tag, Lock } from "lucide-react"
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
 import { DateTimeFormatter, LimitChar } from "@/lib/utils"
-import { TaskWithAssignees } from "@/lib/customtype"
-import UserAvatar from "@/components/user-avatar"
 import { StripHTML } from "@/lib/utils"
+import UserAvatar from "@/components/user-avatar"
 
-export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignees; userId: string; editTask: boolean; }){
+export default function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignees; userId: string; editTask: boolean; }){
   // Check if user is allowed to drag the task
   const assignee = task.assignees?.some((a) => a.userId === userId);
   const isAllowed = assignee || editTask;
@@ -39,7 +39,7 @@ export function KanbanTask({ task, userId, editTask } : { task: TaskWithAssignee
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <h4 className="mb-2 font-medium text-gray-900 dark:text-white">
-            {task.title}
+            {LimitChar(task.title, 50)}
           </h4>
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {LimitChar(StripHTML(task.description), 70)}

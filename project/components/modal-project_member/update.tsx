@@ -59,8 +59,9 @@ export default function UpdateProjectMember(
         onProjectSelect?.(member.projectId);
         queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
       },
-      onError: () => {
-        toast.error("Error updating project member role.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error updating project member role.");
         closeModal();
       }
     });

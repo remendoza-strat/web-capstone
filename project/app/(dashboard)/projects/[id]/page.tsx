@@ -15,9 +15,9 @@ import ErrorPage from "@/components/util-pages/error-page"
 import LoadingPage from "@/components/util-pages/loading-page"
 import DeleteProject from "@/components/modal-project/delete"
 import LeaveProject from "@/components/modal-extras/leave-project"
-import { KanbanBoard } from "@/components/page-project/kanban/kanban-board"
+import KanbanBoard from "@/components/page-project/kanban/kanban-board"
 import CalendarView from "@/components/page-project/calendar-view"
-import { TeamView } from "@/components/page-project/team-view"
+import TeamView from "@/components/page-project/team-view"
 
 // List tabs
 const tabs = [
@@ -100,7 +100,7 @@ export default function ProjectPage(){
                   </div>
                 </div>
               </div>
-              <div className="flex space-x-3">
+              <div className="flex flex-wrap gap-2 sm:space-x-3">
                 {editProject &&
                 <>
                   <button
@@ -133,7 +133,7 @@ export default function ProjectPage(){
             </div>
           </div>
           <div className="p-2 mb-8 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
-            <div className="flex space-x-1">
+            <div className="flex space-x-2 overflow-x-auto no-scrollbar">
               {tabs.map((tab) => (
                 <button
                   type="button"

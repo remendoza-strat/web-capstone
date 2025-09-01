@@ -72,8 +72,9 @@ export default function UpdateProject({ userId, projectData } : { userId: string
         closeModal();
         queryClient.invalidateQueries({ queryKey: ["project-data", projectData.id] });
       },
-      onError: () => {
-        toast.error("Error updating the project.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error updating project.");
         closeModal();
       }
     });

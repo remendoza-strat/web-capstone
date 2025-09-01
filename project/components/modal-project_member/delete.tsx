@@ -59,8 +59,9 @@ export default function DeleteProjectMember(
         onProjectSelect?.(member.projectId);
         queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
       },
-      onError: () => {
-        toast.error("Error kicking the user.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error kicking the user.");
         closeModal();
       }
     });

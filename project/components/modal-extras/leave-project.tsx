@@ -38,8 +38,9 @@ export default function LeaveProject({ userId, projectData } : { userId: string,
 					router.push("/projects");
           closeModal();
         },
-        onError: () => {
-          toast.error("Error leaving the project.");
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error leaving project.");
           closeModal();
         }
       });
@@ -60,8 +61,9 @@ export default function LeaveProject({ userId, projectData } : { userId: string,
 				router.push("/projects");
         closeModal();
       },
-      onError: () => {
-        toast.error("Error leaving the project.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error leaving project.");
         closeModal();
       }
     });
