@@ -20,8 +20,8 @@ import KanbanTask from "@/components/page-project/kanban/kanban-task"
 import { KanbanUpdateTask } from "@/lib/db/tanstack"
 import UpdateColumn from "@/components/modal-extras/update-column"
 import CreateColumn from "@/components/modal-extras/create-column"
-import { DeleteColumn } from "@/components/modal-extras/delete-column"
-import { CreateTask } from "@/components/modal-extras/create-task"
+import DeleteColumn from "@/components/modal-extras/delete-column"
+import CreateTask from "@/components/modal-extras/create-task"
 
 export default function KanbanBoard({ userId, editProject, addTask, editTask, projectData } : { userId: string; editProject: boolean; addTask: boolean; editTask: boolean; projectData: ProjectData; }){
   // For values to display in board

@@ -5,10 +5,14 @@ import { useModal } from "@/lib/states"
 import { projects, Task, tasks } from "@/lib/db/schema"
 import { TaskWithAssignees } from "@/lib/customtype"
 import { KanbanDeleteTask, KanbanUpdateProject, KanbanUpdateTask } from "@/lib/db/tanstack"
+import { useQueryClient } from "@tanstack/react-query"
 
-export function DeleteColumn({ columnIndex, columnNames, boardTasks, projectId } : { columnIndex: number; columnNames: string[]; boardTasks: TaskWithAssignees[]; projectId: string }){
+export default function DeleteColumn({ columnIndex, columnNames, boardTasks, projectId } : { columnIndex: number; columnNames: string[]; boardTasks: TaskWithAssignees[]; projectId: string }){
   // Closing modal
   const { closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
   // Deleting and updating mutation
   const deleteColumnMutation = KanbanUpdateProject();
@@ -34,8 +38,9 @@ export function DeleteColumn({ columnIndex, columnNames, boardTasks, projectId }
           await deleteTaskMutation.mutateAsync({ projectId: projectId, taskId: task.id });
         }
       } 
-      catch{
-        toast.error("Error occurred.");
+      catch(err){
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error creating task.");
         return;
       }
 
@@ -57,8 +62,9 @@ export function DeleteColumn({ columnIndex, columnNames, boardTasks, projectId }
               await updateTaskMutation.mutateAsync({ projectId: projectId, taskId: task.id, updTask: updTask });
             }
           } 
-        catch{
-          toast.error("Error occurred.");
+        catch(err){
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error creating task.");
           return;
         }
       }
@@ -79,10 +85,12 @@ export function DeleteColumn({ columnIndex, columnNames, boardTasks, projectId }
     deleteColumnMutation.mutate({ projectId: projectId, updProject: updProject },{
       onSuccess: () => {
         toast.success("Column deleted successfully.");
+        queryClient.invalidateQueries({ queryKey: ["project-data", projectId] });
         closeModal();
       },
-      onError: () => {
-        toast.error("Error occured.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error deleting column.");
         closeModal();
       }
     });

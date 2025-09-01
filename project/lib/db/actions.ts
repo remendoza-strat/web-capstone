@@ -690,47 +690,14 @@ export async function KanbanUpdateProjectAction
 
 }
 
-
-
-
-
-
-
-export async function KanbanUpdateTaskAction
-  (projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>){
-    
-  // Update the task
-  await db.update(tasks).set({ ...updTask }).where(eq(tasks.id, taskId));
-
-  // Get full task info to return
-  const fullTask = await db.query.tasks.findFirst({ 
-    where: eq(tasks.id, taskId),
-    with: {assignees: {with: {user: true}}}
-  });
-
-  // Broadcast
-  await pusherServer.trigger(
-    `kanban-channel-${projectId}`,
-    "kanban-update",
-    { action: "update", task: fullTask }
-  );
-}
-
-export async function KanbanDeleteTaskAction
-  (projectId: string, taskId: string){
-
-  // Delete the task
-  await db.delete(tasks).where(eq(tasks.id, taskId));
-
-  // Broadcast
-  await pusherServer.trigger(
-    `kanban-channel-${projectId}`,
-    "kanban-update",
-    { action: "delete", taskId }
-  );
-}
 export async function KanbanCreateTaskAction
   (projectId: string, newTask: NewTask, assignees: string[]){
+
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
   
   // Create task
   const [inserted] = await db
@@ -760,6 +727,64 @@ export async function KanbanCreateTaskAction
     "kanban-update",
     { action: "update", task: fullTask }
   );
+
+  // Return success
+  return { success: true };
+
+}
+
+export async function KanbanUpdateTaskAction
+  (projectId: string, taskId: string, updTask: Partial<typeof tasks.$inferInsert>){
+    
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
+
+  // Update the task
+  await db.update(tasks).set({ ...updTask }).where(eq(tasks.id, taskId));
+
+  // Get full task info to return
+  const fullTask = await db.query.tasks.findFirst({ 
+    where: eq(tasks.id, taskId),
+    with: {assignees: {with: {user: true}}}
+  });
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "update", task: fullTask }
+  );
+
+  // Return success
+  return { success : true }
+
+}
+
+export async function KanbanDeleteTaskAction
+  (projectId: string, taskId: string){
+
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
+
+  // Delete the task
+  await db.delete(tasks).where(eq(tasks.id, taskId));
+
+  // Broadcast
+  await pusherServer.trigger(
+    `kanban-channel-${projectId}`,
+    "kanban-update",
+    { action: "delete", taskId }
+  );
+
+  // Return success
+  return { success : true }
+
 }
 
 

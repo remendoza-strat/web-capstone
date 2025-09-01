@@ -252,6 +252,46 @@ export function KanbanUpdateProject(){
   });
 }
 
+export function KanbanCreateTask(){
+  return useMutation({
+    mutationFn: async ({ projectId, newTask, assignees } : 
+      { projectId: string; newTask: Schema.NewTask; assignees: string[]; }) => {
+      const result = await Actions.KanbanCreateTaskAction(projectId, newTask, assignees);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
+
+export function KanbanUpdateTask(){
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ projectId, taskId, updTask } : 
+      { projectId: string; taskId: string; updTask: Partial<typeof Schema.tasks.$inferInsert>; }) => {
+      const result = await Actions.KanbanUpdateTaskAction(projectId, taskId, updTask);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["project-data", vars.projectId] });
+    }
+  });
+}
+
+export function KanbanDeleteTask(){
+  return useMutation({
+    mutationFn: async ({ projectId, taskId } : 
+      { projectId: string; taskId: string; }) => {
+      const result = await Actions.KanbanDeleteTaskAction(projectId, taskId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    },
+  });
+}
+
 
 
 
@@ -280,39 +320,10 @@ export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
   });
 }
 
-export function KanbanUpdateTask(){
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ projectId, taskId, updTask } : 
-      { projectId: string; taskId: string; updTask: Partial<typeof Schema.tasks.$inferInsert>; }) => {
-      await Actions.KanbanUpdateTaskAction(projectId, taskId, updTask);
-    },
-    onSuccess: (_, vars) => {
-      queryClient.invalidateQueries({ queryKey: ["task-data", vars.taskId] });
-      queryClient.invalidateQueries({ queryKey: ["project-data", vars.projectId] });
-    }
-  });
-}
 
 
 
-export function KanbanDeleteTask(){
-  return useMutation({
-    mutationFn: async ({ projectId, taskId } : 
-      { projectId: string; taskId: string; }) => {
-      await Actions.KanbanDeleteTaskAction(projectId, taskId);
-    },
-  });
-}
 
-export function KanbanCreateTask(){
-  return useMutation({
-    mutationFn: async ({ projectId, newTask, assignees } : 
-      { projectId: string; newTask: Schema.NewTask; assignees: string[]; }) => {
-      await Actions.KanbanCreateTaskAction(projectId, newTask, assignees);
-    }
-  });
-}
 
 export function getTaskData(taskId: string, options? : { enabled?: boolean }){
   return useQuery({
