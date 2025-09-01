@@ -1,8 +1,7 @@
 import { Webhook } from "svix"
 import { NextResponse } from "next/server"
-import { updateUserAction } from "@/lib/db/actions"
+import { createUserAction, updateUserAction } from "@/lib/db/user_actions"
 import { NewUser } from "@/lib/db/schema"
-import { createUserAction } from "@/lib/db/actions"
 
 // Creating user event
 type ClerkUserCreatedEvent = {

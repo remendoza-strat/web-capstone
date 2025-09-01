@@ -1,14 +1,16 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
-import { Save, LogOut, UserCircle2, Camera, Trash2, Lock } from "lucide-react"
-import { toast } from "sonner"
-import DashboardLayout from "@/components/dashboard-layout"
-import LoadingPage from "@/components/util-pages/loading-page"
 import { useUser, useClerk } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
+import { useState, useEffect, useRef } from "react"
 import { useModal } from "@/lib/states"
-import { DeleteUser } from "@/components/modal-user/delete"
+import { getUserId, getUserProjects } from "@/lib/db/tanstack"
+import { toast } from "sonner"
 import { NameSchema, PasswordSchema } from "@/lib/validations"
+import DashboardLayout from "@/components/dashboard-layout"
+import DeleteUser from "@/components/modal-user/delete"
+import LoadingPage from "@/components/util-pages/loading-page"
+import ErrorPage from "@/components/util-pages/error-page"
+import { Save, LogOut, UserCircle2, Camera, Trash2, Lock } from "lucide-react"
 
 export default function ProfilePage(){
   // Signout and change route
@@ -53,46 +55,35 @@ export default function ProfilePage(){
     }
   }, [isLoaded, user]);
 
+  // Disabling buttons
   useEffect(() => {
     setDisableButtons(isUpdateImage || isUpdateUser || isChangePassword);
-  }, [isUpdateImage, isUpdateUser, isChangePassword])
+  }, [isUpdateImage, isUpdateUser, isChangePassword]);
+
+  // Get user id
+  const { 
+    data: userId, 
+    isLoading: userIdLoading, 
+    error: userIdError 
+  } = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
+
+  // Get user projects
+  const {
+    data: userProjs, 
+    isLoading: userProjsLoading, 
+    error: userProjsError 
+  } = getUserProjects(userId ?? "", { enabled: Boolean(userId) });
+
+  // Show loading
+  const isLoading = !isLoaded || userIdLoading || userProjsLoading;
+
+  // Show error
+  const isError = userIdError || userProjsError;
 
   // Logout current user
   function logoutUser(){
     signOut();
     router.push("/");
-  }
-
-  // Update user information
-  async function updateProfile(fname: string, lname: string){
-    // Check if there is signed in user
-    if(!user){
-      toast.error("No user signed in.");
-      return;
-    }
-
-    // Validate input
-    const result = NameSchema.safeParse({
-      fname: fname,
-      lname: lname
-    });
-
-    // Display error from validation
-    if(!result.success){
-      toast.error(result.error.issues[0].message);
-      return;
-    }
-
-    // Update user info
-    try{
-      setIsUpdateUser(true);
-      await user.update({ firstName: fname, lastName: lname });
-      toast.success("Profile information updated.");
-    } 
-    catch{
-      toast.error("Updating information error.");
-    }
-    setIsUpdateUser(false);
   }
 
   // Update user icon
@@ -120,12 +111,46 @@ export default function ProfilePage(){
     } 
     catch{
       toast.error("Updating image error.");
+      setIsUpdateImage(false);
     }
     setIsUpdateImage(false);
   }
 
+  // Update user information
+  async function updateProfile(){
+    // Check if there is signed in user
+    if(!user){
+      toast.error("No user signed in.");
+      return;
+    }
+
+    // Validate input
+    const result = NameSchema.safeParse({
+      fname: fname,
+      lname: lname
+    });
+
+    // Display error from validation
+    if(!result.success){
+      toast.error(result.error.issues[0].message);
+      return;
+    }
+
+    // Update user info
+    try{
+      setIsUpdateUser(true);
+      await user.update({ firstName: fname, lastName: lname });
+      toast.success("Profile information updated.");
+    } 
+    catch{
+      toast.error("Updating information error.");
+      setIsUpdateUser(false);
+    }
+    setIsUpdateUser(false);
+  }
+
   // Change user password
-  async function changePassword(newPass: string, confirmPass: string){
+  async function changePassword(){
     // Check if there is signed in user
     if(!user){
       toast.error("No user signed in.");
@@ -165,187 +190,192 @@ export default function ProfilePage(){
       else{
         const data = await res.json();
         toast.error(data.error);
+        setIsChangePassword(false);
       }
     } 
     catch{
       toast.error("Changing password error.");
+      setIsChangePassword(false);
     }
     setIsChangePassword(false);
   };
 
   return(
     <DashboardLayout>
-      {isOpen && modalType === "deleteUser" && user?.id && <DeleteUser/>}
-      {!isLoaded? <LoadingPage/> : (
-        <div className="bg-gray-50 dark:bg-gray-900">
-          <div className="max-w-3xl p-2 mx-auto lg:p-8">
-            <div className="flex flex-col items-center mb-8 space-y-4">
-              <div className="relative w-32 h-32">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    className="object-cover w-full h-full rounded-full"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full text-gray-400">
-                    <UserCircle2 className="w-16 h-16"/>
-                  </div>
-                )}
+      {isOpen && modalType === "deleteUser" && userId && <DeleteUser userId={userId} userProjs={userProjs ?? []}/>}
+      {isLoading ? (<LoadingPage/>) : 
+      isError ? (<ErrorPage code={400} message={isError.message || "Fetching data error."}/>) : 
+        (
+          <div className="bg-gray-50 dark:bg-gray-900">
+            <div className="max-w-3xl p-2 mx-auto lg:p-8">
+              <div className="flex flex-col items-center mb-8 space-y-4">
+                <div className="relative w-32 h-32">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      className="object-cover w-full h-full rounded-full"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full text-gray-400">
+                      <UserCircle2 className="w-16 h-16"/>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    disabled={disableButtons}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute p-1 text-white rounded-full bottom-2 right-2 bg-black/60"
+                  >
+                    <Camera className="w-4 h-4"/>
+                  </button>
+                </div>
+                <input
+                  type="file"
+                  disabled={disableButtons}
+                  ref={fileInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => updateImage(e)}
+                />
+              </div>
+              <div className="flex justify-center mb-6 space-x-4 border-b border-gray-300 dark:border-gray-700">
                 <button
                   type="button"
-                  disabled={disableButtons}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute p-1 text-white rounded-full bottom-2 right-2 bg-black/60"
+                  className={`px-4 py-2 font-medium ${
+                    activeTab === "profile"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                  onClick={() => setActiveTab("profile")}
                 >
-                  <Camera className="w-4 h-4"/>
+                  Profile
+                </button>
+                <button
+                  type="button"
+                  className={`px-4 py-2 font-medium ${
+                    activeTab === "password"
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                  onClick={() => setActiveTab("password")}
+                >
+                  Password
                 </button>
               </div>
-              <input
-                type="file"
-                disabled={disableButtons}
-                ref={fileInputRef}
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => updateImage(e)}
-              />
-            </div>
-            <div className="flex justify-center mb-6 space-x-4 border-b border-gray-300 dark:border-gray-700">
-              <button
-                type="button"
-                className={`px-4 py-2 font-medium ${
-                  activeTab === "profile"
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-500 dark:text-gray-400"
-                }`}
-                onClick={() => setActiveTab("profile")}
-              >
-                Profile
-              </button>
-              <button
-                type="button"
-                className={`px-4 py-2 font-medium ${
-                  activeTab === "password"
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-500 dark:text-gray-400"
-                }`}
-                onClick={() => setActiveTab("password")}
-              >
-                Password
-              </button>
-            </div>
-            {activeTab === "profile" && (
-              <div className="p-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
-                <div className="relative w-full">
-                  <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    disabled={true}
-                    contentEditable={false}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-10 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                  />
-                  <Lock className="absolute left-3 top-[2.3rem] text-gray-400 pointer-events-none"/>
-                </div>
-                <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
-                  <div>
+              {activeTab === "profile" && (
+                <div className="p-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
+                  <div className="relative w-full">
                     <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      First Name
+                      Email
                     </label>
                     <input
-                      type="text"
-                      value={fname}
-                      onChange={(e) => setFname(e.target.value)}
-                      className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      type="email"
+                      disabled={true}
+                      contentEditable={false}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-10 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                     />
+                    <Lock className="absolute left-3 top-[2.3rem] text-gray-400 pointer-events-none"/>
                   </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      value={lname}
-                      onChange={(e) => setLname(e.target.value)}
-                      className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                    />
+                  <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        value={fname}
+                        onChange={(e) => setFname(e.target.value)}
+                        className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        value={lname}
+                        onChange={(e) => setLname(e.target.value)}
+                        className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-6">
+                    <button
+                      type="button"
+                      disabled={disableButtons}
+                      onClick={updateProfile}
+                      className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50"
+                    >
+                      <Save className="w-5 h-5"/>
+                      <span>{isUpdateUser? "Saving Changes..." : "Save Changes"}</span>
+                    </button>
                   </div>
                 </div>
-                <div className="flex justify-end mt-6">
-                  <button
-                    type="button"
-                    disabled={disableButtons}
-                    onClick={() => updateProfile(fname, lname)}
-                    className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50"
-                  >
-                    <Save className="w-5 h-5"/>
-                    <span>{isUpdateUser? "Saving Changes..." : "Save Changes"}</span>
-                  </button>
+              )}
+              {activeTab === "password" && (
+                <div className="p-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
+                  <div className="grid grid-cols-1 gap-6">
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={newPass}
+                        onChange={(e) => setNewPass(e.target.value)}
+                        className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Confirm Password
+                      </label>
+                      <input
+                        type="password"
+                        value={confirmPass}
+                        onChange={(e) => setConfirmPass(e.target.value)}
+                        className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-6">
+                    <button
+                      type="button"
+                      disabled={disableButtons}
+                      onClick={changePassword}
+                      className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50"
+                    >
+                      <Lock className="w-5 h-5"/>
+                      <span>{isChangePassword? "Changing Password..." : "Change Password"}</span>
+                    </button>
+                  </div>
                 </div>
+              )}
+              <div className="flex justify-end mt-6 space-x-4">
+                <button
+                  type="button"
+                  onClick={logoutUser}
+                  className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-gray-600 hover:bg-gray-700 rounded-xl"
+                >
+                  <LogOut className="w-5 h-5"/>
+                  <span>Logout</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openModal("deleteUser")}
+                  className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-red-600 hover:bg-red-700 rounded-xl disabled:opacity-50"
+                >
+                  <Trash2 className="w-5 h-5"/>
+                  <span>Delete Account</span>
+                </button>
               </div>
-            )}
-            {activeTab === "password" && (
-              <div className="p-6 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
-                    <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={newPass}
-                      onChange={(e) => setNewPass(e.target.value)}
-                      className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Confirm Password
-                    </label>
-                    <input
-                      type="password"
-                      value={confirmPass}
-                      onChange={(e) => setConfirmPass(e.target.value)}
-                      className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end mt-6">
-                  <button
-                    type="button"
-                    disabled={disableButtons}
-                    onClick={() => changePassword(newPass, confirmPass)}
-                    className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-50"
-                  >
-                    <Lock className="w-5 h-5"/>
-                    <span>{isChangePassword? "Changing Password..." : "Change Password"}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-            <div className="flex justify-end mt-6 space-x-4">
-              <button
-                type="button"
-                onClick={logoutUser}
-                className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-gray-600 hover:bg-gray-700 rounded-xl"
-              >
-                <LogOut className="w-5 h-5"/>
-                <span>Logout</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => openModal("deleteUser")}
-                className="flex items-center justify-center px-4 py-3 space-x-2 font-medium text-white transition-colors bg-red-600 hover:bg-red-700 rounded-xl disabled:opacity-50"
-              >
-                <Trash2 className="w-5 h-5"/>
-                <span>Delete Account</span>
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </DashboardLayout>
   );
 }

@@ -808,15 +808,3 @@ export async function updateCommentAction(cId: string, updComment: Partial<typeo
 export async function getTaskDataAction(taskId: string){
   return await getQueries.getTaskData(taskId);
 }
-
-export async function createUserAction(newUser: NewUser){
-  return await createQueries.createUser(newUser);
-}
-
-export async function deleteUserAction(clerkId: string){
-  await deleteQueries.deleteUser(clerkId);
-}
-
-export async function updateUserAction(clerkId: string, updUser: Partial<typeof users.$inferInsert>){
-  await updateQueries.updateUser(clerkId, updUser);
-}
