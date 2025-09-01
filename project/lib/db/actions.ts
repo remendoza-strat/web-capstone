@@ -11,10 +11,6 @@ import { validate as isUuid } from "uuid"
 import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema, ServerUpdateProjectTimeSchema } from "../validations"
 import { hasPermission, Permissions } from "../permissions"
 
-
-
-
-
 // Checking for:
 // is parameter clerkId === current clerkId?
 export async function ClerkIdMatcher(clerkId: string){
@@ -180,10 +176,6 @@ export async function UserPermission(userId: string, projectId: string, action: 
   return {success: true};
 
 }
-
-
-
-
 
 export async function getUserIdAction(clerkId: string){
 
@@ -653,14 +645,6 @@ export async function leaveProjectAction(pmId: string, projectId: string, member
 
 }
 
-
-
-
-
-
-
-
-
 // KANBAN ACTIONS
 export async function KanbanUpdateProjectAction
   (projectId: string, updProject: Partial<typeof projects.$inferInsert>){
@@ -787,49 +771,52 @@ export async function KanbanDeleteTaskAction
 
 }
 
+export async function KanbanCreateAssigneeAction(newTaskAssignee: NewTaskAssignee){
 
+  if (!newTaskAssignee) return { success : false, message: "error" }
 
+  await createQueries.createTaskAssignee(newTaskAssignee);
 
+  // Return success
+  return { success : true }
 
+}
 
+export async function KanbanDeleteAssigneeAction(taId: string){
 
+  if (!taId) return { success : false, message: "error" }
 
+  await deleteQueries.deleteTaskAssignee(taId);
 
+  // Return success
+  return { success : true }
 
+}
 
+export async function createCommentAction(newComment: NewComment){
+  await createQueries.createComment(newComment);
+}
 
+export async function deleteCommentAction(cId: string){
+  await deleteQueries.deleteComment(cId);
+}
 
-
-
-
+export async function updateCommentAction(cId: string, updComment: Partial<typeof comments.$inferInsert>){
+  await updateQueries.updateComment(cId, updComment);
+}
 
 export async function getTaskDataAction(taskId: string){
   return await getQueries.getTaskData(taskId);
 }
+
 export async function createUserAction(newUser: NewUser){
   return await createQueries.createUser(newUser);
 }
-export async function createCommentAction(newComment: NewComment){
-  await createQueries.createComment(newComment);
-}
-export async function updateCommentAction(cId: string, updComment: Partial<typeof comments.$inferInsert>){
-  await updateQueries.updateComment(cId, updComment);
-}
-export async function updateUserAction(clerkId: string, updUser: Partial<typeof users.$inferInsert>){
-  await updateQueries.updateUser(clerkId, updUser);
-}
-export async function deleteTaskAssigneeAction(taId: string){
-  await deleteQueries.deleteTaskAssignee(taId);
-}
-export async function deleteCommentAction(cId: string){
-  await deleteQueries.deleteComment(cId);
-}
+
 export async function deleteUserAction(clerkId: string){
   await deleteQueries.deleteUser(clerkId);
 }
-export async function deleteAllTaskAssigneeAction(projectId: string, userId: string){
-  await deleteQueries.deleteAllTaskAssignee(projectId, userId);
-}
-export async function deleteAllCommentAction(projectId: string, userId: string){
-  await deleteQueries.deleteAllComment(projectId, userId);
+
+export async function updateUserAction(clerkId: string, updUser: Partial<typeof users.$inferInsert>){
+  await updateQueries.updateUser(clerkId, updUser);
 }

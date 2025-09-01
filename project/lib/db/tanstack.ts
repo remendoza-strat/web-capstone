@@ -3,10 +3,6 @@ import { getUserImageAction } from "@/lib/clerk/user-image"
 import * as Actions from "@/lib/db/actions"
 import * as Schema from "@/lib/db/schema"
 
-
-
-
-
 export function getUserId(clerkId: string, options: { enabled: boolean }){
   return useQuery({
     queryKey: ["user-id", clerkId],
@@ -235,10 +231,6 @@ export function leaveProject(){
   });
 }
 
-
-
-
-
 // KANBAN QUERIES
 export function KanbanUpdateProject(){
   return useMutation({
@@ -292,22 +284,27 @@ export function KanbanDeleteTask(){
   });
 }
 
+export function KanbanCreateAssignee(){
+  return useMutation({
+    mutationFn: async (newTaskAssignee: Schema.NewTaskAssignee) => {
+      const result = await Actions.KanbanCreateAssigneeAction(newTaskAssignee);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export function KanbanDeleteAssignee(){
+  return useMutation({
+    mutationFn: async (taId: string) => {
+      const result = await Actions.KanbanDeleteAssigneeAction(taId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
+  });
+}
 
 export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
   return useQuery({
@@ -320,11 +317,6 @@ export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
   });
 }
 
-
-
-
-
-
 export function getTaskData(taskId: string, options? : { enabled?: boolean }){
   return useQuery({
     queryKey: ["task-data", taskId],
@@ -335,23 +327,6 @@ export function getTaskData(taskId: string, options? : { enabled?: boolean }){
     enabled: options?.enabled ?? !!taskId
   });
 }
-
-
-
-
-
-
-
-
-export function deleteTaskAssignee(){
-  return useMutation({
-    mutationFn: async (taId: string) => {
-      await Actions.deleteTaskAssigneeAction(taId);
-    }
-  });
-}
-
-
 
 export function createComment(taskId: string){
   const queryClient = useQueryClient();

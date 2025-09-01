@@ -15,10 +15,11 @@ import ErrorPage from "@/components/util-pages/error-page"
 import LoadingPage from "@/components/util-pages/loading-page"
 import UserAvatar from "@/components/user-avatar"
 import { NewTaskAssignee, tasks } from "@/lib/db/schema"
-import { getUserId, getTaskData, KanbanUpdateTask, createTaskAssignee, deleteTaskAssignee, KanbanUpdateProject, KanbanDeleteTask } from "@/lib/db/tanstack"
+import { getUserId, getTaskData, KanbanUpdateTask, KanbanUpdateProject, KanbanDeleteTask, KanbanCreateAssignee, KanbanDeleteAssignee } from "@/lib/db/tanstack"
 import type { User } from "@/lib/db/schema"
-import { TaskSchema } from "@/lib/validations"
+import { ClientCreateTaskSchema } from "@/lib/validations"
 import { CommentSection } from "@/components/page-task/comment-section"
+import { useQueryClient } from "@tanstack/react-query"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
@@ -27,9 +28,12 @@ export default function TaskPage(){
   // Changing route
   const router = useRouter();
 
+  // Refresh data
+  const queryClient = useQueryClient();
+
   // Mutation for operations
-  const createTaskAssigneeMutation = createTaskAssignee();
-  const deleteTaskAssigneeMutation = deleteTaskAssignee();
+  const createTaskAssigneeMutation = KanbanCreateAssignee();
+  const deleteTaskAssigneeMutation = KanbanDeleteAssignee();
   const updateTaskMutation = KanbanUpdateTask();
   const updateProjectMutation = KanbanUpdateProject();
   const deleteTaskMutation = KanbanDeleteTask();
@@ -142,9 +146,11 @@ export default function TaskPage(){
         onSuccess: () => {
           toast.success("Task deleted successfully.");
           router.push(`/projects/${taskData.projectId}`);
+          queryClient.invalidateQueries({ queryKey: ["project-data", taskData.projectId] });
         },
-        onError: () => {
-          toast.error("Error occured.");
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error creating project.");
         }
       });
     }
@@ -171,32 +177,17 @@ export default function TaskPage(){
       const descriptionRaw = StripHTML(String(description).trim());
       
       // Validate input
-      const result = TaskSchema.safeParse({
+      const result = ClientCreateTaskSchema.safeParse({
         title: title,
         description: descriptionRaw,
         label: label,
         dueDate: new Date(dueDate)
       });
-      
-      // Display errors
+
+      // Display error from validation
       if(!result.success){
-        const errors = result.error.flatten().fieldErrors;
-        if(errors.title?.[0]){
-          toast.error(errors.title[0]);
-          return;
-        }
-        if(errors.description?.[0]){
-          toast.error(errors.description[0]);
-          return;
-        }
-        if(errors.label?.[0]){
-          toast.error(errors.label[0]);
-          return;
-        }
-        if(errors.dueDate?.[0]){
-          toast.error(errors.dueDate[0]);
-          return;
-        } 
+        toast.error(result.error.issues[0].message);
+        return;
       }
 
       // Selected users
@@ -230,8 +221,9 @@ export default function TaskPage(){
           await deleteTaskAssigneeMutation.mutateAsync(delAssignee.id);
         }
       }
-      catch{
-        toast.error("Error occured.");
+      catch(err){
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error creating project.");
         return;
       }
 
@@ -246,8 +238,9 @@ export default function TaskPage(){
       
       // Update task
       updateTaskMutation.mutate({ projectId: taskData.projectId, taskId: taskData.id, updTask: updTask},{
-        onError: () => {
-          toast.error("Error occured.");
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error creating project.");
           return;
         }
       });   
@@ -257,9 +250,12 @@ export default function TaskPage(){
         onSuccess: () => {
           toast.success("Task created successfully.");
           setIsEditing(false);
+          queryClient.invalidateQueries({ queryKey: ["project-data", taskData.projectId] });
+          queryClient.invalidateQueries({ queryKey: ["task-data", taskData.id] });
         },
-        onError: () => {
-          toast.error("Error occured.");
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error creating project.");
         }
       });
     }        
