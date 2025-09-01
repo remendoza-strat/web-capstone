@@ -409,9 +409,7 @@ export async function createTaskAssigneeAction(newTaskAssignee: NewTaskAssignee,
 
 }
 
-export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, userId: string){
-
-  if("updatedAt" in updProject){
+export async function updateProjectTimeAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>){
 
     // Validate data
     const result = ServerUpdateProjectTimeSchema.safeParse({
@@ -433,8 +431,6 @@ export async function updateProjectAction(projectId: string, updProject: Partial
       return { success: false, message: checkAuth.message };
     }
     
-  }
-
   // Update project
   await updateQueries.updateProject(projectId, updProject);
   return {success: true};

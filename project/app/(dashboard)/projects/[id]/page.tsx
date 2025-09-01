@@ -16,7 +16,7 @@ import LoadingPage from "@/components/util-pages/loading-page"
 import { DeleteProject } from "@/components/modal-project/delete"
 import { LeaveProject } from "@/components/modal-extras/leave-project"
 import { KanbanBoard } from "@/components/page-project/kanban/kanban-board"
-import { CalendarView } from "@/components/page-project/calendar-view"
+import CalendarView from "@/components/page-project/calendar-view"
 import { TeamView } from "@/components/page-project/team-view"
 
 // List tabs

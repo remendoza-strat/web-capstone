@@ -105,10 +105,10 @@ export function createTaskAssignee(){
   });
 }
 
-export function updateProject(){
+export function updateProjectTime(){
   return useMutation({
-    mutationFn: async ({ projectId, updProject, userId } : { projectId: string; updProject: Partial<typeof Schema.projects.$inferInsert>, userId: string }) => {
-      const result = await Actions.updateProjectAction(projectId, updProject, userId);
+    mutationFn: async ({ projectId, updProject } : { projectId: string; updProject: Partial<typeof Schema.projects.$inferInsert> }) => {
+      const result = await Actions.updateProjectTimeAction(projectId, updProject);
       if(!result.success){
         throw { message: result.message };
       }

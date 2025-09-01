@@ -1,6 +1,6 @@
 import { UserProjects } from "@/lib/customtype"
 import { useQueryClient } from "@tanstack/react-query"
-import { deleteProjectMember, updateProject, updateProjectMember } from "@/lib/db/tanstack"
+import { deleteProjectMember, updateProjectTime, updateProjectMember } from "@/lib/db/tanstack"
 import { LimitChar, TimeAgo } from "@/lib/utils"
 import { toast } from "sonner"
 import { Check, X, Clock } from "lucide-react"
@@ -8,7 +8,7 @@ import { Check, X, Clock } from "lucide-react"
 export default function InviteTab({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
 	// Mutation for operation
 	const updateProjectMemberMutation = updateProjectMember();
-	const updateProjectMutation = updateProject();
+	const updateProjectMutation = updateProjectTime();
 	const deleteProjectMemberMutation = deleteProjectMember();
 
 	// Refresh data
@@ -40,7 +40,7 @@ export default function InviteTab({ userId, userProjs } : { userId: string, user
 		// Accept membership invite
 		updateProjectMemberMutation.mutate({ pmId: pmId, updPm: { approved: true } }, {
 			onSuccess: () => {
-				updateProjectMutation.mutate({ projectId: projectId, updProject: { updatedAt: new Date() }, userId: userId }, {
+				updateProjectMutation.mutate({ projectId: projectId, updProject: { updatedAt: new Date() }}, {
 					onSuccess: () => {
 						toast.success("Project membership accepted.");
 						queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });

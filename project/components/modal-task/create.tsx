@@ -7,7 +7,7 @@ import { hasPermission } from "@/lib/permissions"
 import { useQueryClient } from "@tanstack/react-query"
 import type { NewTask, NewTaskAssignee, User } from "@/lib/db/schema"
 import { useState, useEffect } from "react"
-import { createTask, createTaskAssignee, updateProject } from "@/lib/db/tanstack"
+import { createTask, createTaskAssignee, updateProjectTime } from "@/lib/db/tanstack"
 import { toast } from "sonner"
 import { StripHTML } from "@/lib/utils"
 import { ClientCreateTaskSchema } from "@/lib/validations"
@@ -48,7 +48,7 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
   // Mutations to perform
   const createTaskMutation = createTask();
   const createTaskAssigneeMutation = createTaskAssignee();
-  const updateProjectMutation = updateProject();
+  const updateProjectMutation = updateProjectTime();
 
 	// Set initial selected project
 	useEffect(() =>{
@@ -185,7 +185,7 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
     }
 
     // Update project  
-    updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() } , userId: userId}, {
+    updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() }}, {
       onSuccess: () => {
         toast.success("Task created successfully.");
         closeModal();
