@@ -1,9 +1,9 @@
 "use client"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
-import { TrendingUp } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
+import { TrendingUp } from "lucide-react"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 
-export function TaskProgress({ project } : { project?: UserProjects | null }){
+export default function TaskProgress({ project } : { project?: UserProjects | null }){
   // Get data
   const cols = project?.columnNames ?? [];
   const tasks = project?.tasks ?? [];

@@ -1,14 +1,14 @@
 "use client"
-import { useEffect, useState } from "react"
-import { CalendarCheck } from "lucide-react"
-import { DashboardLayout } from "@/components/dashboard-layout"
 import { useUser } from "@clerk/nextjs"
-import { getUserId, getUserTasks } from "@/lib/db/tanstack"
-import LoadingPage from "@/components/pages/loading"
-import ErrorPage from "@/components/pages/error"
+import { useEffect, useState } from "react"
 import { Task } from "@/lib/db/schema"
-import { CalendarView } from "@/components/calendar-view"
-import { UpcomingTasks } from "@/components/page-calendar/upcoming-tasks"
+import { getUserId, getUserTasks } from "@/lib/db/tanstack"
+import DashboardLayout from "@/components/dashboard-layout"
+import LoadingPage from "@/components/util-pages/loading-page"
+import ErrorPage from "@/components/util-pages/error-page"
+import { CalendarCheck } from "lucide-react"
+import CalendarView from "@/components/page-project/calendar-view"
+import UpcomingTasks from "@/components/page-calendar/upcoming-tasks"
 
 export default function CalendarPage(){
   // Get current user
@@ -44,29 +44,32 @@ export default function CalendarPage(){
   
   return(
     <DashboardLayout>
-      {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
-        <>
-          <div className="mb-8">
-            <h1 className="flex items-center text-3xl font-bold text-gray-900 dark:text-white">
-              <CalendarCheck className="w-8 h-8 mr-3 text-blue-600"/>
-              Calendar
-            </h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-300">
-              Due dates for your upcoming tasks
-            </p>
-            <div className="flex flex-col min-h-screen gap-6 mt-8 xl:flex-row xl:overflow-x-hidden">
-              <div className="flex-[2] min-w-0 bg-white dark:bg-gray-800 p-5 rounded-xl">
-                <CalendarView tasks={allTasks ?? []}/>
-              </div>
-              <div className="flex-[1] min-w-0 flex flex-col">
-                <div className="overflow-y-auto h-[60vh] xl:h-[90vh] p-4">
-                  <UpcomingTasks tasks={userTasks ?? []}/>
+      {isLoading ? (<LoadingPage/>) : 
+      isError ? (<ErrorPage message={isError.message || "Fetching data error."}/>) : 
+        (
+          <>
+            <div className="mb-8">
+              <h1 className="flex items-center text-3xl font-bold text-gray-900 dark:text-white">
+                <CalendarCheck className="w-8 h-8 mr-3 text-blue-600"/>
+                Calendar
+              </h1>
+              <p className="mt-2 text-gray-600 dark:text-gray-300">
+                Due dates for your upcoming tasks
+              </p>
+              <div className="flex flex-col min-h-screen gap-6 mt-8 xl:flex-row xl:overflow-x-hidden">
+                <div className="flex-[2] min-w-0 bg-white dark:bg-gray-800 p-5 rounded-xl">
+                  <CalendarView tasks={allTasks ?? []}/>
+                </div>
+                <div className="flex-[1] min-w-0 flex flex-col">
+                  <div className="overflow-y-auto h-[60vh] xl:h-[90vh] p-4">
+                    <UpcomingTasks tasks={userTasks ?? []}/>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )
+      }
     </DashboardLayout>
   );
 }

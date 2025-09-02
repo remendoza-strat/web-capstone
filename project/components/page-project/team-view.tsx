@@ -1,9 +1,9 @@
-import { Mail, Shield, Clock, Settings } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { MembersWithData } from "@/lib/customtype"
-import { UserAvatar } from "@/components/user-avatar"
+import { useRouter } from "next/navigation"
+import { Mail, Shield, Clock, Settings } from "lucide-react"
+import UserAvatar from "@/components/user-avatar"
 
-export function TeamView({ members } : { members: MembersWithData[] }){
+export default function TeamView({ members } : { members: MembersWithData[] }){
   // Going to team page
   const router = useRouter();
 
@@ -26,20 +26,20 @@ export function TeamView({ members } : { members: MembersWithData[] }){
       <div className="bg-white border border-gray-200 shadow-sm dark:bg-gray-900 rounded-2xl dark:border-gray-700">
         <div className="overflow-hidden">
           {members.map((member) => (
-            <div key={member.id} className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div key={member.id} className="flex flex-col p-4 border-b border-gray-200 sm:flex-row sm:items-center sm:justify-between sm:p-6 dark:border-gray-700">
               <div className="flex items-center space-x-4">
                 <UserAvatar clerkId={member.user.clerkId}/>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">
                     {member.user.fname} {member.user.lname}
                   </h3>
-                  <div className="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-300 sm:text-sm">
                     <Mail className="w-4 h-4 mr-2"/>
                     {member.user.email}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-wrap items-center mt-3 space-x-2 sm:mt-0 sm:space-x-4">
                 <div className="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/20 dark:text-blue-300">
                   {member.role}
                 </div>

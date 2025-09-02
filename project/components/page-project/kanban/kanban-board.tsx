@@ -1,20 +1,29 @@
 "use client"
 import { useEffect, useState } from "react"
+import { 
+  DndContext, 
+  DragOverlay, 
+  MouseSensor, 
+  TouchSensor, 
+  useSensor, 
+  useSensors 
+} from "@dnd-kit/core";
+
 import { Plus } from "lucide-react"
-import { DndContext, DragOverlay } from "@dnd-kit/core"
+
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { KanbanColumn } from "@/components/kanban/kanban-column"
+import KanbanColumn from "@/components/page-project/kanban/kanban-column"
 import { useModal } from "@/lib/states"
 import { pusherClient } from "@/lib/pusher/client"
 import { ProjectData, TaskWithAssignees } from "@/lib/customtype"
-import { KanbanTask } from "@/components/kanban/kanban-task"
+import KanbanTask from "@/components/page-project/kanban/kanban-task"
 import { KanbanUpdateTask } from "@/lib/db/tanstack"
-import { UpdateColumn } from "@/components/modal-extras/update-column"
-import { CreateColumn } from "@/components/modal-extras/create-column"
-import { DeleteColumn } from "@/components/modal-extras/delete-column"
-import { CreateTask } from "@/components/modal-extras/create-task"
+import UpdateColumn from "@/components/modal-extras/update-column"
+import CreateColumn from "@/components/modal-extras/create-column"
+import DeleteColumn from "@/components/modal-extras/delete-column"
+import CreateTask from "@/components/modal-extras/create-task"
 
-export function KanbanBoard({ userId, editProject, addTask, editTask, projectData } : { userId: string; editProject: boolean; addTask: boolean; editTask: boolean; projectData: ProjectData; }){
+export default function KanbanBoard({ userId, editProject, addTask, editTask, projectData } : { userId: string; editProject: boolean; addTask: boolean; editTask: boolean; projectData: ProjectData; }){
   // For values to display in board
   const [boardData, setBoardData] = useState<{
     columnNames: string[];
@@ -250,6 +259,23 @@ export function KanbanBoard({ userId, editProject, addTask, editTask, projectDat
     }
   }
 
+    // Sensors for desktop + mobile
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 5, // must move 5px before drag starts
+    },
+  });
+
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 250,  // long press 250ms
+      tolerance: 5,
+    },
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
+
+
   return(
     <div>
       {isOpen && modalType === "addColumn" && <CreateColumn
@@ -274,6 +300,7 @@ export function KanbanBoard({ userId, editProject, addTask, editTask, projectDat
       }
       <div>
         <DndContext
+         sensors={sensors} 
           onDragStart={(event) => {
             const task = event.active.data.current?.task as TaskWithAssignees;
             if (task) setActiveTask(task);

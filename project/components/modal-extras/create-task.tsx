@@ -1,24 +1,28 @@
 "use client"
 import "react-quill-new/dist/quill.snow.css"
 import dynamic from "next/dynamic"
-import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search } from "lucide-react"
+import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search, UsersRound } from "lucide-react"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
-import { TaskSchema } from "@/lib/validations"
+import { ClientCreateTaskSchema } from "@/lib/validations"
 import { StripHTML } from "@/lib/utils"
 import { Priority, PriorityArr } from "@/lib/customtype"
 import type { NewTask, User } from "@/lib/db/schema"
 import type { ProjectData } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
-import { UserAvatar } from "@/components/user-avatar"
-import { KanbanCreateTask, KanbanUpdateProject } from "@/lib/db/tanstack"
+import UserAvatar from "@/components/user-avatar"
+import { KanbanCreateTask } from "@/lib/db/tanstack"
+import { useQueryClient } from "@tanstack/react-query"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
 
-export function CreateTask({ columnIndex, columnOrder, projectData } : { columnIndex: number; columnOrder: number, projectData: ProjectData }){
+export default function CreateTask({ columnIndex, columnOrder, projectData } : { columnIndex: number; columnOrder: number, projectData: ProjectData }){
   // Closing modal
   const { closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
   // Hook for user
   const [query, setQuery] = useState("");
@@ -34,7 +38,6 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
 
   // Mutations to perform
   const createTaskMutation = KanbanCreateTask();
-  const updateProjectMutation = KanbanUpdateProject();
 
   // Getting suggested user and removing already selected user
   useEffect(() => {
@@ -93,33 +96,18 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
     // Get raw text of description
     const descriptionRaw = StripHTML(String(description).trim());
 
-    // Validate input
-    const result = TaskSchema.safeParse({
+     // Validate input
+    const result = ClientCreateTaskSchema.safeParse({
       title: title,
       description: descriptionRaw,
       label: label,
       dueDate: new Date(dueDate)
     });
 
-    // Display errors
+    // Display error from validation
     if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.title?.[0]){
-        toast.error(errors.title[0]);
-        return;
-      }
-      if(errors.description?.[0]){
-        toast.error(errors.description[0]);
-        return;
-      }
-      if(errors.label?.[0]){
-        toast.error(errors.label[0]);
-        return;
-      }
-      if(errors.dueDate?.[0]){
-        toast.error(errors.dueDate[0]);
-        return;
-      } 
+      toast.error(result.error.issues[0].message);
+      return;
     }
 
     // Get order of task
@@ -139,23 +127,17 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
   
     // Create task
     createTaskMutation.mutate({ projectId: projectData.id, newTask: newTask, assignees: selectedUsers.map((s) => s.user.id)},{
-      onError: () => {
-        toast.error("Error occurred.");
-        closeModal();
-        return;
-      },
-    });
-
-    // Update project  
-    updateProjectMutation.mutate({ projectId: projectData.id, updProject: { updatedAt: new Date() } },{
       onSuccess: () => {
         toast.success("Task created successfully.");
         closeModal();
+        queryClient.invalidateQueries({ queryKey: ["project-data", projectData.id] });
       },
-      onError: () => {
-        toast.error("Error occured.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error creating task.");
         closeModal();
-      }
+        return;
+      },
     });
   };
 
@@ -164,12 +146,12 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Create New Task
+            Create Task
           </h2>
           <button
             type="button"
             onClick={closeModal}
-            className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
           </button>
@@ -238,7 +220,8 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Task Assignees
+              <UsersRound className="inline w-4 h-4 mr-2"/>
+              Assignees
             </label>
             <div className="relative">
               <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500"/>
@@ -318,10 +301,10 @@ export function CreateTask({ columnIndex, columnOrder, projectData } : { columnI
             </button>
             <button
               type="submit"
-              disabled={createTaskMutation.isPending|| updateProjectMutation.isPending}
+              disabled={createTaskMutation.isPending}
               className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 rounded-xl"
             >
-              {createTaskMutation.isPending || updateProjectMutation.isPending? "Creating Task..." : "Create Task"}
+              {createTaskMutation.isPending? "Creating Task..." : "Create Task"}
             </button>
           </div>
         </form>

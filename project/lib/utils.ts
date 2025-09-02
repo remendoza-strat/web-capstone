@@ -8,10 +8,9 @@ export function StripHTML(html: string){
 
 // Sort projects by most recent updated
 export function ByRecentProjects(projects: UserProjects[]){
-  const recent = [...projects].sort((a, b) =>
+  return [...projects].sort((a, b) =>
     new Date(b.updatedAt?? 0).getTime() - new Date(a.updatedAt?? 0).getTime()
   );
-  return recent;
 }
 
 // Cut sentence based on characters count
@@ -58,18 +57,39 @@ export function ComputeProgress(tasks: Task[], columnCount: number){
 
   for(const t of tasks){
     const position = t.position;
-    const column = columnCount;
 
     if(position === (columnCount - 1)){
       total += 100;
     }
     else{
-      total += Math.round((position/column) * 100);
+      total += Math.round((position/columnCount) * 100);
     }
   }
 
   return Math.round(total/taskCount);
 }
+
+// Days since membership invitation is sent
+export const TimeAgo = (date?: Date | string | null) => {
+  if (!date) return "Unknown";
+
+  const parsedDate = typeof date === "string"
+    ? new Date(date.replace(" ", "T"))
+    : date;
+
+  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
+    return "Invalid date";
+  }
+
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
+
+  if (diffInHours < 1) return "Just now";
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}d ago`;
+};
 
 // Get status of the project
 export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){
@@ -200,28 +220,6 @@ export function TaskTrack(tasks: Task[]){
     text: diff >= 0 ? `+${diff}` : `${diff}`
   };
 }
-
-// Days since membership invitation is sent
-export const TimeAgo = (date?: Date | string | null) => {
-  if (!date) return "Unknown";
-
-  const parsedDate = typeof date === "string"
-    ? new Date(date.replace(" ", "T"))
-    : date;
-
-  if(!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())){
-    return "Invalid date";
-  }
-
-  const now = new Date();
-  const diffInHours = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60));
-
-  if (diffInHours < 1) return "Just now";
-  if (diffInHours < 24) return `${diffInHours}h ago`;
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  return `${diffInDays}d ago`;
-};
 
 // Convert date to PH timezone for display
 export const FormatDateDisplay = (date: Date) => {

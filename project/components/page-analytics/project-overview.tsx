@@ -1,9 +1,9 @@
-"use client";
-import { Calendar } from "lucide-react"
-import { DateTimeFormatter, ComputeProgress } from "@/lib/utils"
+"use client"
 import { UserProjects } from "@/lib/customtype"
+import { DateTimeFormatter, ComputeProgress } from "@/lib/utils"
+import { Calendar } from "lucide-react"
 
-export function ProjectOverview({ project } : { project?: UserProjects | null }){
+export default function ProjectOverview({ project } : { project?: UserProjects | null }){
   // Get data to display
   const name = project?.name ?? "N/A";
   const dueDate = project?.dueDate ? DateTimeFormatter(project.dueDate) : "N/A";

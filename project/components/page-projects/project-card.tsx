@@ -1,11 +1,10 @@
-import React from "react"
-import Link from "next/link"
-import { Calendar, Users, CheckSquare, AlertTriangle, CheckCircle, Play } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 import { ComputeProgress, DateTimeFormatter, LimitChar, ProjectStatus } from "@/lib/utils"
-import { UserAvatar } from "@/components/user-avatar"
+import Link from "next/link"
+import { Calendar, Users, CheckSquare, AlertTriangle, CheckCircle, Play } from "lucide-react"
+import UserAvatar from "@/components/user-avatar"
 
-export function ProjectCard({ project } : { project: UserProjects }){
+export default function ProjectCard({ project } : { project: UserProjects }){
 	// Icon display
   function StatusLabel(status: string){
     switch(status){
@@ -59,7 +58,7 @@ export function ProjectCard({ project } : { project: UserProjects }){
 								<span>{projStatus.toUpperCase()}</span>
 							</span>
 						</div>
-						<p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300 line-clamp-2">
+						<p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
 							{briefDesc}
 						</p>
 					</div>

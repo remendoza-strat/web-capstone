@@ -1,23 +1,23 @@
 "use client"
 import "react-quill-new/dist/quill.snow.css"
 import dynamic from "next/dynamic"
-import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search } from "lucide-react"
-import { toast } from "sonner"
-import { useState, useEffect } from "react"
-import { TaskSchema } from "@/lib/validations"
-import { StripHTML } from "@/lib/utils"
-import { Priority, PriorityArr } from "@/lib/customtype"
-import type { NewTask, NewTaskAssignee, User} from "@/lib/db/schema"
-import type { UserProjects } from "@/lib/customtype"
-import { hasPermission } from "@/lib/permissions"
+import { type UserProjects, Priority, PriorityArr } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
-import { UserAvatar } from "@/components/user-avatar"
-import { createTask, createTaskAssignee, updateProject } from "@/lib/db/tanstack"
+import { hasPermission } from "@/lib/permissions"
+import { useQueryClient } from "@tanstack/react-query"
+import type { NewTask, NewTaskAssignee, User } from "@/lib/db/schema"
+import { useState, useEffect } from "react"
+import { createTask, createTaskAssignee, updateProjectTime } from "@/lib/db/tanstack"
+import { toast } from "sonner"
+import { StripHTML } from "@/lib/utils"
+import { ClientCreateTaskSchema } from "@/lib/validations"
+import { X, Trash, CheckSquare, FileText, Calendar, AlertCircle, Tag, Search, ChartNoAxesColumn, Type, UsersRound } from "lucide-react"
+import UserAvatar from "@/components/user-avatar"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
 
-export function CreateTask({ userId, projectsData } : { userId: string; projectsData: UserProjects[] }){
+export default function CreateTask({ userId, projectsData } : { userId: string; projectsData: UserProjects[] }){
   // Closing modal
   const { closeModal } = useModal();
 
@@ -25,6 +25,9 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
 	const projects: UserProjects[] = projectsData
 		.filter((project) => project.members.some((member) => member.userId === userId && member.approved && hasPermission(member.role, "addTask")))
     .map((project) => ({...project, members: project.members.filter((member) => member.approved)}));
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
 	// Hook for project
 	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
@@ -43,9 +46,9 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
 	const [label, setLabel] = useState("");
 
   // Mutations to perform
-  const createTaskMutation = createTask(userId);
+  const createTaskMutation = createTask();
   const createTaskAssigneeMutation = createTaskAssignee();
-  const updateProjectMutation = updateProject(userId);
+  const updateProjectMutation = updateProjectTime();
 
 	// Set initial selected project
 	useEffect(() =>{
@@ -113,6 +116,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
     
     // Get selected project due date
     const project = projects.find(p => p.id === selectedProjectId);
+    if (!project) return;
     const deadline = project?.dueDate;
     if(deadline){
       const projDue = new Date(deadline);
@@ -127,87 +131,72 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
     const descriptionRaw = StripHTML(String(description).trim());
 
     // Validate input
-    const result = TaskSchema.safeParse({
+    const result = ClientCreateTaskSchema.safeParse({
       title: title,
       description: descriptionRaw,
       label: label,
       dueDate: new Date(dueDate)
     });
 
-    // Display errors
+    // Display error from validation
     if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.title?.[0]){
-        toast.error(errors.title[0]);
-        return;
-      }
-      if(errors.description?.[0]){
-        toast.error(errors.description[0]);
-        return;
-      }
-      if(errors.label?.[0]){
-        toast.error(errors.label[0]);
-        return;
-      }
-      if(errors.dueDate?.[0]){
-        toast.error(errors.dueDate[0]);
-        return;
-      } 
+      toast.error(result.error.issues[0].message);
+      return;
     }
 
     // Get order of task
     let lastOrder = 0;
-    if(project){
-      const columnTasks = project.tasks.filter(t => t.position === selectedColumn);
-      if(columnTasks.length > 0){
-        lastOrder = Math.max(...columnTasks.map(t => t.order), 0) + 1;
-      }
+    const columnTasks = project.tasks.filter(t => t.position === selectedColumn);
+    if(columnTasks.length > 0){
+      lastOrder = Math.max(...columnTasks.map(t => t.order), 0) + 1;
     }
-
-    if(project){
-      try{
-        // Create object of new task
-        const newTask: NewTask = {
-          projectId: project.id,
-          title: title,
-          description: description,
-          dueDate: new Date(dueDate),
-          priority: priority,
-          position: selectedColumn,
-          order: lastOrder,
-          label: label
-        };
+    
+    try{
+      // Create object of new task
+      const newTask: NewTask = {
+        projectId: project.id,
+        title: title,
+        description: description,
+        dueDate: new Date(dueDate),
+        priority: priority,
+        position: selectedColumn,
+        order: lastOrder,
+        label: label
+      };
+      
+      // Create task
+      const taskId = await createTaskMutation.mutateAsync({ newTask: newTask, userId: userId});
+      if (!taskId) return;
         
-        // Create task
-        const taskId = await createTaskMutation.mutateAsync({ newTask });
-          
-        // Assign task
-        for(const { user } of selectedUsers){
-          const newTaskAssignee: NewTaskAssignee = {
-            taskId: taskId,
-            userId: user.id
-          };
-          await createTaskAssigneeMutation.mutateAsync(newTaskAssignee);
-        }
-      } 
-      catch{
-        toast.error("Error occurred.");
-        closeModal();
-        return;
+      // Assign task
+      for(const { user } of selectedUsers){
+        const newTaskAssignee: NewTaskAssignee = {
+          taskId: taskId,
+          userId: user.id
+        };
+        await createTaskAssigneeMutation.mutateAsync({ newTaskAssignee: newTaskAssignee, userId: userId });
       }
-
-      // Update project  
-      updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() } }, {
-        onSuccess: () => {
-          toast.success("Task created successfully.");
-          closeModal();
-        },
-        onError: () => {
-          toast.error("Error occured.");
-          closeModal();
-        }
-      });
+    } 
+    catch(err){
+      const error = err as { message?: string };
+      toast.error(error.message ?? "Error creating task.");
+      closeModal();
+      return;
     }
+
+    // Update project  
+    updateProjectMutation.mutate({ projectId: project.id, updProject: { updatedAt: new Date() }}, {
+      onSuccess: () => {
+        toast.success("Task created successfully.");
+        closeModal();
+        queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+      },
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error creating task.");
+        closeModal();
+      }
+    });
 	};
 
   return(
@@ -215,12 +204,12 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Create New Task
+            Create Task
           </h2>
           <button
             type="button"
             onClick={closeModal}
-            className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
           </button>
@@ -228,7 +217,8 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Project
+              <Type className="inline w-4 h-4 mr-2"/>
+              Project Name
             </label>
             <select
               value={selectedProjectId} onChange={(e) => setSelectedProjectId(e.target.value)}
@@ -249,6 +239,7 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <ChartNoAxesColumn className="inline w-4 h-4 mr-2"/>
               Columns
             </label>
             <select
@@ -337,7 +328,8 @@ export function CreateTask({ userId, projectsData } : { userId: string; projects
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Task Assignees
+              <UsersRound className="inline w-4 h-4 mr-2"/>
+              Assignees
             </label>
             <div className="relative">
               <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500"/>

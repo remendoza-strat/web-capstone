@@ -7,18 +7,19 @@ import { validate as isUuid } from "uuid"
 import { useParams, useRouter } from "next/navigation"
 import { ArrowLeft, Calendar, Edit2, Flag, UserRound, Save, Search, Tag, UserMinus, X, Trash2 } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
-import { DashboardLayout } from "@/components/dashboard-layout"
+import DashboardLayout from "@/components/dashboard-layout"
 import { hasPermission } from "@/lib/permissions"
 import { Priority, PriorityArr, Role } from "@/lib/customtype"
 import { DateTimeFormatter, FormatDateDisplay, StripHTML } from "@/lib/utils"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
-import { UserAvatar } from "@/components/user-avatar"
+import ErrorPage from "@/components/util-pages/error-page"
+import LoadingPage from "@/components/util-pages/loading-page"
+import UserAvatar from "@/components/user-avatar"
 import { NewTaskAssignee, tasks } from "@/lib/db/schema"
-import { getUserId, getTaskData, KanbanUpdateTask, createTaskAssignee, deleteTaskAssignee, KanbanUpdateProject, KanbanDeleteTask } from "@/lib/db/tanstack"
+import { getUserId, getTaskData, KanbanUpdateTask, KanbanUpdateProject, KanbanDeleteTask, KanbanCreateAssignee, KanbanDeleteAssignee } from "@/lib/db/tanstack"
 import type { User } from "@/lib/db/schema"
-import { TaskSchema } from "@/lib/validations"
-import { CommentSection } from "@/components/page-task/comment-section"
+import { ClientCreateTaskSchema } from "@/lib/validations"
+import CommentSection from "@/components/page-task/comment-section"
+import { useQueryClient } from "@tanstack/react-query"
 
 // Dynamic import of react quill
 const ReactQuill = dynamic(() => import("react-quill-new"), {ssr: false});
@@ -27,9 +28,12 @@ export default function TaskPage(){
   // Changing route
   const router = useRouter();
 
+  // Refresh data
+  const queryClient = useQueryClient();
+
   // Mutation for operations
-  const createTaskAssigneeMutation = createTaskAssignee();
-  const deleteTaskAssigneeMutation = deleteTaskAssignee();
+  const createTaskAssigneeMutation = KanbanCreateAssignee();
+  const deleteTaskAssigneeMutation = KanbanDeleteAssignee();
   const updateTaskMutation = KanbanUpdateTask();
   const updateProjectMutation = KanbanUpdateProject();
   const deleteTaskMutation = KanbanDeleteTask();
@@ -58,7 +62,7 @@ export default function TaskPage(){
 
   // Check if valid task id
   if(!taskId || !isUuid(taskId)){
-    return <ErrorPage code={404} message="Invalid task ID"/>;
+    return <ErrorPage message="Invalid task ID"/>;
   }
 
   // Get user id with clerk id
@@ -75,7 +79,7 @@ export default function TaskPage(){
           isLoading: taskDataLoading,
           error: taskDataError
         } 
-  = getTaskData(taskId, { enabled: Boolean(taskId) });
+  = getTaskData(taskId ?? "", userId ?? "", { enabled: Boolean(taskId) });
 
   // Set initial values
   useEffect(() => {
@@ -142,9 +146,11 @@ export default function TaskPage(){
         onSuccess: () => {
           toast.success("Task deleted successfully.");
           router.push(`/projects/${taskData.projectId}`);
+          queryClient.invalidateQueries({ queryKey: ["project-data", taskData.projectId] });
         },
-        onError: () => {
-          toast.error("Error occured.");
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error deleting task.");
         }
       });
     }
@@ -171,32 +177,17 @@ export default function TaskPage(){
       const descriptionRaw = StripHTML(String(description).trim());
       
       // Validate input
-      const result = TaskSchema.safeParse({
+      const result = ClientCreateTaskSchema.safeParse({
         title: title,
         description: descriptionRaw,
         label: label,
         dueDate: new Date(dueDate)
       });
-      
-      // Display errors
+
+      // Display error from validation
       if(!result.success){
-        const errors = result.error.flatten().fieldErrors;
-        if(errors.title?.[0]){
-          toast.error(errors.title[0]);
-          return;
-        }
-        if(errors.description?.[0]){
-          toast.error(errors.description[0]);
-          return;
-        }
-        if(errors.label?.[0]){
-          toast.error(errors.label[0]);
-          return;
-        }
-        if(errors.dueDate?.[0]){
-          toast.error(errors.dueDate[0]);
-          return;
-        } 
+        toast.error(result.error.issues[0].message);
+        return;
       }
 
       // Selected users
@@ -230,8 +221,9 @@ export default function TaskPage(){
           await deleteTaskAssigneeMutation.mutateAsync(delAssignee.id);
         }
       }
-      catch{
-        toast.error("Error occured.");
+      catch(err){
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error updating assignees.");
         return;
       }
 
@@ -246,8 +238,9 @@ export default function TaskPage(){
       
       // Update task
       updateTaskMutation.mutate({ projectId: taskData.projectId, taskId: taskData.id, updTask: updTask},{
-        onError: () => {
-          toast.error("Error occured.");
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error updating task.");
           return;
         }
       });   
@@ -255,11 +248,14 @@ export default function TaskPage(){
       // Update project  
       updateProjectMutation.mutate({ projectId: taskData.project.id, updProject: { updatedAt: new Date() } },{
         onSuccess: () => {
-          toast.success("Task created successfully.");
+          toast.success("Task updated successfully.");
           setIsEditing(false);
+          queryClient.invalidateQueries({ queryKey: ["project-data", taskData.projectId] });
+          queryClient.invalidateQueries({ queryKey: ["task-data", taskData.id] });
         },
-        onError: () => {
-          toast.error("Error occured.");
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error updating task.");
         }
       });
     }        
@@ -269,13 +265,13 @@ export default function TaskPage(){
   if (!userLoaded || userIdLoading || taskDataLoading) return <LoadingPage/>;
 
   // Display error for queries
-  if (userIdError || !userId) return <ErrorPage code={403} message="User not found"/>;
-  if (taskDataError || !taskData) return <ErrorPage code={404} message="Task not found"/>;
+  if (userIdError || !userId) return <ErrorPage message="User not found"/>;
+  if (taskDataError || !taskData) return <ErrorPage message="Task not found"/>;
 
   // Check if the user is member of the project
   const isMember = taskData.project.members.some((m) => m.userId === userId) ?? false;
   if(!isMember){
-    return <ErrorPage code={403} message="Not a project member"/>;
+    return <ErrorPage message="Not a project member"/>;
   }
 
   // User role
@@ -295,7 +291,7 @@ export default function TaskPage(){
               onClick={() => router.push(`/projects/${taskData.projectId}`)} 
               className="flex items-center px-4 py-2 space-x-2 text-gray-600 transition-colors dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
-              <ArrowLeft className="w-6 h-6 text-gray-500 transition-colors rounded-lg dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"/>
+              <ArrowLeft className="w-6 h-6 text-gray-500 transition-colors rounded-xl dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"/>
               <span>Back to Board</span>
             </button>
             {allowed ? (
@@ -523,7 +519,7 @@ export default function TaskPage(){
                         <button
                           type="button"
                           onClick={() => handleRemoveUser(assignee.user.id)}
-                          className="p-2 text-red-600 transition-colors rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 dark:text-red-400 hover:scale-110"
+                          className="p-2 text-red-600 transition-colors rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 dark:text-red-400 hover:scale-110"
                         >
                           <UserMinus className="w-5 h-5"/>
                         </button>

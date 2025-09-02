@@ -3,13 +3,70 @@ import { db } from "@/lib/db/connection"
 import { users, projects, projectMembers, tasks, taskAssignees, comments } from "@/lib/db/schema"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment } from "@/lib/db/schema"
 
+export const checkQueries = {
+
+  getUser: async (userId: string) => {
+    const result = await db.query.users.findFirst({
+      where: eq(users.id, userId)
+    });
+    return result;
+  },
+
+  getProject: async (projectId: string) => {
+    const result = await db.query.projects.findFirst({
+      where: eq(projects.id, projectId)
+    });
+    return result;
+  },
+
+  getProjectMember: async (projectMemberId: string) => {
+    const result = await db.query.projectMembers.findFirst({
+      where: eq(projectMembers.id, projectMemberId)
+    });
+    return result;
+  },
+
+  getTask: async (taskId: string) => {
+    const result = await db.query.tasks.findFirst({
+      where: eq(tasks.id, taskId)
+    });
+    return result;
+  },
+
+  getTaskAssignee: async (taskAssigneeId: string) => {
+    const result = await db.query.taskAssignees.findFirst({
+      where: eq(taskAssignees.id, taskAssigneeId)
+    });
+    return result;
+  },
+
+  getComment: async (commentId: string) => {
+    const result = await db.query.comments.findFirst({
+      where: eq(comments.id, commentId)
+    });
+    return result;
+  },
+
+  getMembership: async (userId: string, projectId: string) => {
+    const result = await db.query.projectMembers.findFirst({
+      where: (pm, {eq, and}) => and(
+        eq(pm.userId, userId),
+        eq(pm.projectId, projectId),
+        eq(pm.approved, true)
+      )
+    });
+    return result;
+  },
+
+}
+
 export const getQueries = {
 
   getUserId: async (clerkId: string) => {
     const result = await db.query.users.findFirst({
       where: eq(users.clerkId, clerkId)
     });
-    return result?.id;
+    return result?.id ?? null;
   },
 
   getUserProjectsWithMembers: async (userId: string) => {
@@ -102,16 +159,16 @@ export const createQueries = {
 
 export const updateQueries = {
 
-  updateProjectMember: async (pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>) => {
-    await db.update(projectMembers).set({...updPm}).where(eq(projectMembers.id, pmId));
+  updateProjectMember: async (projectMemberId: string, updProjectMember: Partial<typeof projectMembers.$inferInsert>) => {
+    await db.update(projectMembers).set({...updProjectMember}).where(eq(projectMembers.id, projectMemberId));
   },
 
   updateProject: async (projectId: string, updProject: Partial<typeof projects.$inferInsert>) => {
     await db.update(projects).set({...updProject}).where(eq(projects.id, projectId));
   },
 
-  updateComment: async (cId: string, updComment: Partial<typeof comments.$inferInsert>) => {
-    await db.update(comments).set({...updComment}).where(eq(comments.id, cId));
+  updateComment: async (commentId: string, updComment: Partial<typeof comments.$inferInsert>) => {
+    await db.update(comments).set({...updComment}).where(eq(comments.id, commentId));
   },
 
   updateUser: async (clerkId: string, updUser: Partial<typeof users.$inferInsert>) => {
@@ -126,16 +183,16 @@ export const deleteQueries = {
     await db.delete(projects).where(eq(projects.id, projectId));
   },
 
-  deleteProjectMember: async (pmId: string) => {
-    await db.delete(projectMembers).where(eq(projectMembers.id, pmId));
+  deleteProjectMember: async (projectMemberId: string) => {
+    await db.delete(projectMembers).where(eq(projectMembers.id, projectMemberId));
   },
 
-  deleteTaskAssignee: async (taId: string) => {
-    await db.delete(taskAssignees).where(eq(taskAssignees.id, taId));
+  deleteTaskAssignee: async (taskAssigneeId: string) => {
+    await db.delete(taskAssignees).where(eq(taskAssignees.id, taskAssigneeId));
   },
 
-  deleteComment: async (cId: string) => {
-    await db.delete(comments).where(eq(comments.id, cId));
+  deleteComment: async (commentId: string) => {
+    await db.delete(comments).where(eq(comments.id, commentId));
   },
 
   deleteUser: async (clerkId: string) => {

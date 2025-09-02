@@ -1,11 +1,11 @@
 import Link from "next/link"
 
-export default function ErrorPage({ code, message }: { code: number, message: string }){
+export default function ErrorPage({ message }: { message: string }){
   return(
     <div className="flex items-center justify-center h-screen px-4 bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center p-8 text-center bg-white shadow-lg rounded-2xl dark:bg-gray-800">
         <h1 className="font-extrabold text-red-600 text-7xl dark:text-red-400 animate-pulse">
-          {code}
+          Error Detected
         </h1>
         <p className="mt-4 text-xl font-semibold text-gray-800 dark:text-gray-200">
           {message}

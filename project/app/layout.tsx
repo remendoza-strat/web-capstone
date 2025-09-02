@@ -5,7 +5,7 @@ import { Inter } from "next/font/google"
 import { Toaster } from "sonner"
 import { ClerkProvider } from "@clerk/nextjs"
 import { ThemeProvider } from "@/components/theme-provider"
-import { TanstackProvider } from "@/app/tanstack-provider"
+import { TanstackProvider } from "@/lib/tanstack-provider"
 
 // Load inter font
 const inter = Inter({ subsets: ["latin"] });

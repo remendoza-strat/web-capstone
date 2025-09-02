@@ -1,19 +1,23 @@
 "use client"
-import { useState } from "react"
-import { Calendar, FileText, Type, X } from "lucide-react"
-import { toast } from "sonner"
-import type { NewProject, NewProjectMember } from "@/lib/db/schema"
-import { ProjectSchema } from "@/lib/validations"
 import { useModal } from "@/lib/states"
 import { createProject, createProjectMember } from "@/lib/db/tanstack"
+import { useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
+import { ClientCreateProjectSchema } from "@/lib/validations"
+import { toast } from "sonner"
+import type { NewProject, NewProjectMember } from "@/lib/db/schema"
+import { Calendar, FileText, Type, X } from "lucide-react"
 
-export function CreateProject({ userId } : {  userId: string }){
+export default function CreateProject({ userId } : {  userId: string }){
   // Closing modal
   const { closeModal } = useModal();
     
-  // Create project and member
-  const createProjectMutation = createProject(userId);
-  const createProjectMemberMutation = createProjectMember(userId);
+  // Create project and project member
+  const createProjectMutation = createProject();
+  const createProjectMemberMutation = createProjectMember();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 		
   // Hooks for input
   const [name, setName] = useState("");
@@ -25,27 +29,16 @@ export function CreateProject({ userId } : {  userId: string }){
     e.preventDefault();
 
     // Validate input
-    const result = ProjectSchema.safeParse({
-      name,
-      description,
-      dueDate
+    const result = ClientCreateProjectSchema.safeParse({
+      name: name,
+      description: description,
+      dueDate: dueDate
     });
 
     // Display error from validation
     if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.name?.[0]){
-        toast.error(errors.name[0]);
-        return;
-      }
-      if(errors.description?.[0]){
-        toast.error(errors.description[0]);
-        return;
-      }
-      if(errors.dueDate?.[0]){
-        toast.error(errors.dueDate[0]);
-        return;
-      }
+      toast.error(result.error.issues[0].message);
+      return;
     }
     
     // Create object of new project
@@ -59,26 +52,35 @@ export function CreateProject({ userId } : {  userId: string }){
 
     try{
       // Create project
-      const projectId = await createProjectMutation.mutateAsync({ newProject });
+      const projectId = await createProjectMutation.mutateAsync({ newProject: newProject });
+      if (!projectId) return;
 
-      // Create object of new project member
+      // Create project member
       const newProjectMember: NewProjectMember = {
         projectId: projectId,
         userId: userId,
         role: "Project Manager",
         approved: true
-      }
+      };
 
-      // Create project member
-      await createProjectMemberMutation.mutateAsync({ newProjectMember });
-
-      // Display success
-      toast.success("Project created successfully.");
-      closeModal();
+      // Create user as project member
+      createProjectMemberMutation.mutate({ newProjectMember: newProjectMember }, {
+        onSuccess: () => {
+          toast.success("Project created successfully.");
+          queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+          closeModal();
+        },
+        onError: (err) => {
+          const error = err as { message?: string };
+          toast.error(error.message ?? "Error creating project.");
+          closeModal();
+        }
+      });
     } 
-    catch{
-      toast.error("Error occured.");
-      closeModal();
+    catch(err){
+      const error = err as { message?: string };
+      toast.error(error.message ?? "Error creating project.");
+      closeModal(); 
     }
   };
 
@@ -87,12 +89,12 @@ export function CreateProject({ userId } : {  userId: string }){
       <div className="w-full max-w-md bg-white shadow-2xl dark:bg-gray-800 rounded-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Create New Project
+            Create Project
             </h2>
           <button
             type="button"
             onClick={closeModal}
-            className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
           </button>

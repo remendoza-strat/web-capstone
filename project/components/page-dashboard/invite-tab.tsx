@@ -1,15 +1,18 @@
-import React from "react"
+import { UserProjects } from "@/lib/customtype"
+import { useQueryClient } from "@tanstack/react-query"
+import { deleteProjectMember, updateProjectTime, updateProjectMember } from "@/lib/db/tanstack"
+import { LimitChar, TimeAgo } from "@/lib/utils"
 import { toast } from "sonner"
 import { Check, X, Clock } from "lucide-react"
-import { UserProjects } from "@/lib/customtype"
-import { TimeAgo } from "@/lib/utils"
-import { deleteProjectMember, updateProject, updateProjectMember } from "@/lib/db/tanstack"
 
-export function InviteTab({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
+export default function InviteTab({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
 	// Mutation for operation
-	const updateProjectMemberMutation = updateProjectMember(userId);
-	const updateProjectMutation = updateProject(userId);
-	const deleteProjectMemberMutation = deleteProjectMember(userId);
+	const updateProjectMemberMutation = updateProjectMember();
+	const updateProjectMutation = updateProjectTime();
+	const deleteProjectMemberMutation = deleteProjectMember();
+
+	// Refresh data
+	const queryClient = useQueryClient();
 
 	// Button processing
 	const isProcessing = updateProjectMemberMutation.isPending || updateProjectMutation.isPending || deleteProjectMemberMutation.isPending;
@@ -23,7 +26,7 @@ export function InviteTab({ userId, userProjs } : { userId: string, userProjs: U
 		return{
 			projId: project.id,
 			pName: project.name,
-			pDesc: project.description,
+			pDesc: LimitChar(project.description, 75),
 			pmId: member?.id ?? null,
 			pmRole: member?.role ?? null,
 			pmTime: TimeAgo(member?.createdAt)
@@ -33,32 +36,42 @@ export function InviteTab({ userId, userProjs } : { userId: string, userProjs: U
 	// Accepting membership invite
 	function acceptInvite(pmId: string, projectId: string){
 		if(!pmId || !projectId) return;
-		
-    // Update member approval
-    updateProjectMemberMutation.mutate({ pmId: pmId, updPm : { approved: true }}, {
-      onSuccess: () => {
-        toast.success("Project membership accepted.");
-      },
-      onError: () => {
-        toast.error("Error occured.");
-      }
-    });
 
-	// Update project  
-	updateProjectMutation.mutate({ projectId: projectId, updProject: { updatedAt: new Date() }});
+		// Accept membership invite
+		updateProjectMemberMutation.mutate({ projectMemberId: pmId, updProjectMember: { approved: true } }, {
+			onSuccess: () => {
+				updateProjectMutation.mutate({ projectId: projectId, updProject: { updatedAt: new Date() }}, {
+					onSuccess: () => {
+						toast.success("Project membership accepted.");
+						queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+					},
+					onError: (err) => {
+        		const error = err as { message?: string };
+        		toast.error(error.message ?? "Error accepting membership.");
+      		}
+				});
+			},
+			onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error accepting membership.");
+      }
+		});
 	}
 
 	// Rejecting membership invite
 	function rejectInvite(pmId: string, projectId: string){
 		if(!pmId || !projectId) return;
 
-		deleteProjectMemberMutation.mutate({pmId: pmId}, {
+		// Delete membership invite
+		deleteProjectMemberMutation.mutate({projectMemberId: pmId}, {
       onSuccess: () => {
         toast.success("Project membership declined.");
+				queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
       },
-      onError: () => {
-        toast.error("Error occured.");
-      }
+      onError: (err) => {
+				const error = err as { message?: string };
+				toast.error(error.message ?? "Error declining membership.");
+			}
     });
 	}
 

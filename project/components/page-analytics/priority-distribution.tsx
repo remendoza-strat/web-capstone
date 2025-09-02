@@ -1,9 +1,9 @@
-"use client";
+"use client"
+import { Task } from "@/lib/db/schema"
 import { PieChart as PieChartIcon } from "lucide-react"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
-import { Task } from "@/lib/db/schema"
 
-export function PriorityDistribution({ tasks } : { tasks?: Task[] | null }){
+export default function PriorityDistribution({ tasks } : { tasks?: Task[] | null }){
   // Get count per priority
   const allTasks = tasks ?? [];
   const highCount = allTasks.filter((t) => t.priority === "High").length;
@@ -82,7 +82,7 @@ export function PriorityDistribution({ tasks } : { tasks?: Task[] | null }){
       </div>
       <div className="pt-4 mt-6 border-t border-gray-200 dark:border-gray-700">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Total Tasks</span>
+          <span className="text-gray-600 dark:text-gray-400">{allTasks.length > 1? "Total Tasks" :  "Total Task"}</span>
           <span className="font-medium text-gray-900 dark:text-white">{allTasks.length}</span>
         </div>
       </div>

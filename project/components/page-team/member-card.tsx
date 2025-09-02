@@ -1,10 +1,10 @@
 "use client"
-import { Mail, Calendar, Edit2, UserX  } from "lucide-react"
-import { ProjectMemberUser } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
-import { UserAvatar } from "@/components/user-avatar"
+import { ProjectMemberUser } from "@/lib/customtype"
+import { Mail, Calendar, Edit2, UserX, Shield, Clock  } from "lucide-react"
+import UserAvatar from "@/components/user-avatar"
 
-export function MemberCard(
+export default function MemberCard(
   { userId, canEdit, member, onUpdateClick, onDeleteClick } :
   { userId: string, canEdit: boolean, member: ProjectMemberUser; onUpdateClick?: (member: ProjectMemberUser) => void; onDeleteClick?: (member: ProjectMemberUser) => void; }){
  
@@ -44,14 +44,14 @@ export function MemberCard(
               <>             
                 <button 
                   type="button"
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => {onUpdateClick?.(member); openModal("updateMember")}}
                 >
                   <Edit2 className="w-4 h-4 text-gray-500 dark:text-gray-400"/>
                 </button>
                 <button 
                   type="button"
-                  className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+                  className="p-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30"
                   onClick={() => {onDeleteClick?.(member); openModal("deleteMember")}}
                 >
                   <UserX className="w-4 h-4 text-red-500 dark:text-red-400"/>
@@ -64,7 +64,10 @@ export function MemberCard(
               member.approved ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
             }`}
           >
-            {member.approved ? "Approved" : "Pending"}
+            <div className="flex flex-row">
+              {member.approved? <Shield className="w-3 h-3 mr-1"/> : <Clock className="w-3 h-3 mr-1"/>}
+              {member.approved ? "Approved" : "Pending"}
+            </div>
           </span>
         </div>
       </div>

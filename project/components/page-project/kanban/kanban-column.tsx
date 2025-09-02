@@ -3,11 +3,11 @@ import { useState } from "react"
 import { Edit2, MoreHorizontal, Plus, Trash2 } from "lucide-react"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { KanbanTask } from "@/components/kanban/kanban-task"
+import KanbanTask from "@/components/page-project/kanban/kanban-task"
 import { TaskWithAssignees } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
 
-export function KanbanColumn
+export default function KanbanColumn
   ({ id, title, tasks, userId, editProject, addTask, editTask, onUpdateColumn, onDeleteColumn, onCreateTask } : 
   { id: string; title: string; tasks: TaskWithAssignees[]; userId: string; editProject: boolean; addTask: boolean; editTask: boolean; onUpdateColumn: () => void; onDeleteColumn: () => void; onCreateTask: () => void; }){
   
@@ -39,7 +39,7 @@ export function KanbanColumn
             <button
               type="button"
               onClick={() => setShowMenu(!showMenu)}
-              className="p-1 transition-colors rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="p-1 transition-colors rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               <MoreHorizontal className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
             </button>
@@ -78,7 +78,8 @@ export function KanbanColumn
         items={tasks.map((t) => t.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="flex-1 p-3 space-y-3 overflow-y-auto">
+        <div className="flex-1 p-3 space-y-3 overflow-y-auto touch-pan-y">
+
           {tasks.map((task) => (
             <KanbanTask key={task.id} task={task} userId={userId} editTask={editTask}/>
           ))}

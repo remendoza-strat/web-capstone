@@ -4,20 +4,20 @@ import { validate as isUuid } from "uuid"
 import { useParams } from "next/navigation"
 import { Calendar, DoorOpen, Edit2, Kanban, Trash2, Users } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
-import { DashboardLayout } from "@/components/dashboard-layout"
+import DashboardLayout from "@/components/dashboard-layout"
 import { useModal } from "@/lib/states"
 import { hasPermission } from "@/lib/permissions"
 import { Role } from "@/lib/customtype"
 import { DateTimeFormatter } from "@/lib/utils"
 import { getUserId, getProjectData } from "@/lib/db/tanstack"
-import { UpdateProject } from "@/components/modal-project/update"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
-import { DeleteProject } from "@/components/modal-project/delete"
-import { LeaveProject } from "@/components/modal-extras/leave-project"
-import { KanbanBoard } from "@/components/kanban/kanban-board"
-import { CalendarView } from "@/components/calendar-view"
-import { TeamView } from "@/components/team-view"
+import UpdateProject from "@/components/modal-project/update"
+import ErrorPage from "@/components/util-pages/error-page"
+import LoadingPage from "@/components/util-pages/loading-page"
+import DeleteProject from "@/components/modal-project/delete"
+import LeaveProject from "@/components/modal-extras/leave-project"
+import KanbanBoard from "@/components/page-project/kanban/kanban-board"
+import CalendarView from "@/components/page-project/calendar-view"
+import TeamView from "@/components/page-project/team-view"
 
 // List tabs
 const tabs = [
@@ -42,36 +42,34 @@ export default function ProjectPage(){
 
   // Check if valid project id
   if(!projectId || !isUuid(projectId)){
-    return <ErrorPage code={404} message="Invalid project ID"/>;
+    return <ErrorPage message="Invalid project ID"/>;
   }
 
-  // Get user id with clerk id
-  const {
-          data: userId,
-          isLoading: userIdLoading,
-          error: userIdError
-        }
-  = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
+  // Get user id
+  const { 
+    data: userId, 
+    isLoading: userIdLoading, 
+    error: userIdError 
+  } = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
 
-  // Get project data with project id
+  // Get user projects
   const {
-          data: projectData,
-          isLoading: projectDataLoading,
-          error: projectDataError
-        } 
-  = getProjectData(projectId, { enabled: Boolean(projectId) });
+    data: projectData, 
+    isLoading: projectDataLoading, 
+    error: projectDataError 
+  } = getProjectData(projectId ?? "", userId ?? "", { enabled: Boolean(projectId) });
 
   // Show loading page if still processing
   if (!userLoaded || userIdLoading || projectDataLoading) return <LoadingPage/>;
 
   // Display error for queries
-  if (userIdError || !userId) return <ErrorPage code={403} message="User not found"/>;
-  if (projectDataError || !projectData) return <ErrorPage code={404} message="Project not found"/>;
+  if (userIdError || !userId) return <ErrorPage message="User not found"/>;
+  if (projectDataError || !projectData) return <ErrorPage message={projectDataError?.message || "Fetching data error."}/>;
 
   // Check if the user is member of the project
   const isMember = projectData.members.some((m) => m.userId === userId && m.approved) ?? false;
   if(!isMember){
-    return <ErrorPage code={403} message="Not a project member"/>;
+    return <ErrorPage message="Not a project member"/>;
   }
   
   // User role
@@ -102,7 +100,7 @@ export default function ProjectPage(){
                   </div>
                 </div>
               </div>
-              <div className="flex space-x-3">
+              <div className="flex flex-wrap gap-2 sm:space-x-3">
                 {editProject &&
                 <>
                   <button
@@ -135,7 +133,7 @@ export default function ProjectPage(){
             </div>
           </div>
           <div className="p-2 mb-8 bg-white border border-gray-200 shadow-sm dark:bg-gray-800 rounded-2xl dark:border-gray-700">
-            <div className="flex space-x-1">
+            <div className="flex space-x-2 overflow-x-auto no-scrollbar">
               {tabs.map((tab) => (
                 <button
                   type="button"

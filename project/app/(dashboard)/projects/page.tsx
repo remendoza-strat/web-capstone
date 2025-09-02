@@ -1,16 +1,16 @@
 "use client"
+import { useModal } from "@/lib/states"
+import { useUser } from "@clerk/nextjs"
 import { useEffect, useState } from "react"
-import { Filter, Search, FolderOpen, FolderArchive, Plus } from "lucide-react"
-import { DashboardLayout } from "@/components/dashboard-layout"
 import { RoleArr, UserProjects } from "@/lib/customtype"
 import { getUserId, getUserProjects } from "@/lib/db/tanstack"
-import { useUser } from "@clerk/nextjs"
-import { useModal } from "@/lib/states"
-import { ProjectCard } from "@/components/page-project/project-card"
 import { ProjectsByStatus, ProjectsByDueDate, ProjectsByRole } from "@/lib/utils"
-import { CreateProject } from "@/components/modal-project/create"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
+import DashboardLayout from "@/components/dashboard-layout"
+import LoadingPage from "@/components/util-pages/loading-page"
+import ErrorPage from "@/components/util-pages/error-page"
+import CreateProject from "@/components/modal-project/create"
+import { Filter, Search, FolderOpen, FolderArchive, Plus } from "lucide-react"
+import ProjectCard from "@/components/page-projects/project-card"
 
 export default function ProjectsPage(){
   // Create project modal
@@ -33,17 +33,16 @@ export default function ProjectsPage(){
 
   // Get user id
   const { 
-          data: userId, 
-          isLoading: userIdLoading, 
-          error: userIdError 
-        } 
-  = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
+    data: userId, 
+    isLoading: userIdLoading, 
+    error: userIdError 
+  } = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
 
   // Get user projects
   const {
-          data: userProjs, 
-          isLoading: userProjsLoading, 
-          error: userProjsError 
+    data: userProjs, 
+    isLoading: userProjsLoading, 
+    error: userProjsError 
   } = getUserProjects(userId ?? "", { enabled: Boolean(userId) });
 
   // Show loading
@@ -85,8 +84,10 @@ export default function ProjectsPage(){
 
   return(
     <DashboardLayout>
-      {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
-          <>
+      {isLoading ? (<LoadingPage/>) : 
+      isError ? (<ErrorPage message={isError.message || "Fetching data error."}/>) : 
+        (
+          <> 
             {isOpen && modalType === "createProject" && userId && <CreateProject userId={userId}/>}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
@@ -190,7 +191,7 @@ export default function ProjectsPage(){
               ) : 
               (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {projectsData.map((project) => (userId &&
+                {projectsData.map((project) => (
                   <ProjectCard key={project.id} project={project}/>
                 ))}
               </div>

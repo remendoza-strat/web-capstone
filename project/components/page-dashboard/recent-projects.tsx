@@ -1,10 +1,9 @@
-import React from "react"
 import Link from "next/link"
 import { Calendar, Users, CheckSquare } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 import { ByRecentProjects, ComputeProgress, DateTimeFormatter, LimitChar } from "@/lib/utils"
 
-export function RecentProjects({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
+export default function RecentProjects({ userId, userProjs } : { userId: string, userProjs: UserProjects[] }){
   // Projects that user is approved
   const approved = userProjs.filter((p) => p.members.some((m) => m.userId === userId && m.approved));
   
@@ -33,22 +32,22 @@ export function RecentProjects({ userId, userProjs } : { userId: string, userPro
   };
 
   return(
-    <div className="p-6 bg-white border border-gray-200 dark:bg-gray-800 rounded-xl dark:border-gray-700">
+    <div className="max-w-6xl p-6 mx-auto bg-white border border-gray-200 dark:bg-gray-800 rounded-xl dark:border-gray-700">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Projects</h3>
         <Link href="/projects" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">View all</Link>
       </div>
-      <div className="pr-2 space-y-4">
+      <div className="grid grid-cols-1 gap-4 auto-rows-fr">
         {projects?.map((project) => (
-          <Link href={`projects/${project.id}`} key={project.id}>
-            <div className="p-5 my-2 transition-colors border border-gray-200 rounded-xl dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+          <Link href={`projects/${project.id}`} key={project.id} className="h-full">
+            <div className="flex flex-col justify-between h-full p-5 my-2 transition-colors border border-gray-200 rounded-xl dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h4 className="mb-1 font-semibold text-gray-900 dark:text-white">{project.name}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{project.briefDesc}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{project.briefDesc}</p>
                 </div>
               </div>
-              <div className="flex items-center mb-3 space-x-4 text-sm text-gray-600 dark:text-gray-300">
+              <div className="flex flex-wrap items-center mb-3 text-sm text-gray-600 gap-x-4 gap-y-2 dark:text-gray-300">
                 <div className="flex items-center space-x-1">
                   <Calendar className="w-4 h-4"/>
                   <span>{project.detailedDate}</span>

@@ -5,12 +5,12 @@ const features = [
   {
     icon: Kanban,
     title: "Kanban Boards",
-    description: "Visualize your workflow with intuitive drag-and-drop Kanban boards that keep your team organized."
+    description: "Visualize your workflow with intuitive drag-and-drop kanban boards that keep your team organized."
   },
   {
     icon: Users,
     title: "Team Collaboration",
-    description: "Work together seamlessly with real-time updates, comments, and task assignments."
+    description: "Work together seamlessly with real-time updates."
   },
   {
     icon: Calendar,
@@ -34,7 +34,7 @@ const features = [
   }
 ];
 
-export function Features(){
+export default function Features(){
   return(
     <section className="flex flex-col items-center justify-center min-h-screen px-6 py-20 bg-white dark:bg-gray-900">
       <div className="max-w-3xl mb-12 text-center">

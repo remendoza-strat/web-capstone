@@ -1,58 +1,68 @@
-import { toast } from "sonner"
-import { X, AlertTriangle, Trash2  } from "lucide-react"
 import { ProjectMemberUser } from "@/lib/customtype"
-import { deleteProject, kickMember } from "@/lib/db/tanstack"
 import { useModal } from "@/lib/states"
-import { UserAvatar } from "@/components/user-avatar"
+import { useQueryClient } from "@tanstack/react-query"
+import { deleteProject, kickMember } from "@/lib/db/tanstack"
+import { toast } from "sonner"
+import { X, AlertTriangle  } from "lucide-react"
+import UserAvatar from "@/components/user-avatar"
 
-export function DeleteProjectMember(
+export default function DeleteProjectMember(
   { userId, member, members, onProjectSelect } :
   { userId: string, member: ProjectMemberUser, members: ProjectMemberUser[]; onProjectSelect?: (projectId: string) => void; }){
   
   // Closing modal
   const {closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
   
-  // Delete or kick member
-  const deleteProjectMutation = deleteProject(userId);
-  const kickMemberMutation = kickMember(userId);
+  // Delete project or kick member
+  const deleteProjectMutation = deleteProject();
+  const kickMemberMutation = kickMember();
 
   // Handle submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function handleSubmit(e: React.FormEvent){
+    e.preventDefault()
 
-    // Kick self and delete project
-    if(members.length === 1){
-      deleteProjectMutation.mutate({ projectId: member.projectId }, {
-        onSuccess: () => {
-          toast.success("Project left and deleted successfully.");
-          closeModal();
-          onProjectSelect?.(member.projectId);
-        },
-        onError: () => {
-          toast.error("Error occured.");
-          closeModal();
-        }
-      });
-      return;
-    }
+    // Approved member checking and kicking
+    if(member.approved){
+      const approvedMembers = members.filter((m) => m.approved);
+      const pMs = approvedMembers.filter((m) => m.role === "Project Manager");
 
-    // Prevent project with no project manager
-    const pmCount = (members.filter((m) => m.role === "Project Manager" && m.approved)).length;
-    if(member.role === "Project Manager" && member.approved && pmCount === 1){
-      toast.error("Project needs at least one approved project manager.");
-      closeModal();
-      return;
+      if(approvedMembers.length === 1){
+        deleteProjectMutation.mutate({ projectId: member.projectId, userId: userId }, {
+          onSuccess: () => {
+            toast.success("Project left and deleted successfully.");
+            closeModal();
+            onProjectSelect?.(member.projectId);
+            queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
+          },
+          onError: (err) => {
+            const error = err as { message?: string };
+            toast.error(error.message ?? "Error leaving project.");
+            closeModal();
+          }
+        })
+        return;
+      }
+      if(member.role === "Project Manager" && pMs.length === 1 && approvedMembers.length > 1) {
+        toast.error("Project needs at least one approved project manager.");
+        closeModal();
+        return;
+      }
     }
 
     // Kick member
-    kickMemberMutation.mutate({pmId: member.id, projectId: member.projectId, userId: member.user.id}, {
+    kickMemberMutation.mutate({ projectMemberId: member.id, projectId: member.projectId, memberUserId: member.userId, userId: userId }, {
       onSuccess: () => {
         toast.success("User successfully kicked.");
         closeModal();
         onProjectSelect?.(member.projectId);
+        queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
       },
-      onError: () => {
-        toast.error("Error occured.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error kicking user.");
         closeModal();
       }
     });
@@ -73,13 +83,13 @@ export function DeleteProjectMember(
           <button
             type="button"
             onClick={closeModal}
-            className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="mb-6">
             <div className="flex items-center mb-4 space-x-3">
               <UserAvatar clerkId={member.user.clerkId}/>
@@ -91,7 +101,7 @@ export function DeleteProjectMember(
             </div>
             <div className="p-4 border border-red-200 rounded-xl bg-red-50 dark:bg-red-900/20 dark:border-red-800">
               <p className="text-sm text-red-800 dark:text-red-200">
-                <strong>Warning:</strong> This action cannot be undone. The member will be permanently removed from all projects and lose access to its data.
+                <strong>Warning:</strong> This action cannot be undone. The member will be permanently removed from the project and will lose access to its data.
               </p>
             </div>
           </div>
@@ -99,16 +109,15 @@ export function DeleteProjectMember(
             <button
               type="button"
               onClick={closeModal}
-              className="flex-1 px-4 py-2 text-gray-700 transition-colors border border-gray-300 rounded-xl dark:border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="flex-1 px-4 py-3 font-medium text-gray-700 transition-colors border border-gray-300 dark:border-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={deleteProjectMutation.isPending || kickMemberMutation.isPending}
-              className="flex items-center justify-center flex-1 px-4 py-2 space-x-2 text-white transition-colors bg-red-600 rounded-xl hover:bg-red-700"
+              className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-red-600 hover:bg-red-700 rounded-xl"
             >
-              <Trash2 className="w-4 h-4"/>
               <span>{deleteProjectMutation.isPending || kickMemberMutation.isPending? "Kicking Member..." : "Kick Member"}</span>
             </button>
           </div>

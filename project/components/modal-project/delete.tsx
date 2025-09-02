@@ -1,36 +1,41 @@
 "use client"
-import React from "react"
-import { X, AlertTriangle } from "lucide-react"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
-import { useModal } from "@/lib/states"
 import { ProjectData } from "@/lib/customtype"
+import { useModal } from "@/lib/states"
+import { useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import { deleteProject } from "@/lib/db/tanstack"
+import { toast } from "sonner"
+import { X, AlertTriangle } from "lucide-react"
 
-export function DeleteProject({ userId, projectData } : { userId: string, projectData: ProjectData }){
+export default function DeleteProject({ userId, projectData } : { userId: string, projectData: ProjectData }){
   // Closing modal
   const { closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
 	// Route for when deleted
 	const router = useRouter();
 
 	// Deleting project
-	const deleteMutation = deleteProject(userId);
+	const deleteMutation = deleteProject();
 
 	// Handle form submission
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 	
 		// Delete project
-		deleteMutation.mutate({ projectId: projectData.id }, {
+		deleteMutation.mutate({ projectId: projectData.id, userId: userId }, {
 			onSuccess: () => {
 				toast.success("Project deleted successfully.");
 				router.push("/projects");
+        queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
 				closeModal();
 		
 			},
-			onError: () => {
-				toast.error("Error occured.");
+			onError: (err) => {
+				const error = err as { message?: string };
+        toast.error(error.message ?? "Error deleting project.");
 				closeModal();
 			}
 		});
@@ -51,7 +56,7 @@ export function DeleteProject({ userId, projectData } : { userId: string, projec
           <button
             type="button"
             onClick={closeModal}
-            className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
           </button>
@@ -63,7 +68,7 @@ export function DeleteProject({ userId, projectData } : { userId: string, projec
                 Are you sure?
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                This action cannot be undone. You are about to delete <strong>"{projectData.name}"</strong>. This will permanently remove the project and all its associated data.
+                You are about to delete <strong>"{projectData.name}"</strong> project. This action will permanently delete the project and all its data.
               </p>
             </div>
           </div>

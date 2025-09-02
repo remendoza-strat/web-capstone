@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-export function Footer(){
+export default function Footer(){
   return(
     <footer className="bg-white border-t border-gray-200 dark:bg-gray-900 dark:border-gray-700">
       <div className="px-6 py-10">
@@ -12,7 +12,7 @@ export function Footer(){
             ProjectFlow
           </Link>
           <p className="mt-4 text-gray-600 dark:text-gray-300">
-            The modern project management platform that helps teams collaborate  and deliver results.
+            The modern project management platform that help teams collaborate and deliver results.
           </p>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             © 2025 ProjectFlow. All rights reserved.

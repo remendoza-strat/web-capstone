@@ -1,20 +1,23 @@
 "use client"
-import { X, Search, Trash2 } from "lucide-react"
-import { toast } from "sonner"
+import UserAvatar from "@/components/user-avatar"
+import { useModal } from "@/lib/states"
+import { useQueryClient } from "@tanstack/react-query"
 import { useState, useEffect } from "react"
 import type { NewProjectMember, User } from "@/lib/db/schema"
-import { Role, RoleArr } from "@/lib/customtype"
-import type { ProjectsWithMembers } from "@/lib/customtype"
+import { Role, RoleArr, type ProjectsWithMembers } from "@/lib/customtype"
 import { hasPermission } from "@/lib/permissions"
-import { createProjectMember, getAllUsers } from "@/lib/db/tanstack"
-import { UserAvatar } from "@/components/user-avatar"
-import { useModal } from "@/lib/states"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
+import { addProjectMember, getAllUsers } from "@/lib/db/tanstack"
+import { toast } from "sonner"
+import LoadingPage from "@/components/util-pages/loading-page"
+import ErrorPage from "@/components/util-pages/error-page"
+import { X, Search, Trash2, Type, UsersRound } from "lucide-react"
 
-export function CreateProjectMember({ userId, projectsData, onProjectSelect } : { userId: string; projectsData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
+export default function CreateProjectMember({ userId, projectsData, onProjectSelect } : { userId: string; projectsData: ProjectsWithMembers[]; onProjectSelect?: (projectId: string) => void; }){
   // Modal closing
   const { closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
   // Hook for selected project
   const [selectedProjectId, setSelectedProjectId] = useState("");
@@ -29,7 +32,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
     .filter((project) => project.members.some((member) => member.userId === userId && member.approved && hasPermission(member.role, "addMember")));
 
   // Create project member
-  const createMutation = createProjectMember(userId);
+  const createMutation = addProjectMember();
 
   // Get all users
   const {
@@ -132,14 +135,17 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
           role: role,
           approved: false,
         };
-        await createMutation.mutateAsync({ newProjectMember });
+        await createMutation.mutateAsync({ newProjectMember: newProjectMember, userId: userId });
       }
       toast.success("Project membership invitation sent.");
       closeModal();
       onProjectSelect?.(selectedProjectId);
+      queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });
+      queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
     } 
-    catch(error){
-      toast.error("Error occurred.");
+    catch(err){
+      const error = err as { message?: string };
+      toast.error(error.message ?? "Error inviting user to the project.");
       closeModal();
     }
   };
@@ -147,17 +153,17 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
-        {allUsersLoading? (<LoadingPage/>) : allUsersError? (<ErrorPage code={404} message="Fetching data error"/>) :
+        {allUsersLoading? (<LoadingPage/>) : allUsersError? (<ErrorPage message={allUsersError.message || "Fetching data error."}/>) :
           (
             <>
               <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Add Team Member
+                  Add Member
                 </h2>
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
                 </button>
@@ -165,7 +171,8 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
               <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Project
+                    <Type className="inline w-4 h-4 mr-2"/>
+                    Project Name
                   </label>
                   <select
                     className="w-full px-3 py-3 text-gray-900 bg-white border border-gray-300 cursor-pointer dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
@@ -187,7 +194,8 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                 </div>
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Search Users
+                    <UsersRound className="inline w-4 h-4 mr-2"/>
+                    Users
                   </label>
                   <div className="relative">
                     <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2 dark:text-gray-500"/>
@@ -232,9 +240,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                           className="flex items-center justify-between gap-3 p-3 border border-gray-200 bg-gray-50 dark:bg-gray-700 rounded-xl dark:border-gray-600"
                         >
                           <div className="flex items-center flex-1 min-w-0 space-x-3">
-                            <div className="flex items-center justify-center w-10 h-10 text-sm font-semibold text-white rounded-full">
-                              <UserAvatar clerkId={selected.user.clerkId}/>
-                            </div>
+                            <UserAvatar clerkId={selected.user.clerkId}/>
                             <div className="flex-1 min-w-0">
                               <div className="font-medium text-gray-900 truncate dark:text-white">
                                 {selected.user.fname} {selected.user.lname}
@@ -258,7 +264,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                             <button
                               type="button"
                               onClick={() => handleRemoveUser(index)}
-                              className="p-2 transition-colors rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+                              className="p-2 transition-colors rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30"
                             >
                               <Trash2 className="w-4 h-4 text-red-500 dark:text-red-400"/>
                             </button>
@@ -279,7 +285,7 @@ export function CreateProjectMember({ userId, projectsData, onProjectSelect } : 
                   <button
                     type="submit"
                     disabled={createMutation.isPending}
-                    className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-xl"
+                    className="flex-1 px-4 py-3 font-medium text-white transition-colors bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 rounded-xl"
                   >
                     {createMutation.isPending? 
                       "Adding Member..."

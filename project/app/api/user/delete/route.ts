@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { deleteUserAction } from "@/lib/db/actions"
+import { deleteUserAction } from "@/lib/db/user_actions"
 import { clerkClient } from "@clerk/clerk-sdk-node"
 import { getAuth } from "@clerk/nextjs/server"
 

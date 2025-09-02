@@ -1,16 +1,20 @@
-import React, { useState } from "react"
-import { toast } from "sonner"
-import { X, Type, FileText, Calendar } from "lucide-react"
-import { ProjectSchema } from "@/lib/validations"
+import { ProjectData } from "@/lib/customtype"
 import { useModal } from "@/lib/states"
+import { useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 import { FormatDateDisplay } from "@/lib/utils"
 import { updateProject } from "@/lib/db/tanstack"
+import { toast } from "sonner"
+import { ClientUpdateProjectSchema } from "@/lib/validations"
 import { projects } from "@/lib/db/schema"
-import { ProjectData } from "@/lib/customtype"
+import { X, Type, FileText, Calendar } from "lucide-react"
 
-export function UpdateProject({ userId, projectData } : { userId: string, projectData: ProjectData }){
+export default function UpdateProject({ userId, projectData } : { userId: string, projectData: ProjectData }){
   // Closing modal
   const { closeModal } = useModal();
+
+  // Refresh data
+  const queryClient = useQueryClient();
 
   // Input hooks
   const [name, setName] = useState(projectData.name);
@@ -18,7 +22,7 @@ export function UpdateProject({ userId, projectData } : { userId: string, projec
   const [dueDate, setDueDate] = useState(FormatDateDisplay(projectData.dueDate));
 
   // Update project
-  const updateMutation = updateProject(userId);
+  const updateMutation = updateProject();
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,27 +45,16 @@ export function UpdateProject({ userId, projectData } : { userId: string, projec
     }
 
     // Validate input
-    const result = ProjectSchema.safeParse({
-      name,
-      description,
-      dueDate
+    const result = ClientUpdateProjectSchema.safeParse({
+      name: name,
+      description: description,
+      dueDate: dueDate
     });
   
-    // Display error from validation
+      // Display error from validation
     if(!result.success){
-      const errors = result.error.flatten().fieldErrors;
-      if(errors.name?.[0]){
-        toast.error(errors.name[0]);
-        return;
-      }
-      if(errors.description?.[0]){
-        toast.error(errors.description[0]);
-        return;
-      }
-      if(errors.dueDate?.[0]){
-        toast.error(errors.dueDate[0]);
-        return;
-      }
+      toast.error(result.error.issues[0].message);
+      return;
     }
 
     // Setup project data to update
@@ -73,13 +66,15 @@ export function UpdateProject({ userId, projectData } : { userId: string, projec
     }
         
     // Update project  
-    updateMutation.mutate({ projectId: projectData.id, updProject }, {
+    updateMutation.mutate({ projectId: projectData.id, updProject: updProject, userId: userId }, {
       onSuccess: () => {
         toast.success("Project updated successfully.");
         closeModal();
+        queryClient.invalidateQueries({ queryKey: ["project-data", projectData.id] });
       },
-      onError: () => {
-        toast.error("Error occured.");
+      onError: (err) => {
+        const error = err as { message?: string };
+        toast.error(error.message ?? "Error updating project.");
         closeModal();
       }
     });
@@ -95,7 +90,7 @@ export function UpdateProject({ userId, projectData } : { userId: string, projec
           <button
             type="button"
             onClick={closeModal}
-            className="p-2 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 transition-colors rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/>
           </button>

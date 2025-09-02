@@ -1,18 +1,18 @@
 "use client"
+import { hasPermission } from "@/lib/permissions"
+import { useModal } from "@/lib/states"
+import { useUser } from "@clerk/nextjs"
 import { useEffect, useState } from "react"
-import { ChevronDown, Filter, Search, Users, UsersRound, FolderOpen, UserPlus } from "lucide-react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { MemberCard } from "@/components/page-team/member-card"
 import { ProjectMemberUser, ProjectsWithMembers, RoleArr } from "@/lib/customtype"
 import { getUserId, getUserProjectsWithMembers } from "@/lib/db/tanstack"
-import { useUser } from "@clerk/nextjs"
-import { useModal } from "@/lib/states"
-import { hasPermission } from "@/lib/permissions"
-import { CreateProjectMember } from "@/components/modal-project_member/create"
-import { UpdateProjectMember } from "@/components/modal-project_member/update"
-import { DeleteProjectMember } from "@/components/modal-project_member/delete"
-import ErrorPage from "@/components/pages/error"
-import LoadingPage from "@/components/pages/loading"
+import DashboardLayout from "@/components/dashboard-layout"
+import LoadingPage from "@/components/util-pages/loading-page"
+import ErrorPage from "@/components/util-pages/error-page"
+import CreateProjectMember from "@/components/modal-project_member/create"
+import UpdateProjectMember from "@/components/modal-project_member/update"
+import DeleteProjectMember from "@/components/modal-project_member/delete"
+import { ChevronDown, Filter, Search, Users, UsersRound, FolderOpen, UserPlus } from "lucide-react"
+import MemberCard from "@/components/page-team/member-card"
 
 export default function TeamPage(){
   // Add member modal
@@ -35,8 +35,8 @@ export default function TeamPage(){
   const [projectsData, setProjectsData] = useState<ProjectsWithMembers[]>([]);
   const [members, setMembers] = useState<ProjectMemberUser[]>([]);
 
-  // Hook for project that user added member in
-  const [createdAt, setCreatedAt] = useState("");
+  // Hook for project that user modified
+  const [modifiedAt, setModifiedAt] = useState("");
 
   // Get user permission
   const [canEditMember, setCanEditMember] = useState(false);
@@ -47,33 +47,30 @@ export default function TeamPage(){
 
   // Get user id
   const { 
-          data: userId, 
-          isLoading: userIdLoading, 
-          error: userIdError 
-        } 
-  = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
+    data: userId, 
+    isLoading: userIdLoading, 
+    error: userIdError 
+  } = getUserId(user?.id ?? "", { enabled: Boolean(user?.id) });
 
   // Get projects with members
   const {
-          data: projectWithMembers, 
-          isLoading: projectWithMembersLoading, 
-          error: projectWithMembersError 
+    data: projectWithMembers, 
+    isLoading: projectWithMembersLoading, 
+    error: projectWithMembersError 
   } = getUserProjectsWithMembers(userId ?? "", { enabled: Boolean(userId) });
 
-  // Show loading
+  // Show loading and error
   const isLoading = !userLoaded || userIdLoading || projectWithMembersLoading;
-
-  // Show error
   const isError = userIdError || projectWithMembersError;
 
   // Initial selected project
   useEffect(() => {
     if(projectWithMembers && projectWithMembers.length > 0){
       const currentExists = projectWithMembers.some(
-        (pwm) => pwm.project.id === createdAt
+        (pwm) => pwm.project.id === modifiedAt
       );
-      if(createdAt && currentExists){
-        setSelectedProject(createdAt);
+      if(modifiedAt && currentExists){
+        setSelectedProject(modifiedAt);
       }
       else{
         setSelectedProject(projectWithMembers[0].project.id);
@@ -88,8 +85,7 @@ export default function TeamPage(){
 
   // Initial members of selected project
   useEffect(() => {
-    const selectedProjectData = projectWithMembers?.find(
-      (pwm) => pwm.project.id === selectedProject);
+    const selectedProjectData = projectWithMembers?.find((pwm) => pwm.project.id === selectedProject);
       const membersData = selectedProjectData?.project.members ?? [];
       setMembers(membersData);
 
@@ -130,11 +126,13 @@ export default function TeamPage(){
 
   return(
     <DashboardLayout>
-      {isLoading ? (<LoadingPage/>) : isError ? (<ErrorPage code={404} message="Fetching data error"/>) : (
+      {isLoading ? (<LoadingPage/>) : 
+      isError ? (<ErrorPage message={isError.message || "Fetching data error."}/>) : 
+        (
           <>
-            {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setCreatedAt(projId)}/>}
-            {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
-            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjectMember userId={userId} member={selectedDeleteMember} members={members} onProjectSelect={(projId) => setCreatedAt(projId)}/>)}
+            {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setModifiedAt(projId)}/>}
+            {isOpen && modalType === "updateMember" && userId && selectedUpdateMember && (<UpdateProjectMember userId={userId} member={selectedUpdateMember} members={members} onProjectSelect={(projId) => setModifiedAt(projId)}/>)}
+            {isOpen && modalType === "deleteMember" && userId && selectedDeleteMember && (<DeleteProjectMember userId={userId} member={selectedDeleteMember} members={members} onProjectSelect={(projId) => setModifiedAt(projId)}/>)}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>

@@ -2,10 +2,9 @@
 import React, { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, FolderOpen, Users, Menu, X, BarChart3, Calendar } from "lucide-react"
+import { Home, FolderOpen, Users, Menu, X, BarChart3, Calendar, UserCircle2 } from "lucide-react"
 import { useUser } from "@clerk/nextjs"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { UserAvatar } from "@/components/user-avatar"
+import ThemeToggle from "@/components/theme-toggle"
 
 // Links of nav bar
 const navigation = [
@@ -16,7 +15,7 @@ const navigation = [
   { name: "Calendar", href: "/calendar", icon: Calendar }
 ];
 
-export function DashboardLayout({ children } : { children: React.ReactNode }){
+export default function DashboardLayout({ children } : { children: React.ReactNode }){
   // Get current user
   const { user } = useUser();
   
@@ -74,17 +73,34 @@ export function DashboardLayout({ children } : { children: React.ReactNode }){
         </nav>
         <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
           <Link
-            href="/settings"
+            href="/profile"
             className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-              pathname.startsWith("/settings")
+              pathname.startsWith("/profile")
                 ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
-            <div className="mr-2">
-              {user?.id ? (<UserAvatar clerkId={user.id}/>) : (<Users className="w-5 h-5 mr-3"/>) }
+          <div className="mr-2">
+            <div className="w-10 h-10">
+              {user?.imageUrl ? (
+                <img
+                  src={user.imageUrl}
+                  className="object-cover w-full h-full rounded-full"
+                />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full text-gray-400">
+                  <UserCircle2 className="w-16 h-16"/>
+                </div>
+              )}
             </div>
-            <span>{user?.id ? (<p>{user.firstName} {user.lastName}</p>) : (<p> </p>) }</span>
+          </div>
+          <span>
+            {user?.id ? (
+              <p>{user.firstName} {user.lastName}</p>
+            ) : (
+              <p>&nbsp;</p>
+            )}
+          </span>
           </Link>
         </div>
       </div>

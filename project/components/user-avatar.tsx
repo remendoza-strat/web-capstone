@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react"
 import { getUserImage } from "@/lib/db/tanstack"
 
-export function UserAvatar({ clerkId } : { clerkId: string}){
+export default function UserAvatar({ clerkId } : { clerkId: string}){
   // Get clerk image link
   const { data: imageUrl, isLoading } = getUserImage(clerkId);
 

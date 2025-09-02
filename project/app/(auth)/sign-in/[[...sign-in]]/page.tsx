@@ -1,8 +1,8 @@
 "use client"
 import { useTheme } from "@/components/theme-provider"
 import { SignIn } from "@clerk/nextjs"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+import Header from "@/components/public-components/header"
+import Footer from "@/components/public-components/footer"
 
 export default function SignInPage(){
   const { theme } = useTheme();

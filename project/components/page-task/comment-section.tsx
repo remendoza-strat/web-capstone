@@ -3,12 +3,12 @@ import { toast } from "sonner"
 import { useEffect, useState } from "react"
 import { MessageCircle, Send, MoreHorizontal, Check, X } from "lucide-react"
 import { CommentsWithUser } from "@/lib/customtype"
-import { UserAvatar } from "@/components/user-avatar"
+import UserAvatar from "@/components/user-avatar"
 import { DateTimeFormatter } from "@/lib/utils"
 import { createComment, deleteComment, updateComment } from "@/lib/db/tanstack"
 import { comments, NewComment } from "@/lib/db/schema"
 
-export function CommentSection(
+export default function CommentSection(
   { clerkId, userId, taskId, editComment, allComments } : 
   { clerkId: string; userId: string; taskId: string; editComment: boolean; allComments: CommentsWithUser[]; }){
 
@@ -57,7 +57,7 @@ export function CommentSection(
         setInputCreateComment("");
       },
       onError: () => {
-        toast.error("Error occured.");
+        toast.error("Error posting comment.");
       }
     });
   }
@@ -76,7 +76,7 @@ export function CommentSection(
       const updComment: Partial<typeof comments.$inferInsert> = { content: inputUpdateComment, updatedAt: new Date() };
 
       // Update comment
-      updateCommentMutation.mutate({ cId: id, updComment: updComment }, {
+      updateCommentMutation.mutate({ commentId: id, updComment: updComment }, {
         onSuccess: () => {
           toast.success("Comment successfully updated.");
           setCommentsList(prev =>
@@ -84,21 +84,21 @@ export function CommentSection(
           setEditingCommentId(null);
         },
         onError: () => {
-          toast.error("Error occured.");
+          toast.error("Error updating comment.");
         }
       });
     }
   }
 
   // Delete comment
-  function deleteUserComment(id: string){
-    if(id){
-      deleteCommentMutation.mutate({cId: id}, {
+  function deleteUserComment(commentId: string){
+    if(commentId){
+      deleteCommentMutation.mutate(commentId, {
         onSuccess: () => {
           toast.success("Comment successfully deleted.");
         },
         onError: () => {
-          toast.error("Error occured.");
+          toast.error("Error deleting comment.");
         }
       });
     }
