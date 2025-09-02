@@ -6,9 +6,6 @@ export function StripHTML(html: string){
   return html.replace(/<[^>]+>/g, "").trim();
 }
 
-
-
-
 // Sort projects by most recent updated
 export function ByRecentProjects(projects: UserProjects[]){
   return [...projects].sort((a, b) =>
@@ -93,9 +90,6 @@ export const TimeAgo = (date?: Date | string | null) => {
   const diffInDays = Math.floor(diffInHours / 24);
   return `${diffInDays}d ago`;
 };
-
-
-
 
 // Get status of the project
 export function ProjectStatus(tasks: Task[], columnCount: number, date: Date){

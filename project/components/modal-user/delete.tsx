@@ -31,7 +31,7 @@ export default function DeleteUser({ userId, userProjs } : { userId: string, use
       if (!userMember) return false;
       if(userMember.role === "Project Manager"){
         const approvedPMs = approvedMembers.filter((m) => m.role === "Project Manager");
-        return approvedPMs.length === 1 && approvedMembers.length > 1;
+        return (approvedPMs.length === 1 && approvedMembers.length > 1) || (approvedMembers.length === 1);
       }
       return false;
     });

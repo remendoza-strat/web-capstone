@@ -79,7 +79,6 @@ export const ClientCreateProjectSchema = ProjectSchema.pick({ name: true, descri
 export const ClientUpdateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true});
 export const ServerCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true, columnCount: true, columnNames: true });
 export const ServerUpdateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true, updatedAt: true});
-
 export const ServerUpdateProjectTimeSchema = ProjectSchema.pick({ updatedAt: true });
 export const ClientUpdateProjectColumnSchema = ProjectSchema.pick({ columnName: true });
 
@@ -105,7 +104,6 @@ export const ProjectMemberSchema = z.object({
 
 });
 export const ServerCreateProjectMemberSchema = ProjectMemberSchema.pick({ projectId: true, userId: true, role: true, approved: true});
-
 export const ServerUpdateProjectMemberApprovalSchema = ProjectMemberSchema.pick({ approved: true});
 export const ServerUpdateProjectMemberRoleSchema = ProjectMemberSchema.pick({ role: true });
 
@@ -179,8 +177,7 @@ export const TaskSchema = z.object({
   
 });
 export const ClientCreateTaskSchema = TaskSchema.pick({ title: true, description: true, dueDate: true, label: true });
-export const ServerCreateTaskSchema = TaskSchema.pick({ projectId: true, title: true, description: true, dueDate: true, priority: true, position: true, 
-  order: true, label: true});
+export const ServerCreateTaskSchema = TaskSchema.pick({ projectId: true, title: true, description: true, dueDate: true, priority: true, position: true, order: true, label: true});
 
 // Task assignee data schema
 export const TaskAssigneeSchema = z.object({

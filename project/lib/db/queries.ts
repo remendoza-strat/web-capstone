@@ -66,7 +66,7 @@ export const getQueries = {
     const result = await db.query.users.findFirst({
       where: eq(users.clerkId, clerkId)
     });
-    return result?.id;
+    return result?.id ?? null;
   },
 
   getUserProjectsWithMembers: async (userId: string) => {
