@@ -47,7 +47,7 @@ export const checkQueries = {
     return result;
   },
 
-  getPermission: async (userId: string, projectId: string) => {
+  getMembership: async (userId: string, projectId: string) => {
     const result = await db.query.projectMembers.findFirst({
       where: (pm, {eq, and}) => and(
         eq(pm.userId, userId),

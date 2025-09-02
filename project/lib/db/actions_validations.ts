@@ -204,9 +204,57 @@ export async function UserPermission(userId: string, projectId: string, action: 
   }
   
   // Validate user permission
-  const getUser = await checkQueries.getPermission(userId, projectId);
+  const getUser = await checkQueries.getMembership(userId, projectId);
   if(!getUser || !hasPermission(getUser.role, action)){
     return { success: false, message: "No permission for the action." }; 
+  }
+
+  // Return success
+  return {success: true};
+
+}
+
+// Function:
+// is format of projectId and userId correct?
+// is user an approved member of the project?
+export async function UserProjectMembership(projectId: string, userId: string){
+
+  // Check formats
+  if(!isUuid(userId) || !isUuid(projectId)){
+    return { success: false, message: "Invalid ID." };
+  }
+  
+  // Validate user membership
+  const getUser = await checkQueries.getMembership(userId, projectId);
+  if(!getUser){
+    return { success: false, message: "Not a project member." }; 
+  }
+
+  // Return success
+  return {success: true};
+
+}
+
+// Function:
+// is format of taskId and userId correct?
+// is user an approved member of the task project?
+export async function UserTaskMembership(taskId: string, userId: string){
+
+  // Check formats
+  if(!isUuid(userId) || !isUuid(taskId)){
+    return { success: false, message: "Invalid ID." };
+  }
+
+	// Check if taskId exist in db
+  const exist = await checkQueries.getTask(taskId);
+  if(!exist){
+    return { success: false, message: "Task not found." };
+  }
+  
+  // Validate user membership
+  const getUser = await checkQueries.getMembership(userId, exist.projectId);
+  if(!getUser){
+    return { success: false, message: "Not a project member." }; 
   }
 
   // Return success

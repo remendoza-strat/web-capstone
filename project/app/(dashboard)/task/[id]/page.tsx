@@ -79,7 +79,7 @@ export default function TaskPage(){
           isLoading: taskDataLoading,
           error: taskDataError
         } 
-  = getTaskData(taskId, { enabled: Boolean(taskId) });
+  = getTaskData(taskId ?? "", userId ?? "", { enabled: Boolean(taskId) });
 
   // Set initial values
   useEffect(() => {

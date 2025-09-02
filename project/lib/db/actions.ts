@@ -7,8 +7,9 @@ import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
 import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema, ServerUpdateProjectTimeSchema } from "../validations"
-import { ClerkIdMatcher, UserAuthValidation, UserIdValidator, UserPermission, ValidProject, ValidProjectMember, ValidTask, ValidUser } from "./actions_validations"
+import { ClerkIdMatcher, UserAuthValidation, UserIdValidator, UserPermission, UserProjectMembership, UserTaskMembership, ValidProject, ValidProjectMember, ValidTask, ValidUser } from "./actions_validations"
 
+/* ===================== GET ACTIONS ===================== */ 
 export async function getUserIdAction(clerkId: string){
 
   // Validate clerkId
@@ -79,13 +80,12 @@ export async function getAllUsersAction(){
 
 }
 
-// TO ADD USERIDVALIDATOR
-export async function getProjectDataAction(projectId: string){
+export async function getProjectDataAction(projectId: string, userId: string){
 
-  // Validate user authentication
-  const checkAuth = await UserAuthValidation();
-  if(!checkAuth.success){
-    return { success: false, message: checkAuth.message };
+  // Validate project membership
+  const checkUserProjMem = await UserProjectMembership(projectId, userId);
+  if(!checkUserProjMem.success){
+    return { success: false, message: checkUserProjMem.message };
   }
   
   // Return projectData
@@ -93,19 +93,20 @@ export async function getProjectDataAction(projectId: string){
   return { success : true, projectData };
 
 }
-export async function getTaskDataAction(taskId: string){
 
-  // Validate user authentication
-  const checkAuth = await UserAuthValidation();
-  if(!checkAuth.success){
-    return { success: false, message: checkAuth.message };
+export async function getTaskDataAction(taskId: string, userId: string){
+
+  // Validate task project membership
+  const checkTaskMem = await UserTaskMembership(taskId, userId);
+  if(!checkTaskMem.success){
+    return { success: false, message: checkTaskMem.message };
   }
 
   // Return taskData
   const taskData =  await getQueries.getTaskData(taskId);
   return { success : true, taskData };
 }
-// TO ADD USERIDVALIDATOR
+/* ===================== GET ACTIONS ===================== */ 
 
 
 

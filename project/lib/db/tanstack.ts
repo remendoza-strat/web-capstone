@@ -73,11 +73,11 @@ export function getAllUsers(){
   });
 }
 
-export function getProjectData(projectId: string, options: { enabled: boolean }){
+export function getProjectData(projectId: string, userId: string, options: { enabled: boolean }){
   return useQuery({
     queryKey: ["project-data", projectId],
     queryFn: async () => {
-      const result = await Actions.getProjectDataAction(projectId);
+      const result = await Actions.getProjectDataAction(projectId, userId);
       if(!result.success){
         throw { message: result.message };
       }
@@ -87,11 +87,11 @@ export function getProjectData(projectId: string, options: { enabled: boolean })
   });
 }
 
-export function getTaskData(taskId: string, options: { enabled: boolean }){
+export function getTaskData(taskId: string, userId: string, options: { enabled: boolean }){
   return useQuery({
     queryKey: ["task-data", taskId],
     queryFn: async () => {
-      const result = await Actions.getTaskDataAction(taskId);
+      const result = await Actions.getTaskDataAction(taskId, userId);
       if(!result.success){
         throw { message: result.message };
       }

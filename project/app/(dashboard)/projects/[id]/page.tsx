@@ -57,7 +57,7 @@ export default function ProjectPage(){
     data: projectData, 
     isLoading: projectDataLoading, 
     error: projectDataError 
-  } = getProjectData(projectId ?? "", { enabled: Boolean(projectId) });
+  } = getProjectData(projectId ?? "", userId ?? "", { enabled: Boolean(projectId) });
 
   // Show loading page if still processing
   if (!userLoaded || userIdLoading || projectDataLoading) return <LoadingPage/>;
