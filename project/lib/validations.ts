@@ -1,15 +1,6 @@
 import { z } from "zod"
 import { PriorityArr, RoleArr } from "./customtype";
 
-
-
-
-
-
-
-
-
-
 // Project data validation
 export const ProjectSchema = z.object({
 
@@ -87,6 +78,8 @@ export const ProjectSchema = z.object({
 export const ClientCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true});
 export const ClientUpdateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true});
 export const ServerCreateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true, columnCount: true, columnNames: true });
+export const ServerUpdateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true, updatedAt: true});
+
 export const ServerUpdateProjectTimeSchema = ProjectSchema.pick({ updatedAt: true });
 export const ClientColumnNameSchema = ProjectSchema.pick({ columnName: true });
 
@@ -112,6 +105,8 @@ export const ProjectMemberSchema = z.object({
 
 });
 export const ServerCreateProjectMemberSchema = ProjectMemberSchema.pick({ projectId: true, userId: true, role: true, approved: true});
+
+export const ServerUpdateProjectMemberApprovalSchema = ProjectMemberSchema.pick({ approved: true});
 export const ServerUpdateProjectMemberRoleSchema = ProjectMemberSchema.pick({ role: true });
 
 // Task data input validation
@@ -201,34 +196,6 @@ export const TaskAssigneeSchema = z.object({
 });
 export const ServerCreateTaskAssigneeSchema = TaskAssigneeSchema.pick({ taskId: true, userId: true });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // User data input validation
 export const UserSchema = z.object({
 
@@ -254,9 +221,5 @@ export const UserSchema = z.object({
     .refine((val) => /[^A-Za-z0-9]/.test(val), "Password: Must include at least one symbol (e.g., !@#$%)."),
   
 });
-
-// Validate updating first name and last name
 export const NameSchema = UserSchema.pick({ fname: true, lname: true });
-
-// Validate updating password
 export const PasswordSchema = UserSchema.pick({ pword: true });

@@ -1,15 +1,16 @@
 "use server"
-import { checkQueries, createQueries, deleteQueries, getQueries, updateQueries } from "@/lib/db/queries"
+import { createQueries, deleteQueries, getQueries, updateQueries } from "@/lib/db/queries"
 import type { NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment, comments } from "@/lib/db/schema"
-import { projects, taskAssignees, tasks, users } from "@/lib/db/schema"
+import { projects, taskAssignees, tasks, projectMembers } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
-import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
-import { projectMembers } from './schema';
-import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema, ServerUpdateProjectMemberRoleSchema, ServerUpdateProjectTimeSchema } from "../validations"
-import { ClerkIdMatcher, UserAuthValidation, UserIdValidator, UserPermission, UserProjectMembership, UserTaskMembership, ValidProject, ValidProjectMember, ValidTask, ValidUser } from "./actions_validations"
+import { pusherServer } from "@/lib/pusher/server"
+import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema, ServerUpdateProjectMemberApprovalSchema, 
+ServerUpdateProjectMemberRoleSchema, ServerUpdateProjectTimeSchema } from "@/lib/validations"
+import { ClerkIdMatcher, UserAuthValidation, UserIdValidator, UserPermission, UserProjectMembership, UserTaskMembership, ValidProject, ValidProjectMember, ValidTask, 
+  ValidUser } from "@/lib/db/actions_validations"
 
-/* ===================== GET ACTIONS ===================== */ 
+/* ================ MAIN ACTIONS ================ */
 export async function getUserIdAction(clerkId: string){
 
   // Validate clerkId
@@ -107,9 +108,6 @@ export async function getTaskDataAction(taskId: string, userId: string){
   return { success : true, taskData };
 
 }
-/* ===================== GET ACTIONS ===================== */ 
-
-
 
 export async function createProjectAction(newProject: NewProject){
   
@@ -324,8 +322,8 @@ export async function updateProjectTimeAction(projectId: string, updProject: Par
 export async function updateProjectMemberAction(projectMemberId: string, updProjectMember: Partial<typeof projectMembers.$inferInsert>){
 
   // Validate data
-  const result = ServerUpdateProjectMemberRoleSchema.safeParse({
-    role: updProjectMember.role
+  const result = ServerUpdateProjectMemberApprovalSchema.safeParse({
+    approved: updProjectMember.approved
   });
   if(!result.success){
     return { success: false, message: result.error.issues[0].message };
@@ -369,73 +367,6 @@ export async function deleteProjectMemberAction(projectMemberId: string){
 
 }
 
-
-/* ========================================== */ 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// validate data
-// params order
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ROLE
-export async function updateMemberRoleAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>, userId: string){
-
-  // Validate project member
-  const checkMember = await ValidProjectMember(pmId);
-  if(!checkMember.exist?.userId){
-    return { success: false, message: checkMember.message };
-  }
-
-  // Validate userId
-  const checkUserId = await UserIdValidator(userId);
-  if(!checkUserId.success){
-    return { success: false, message: checkUserId.message };
-  }
-
-  // Validate user permission
-  const checkPermission = await UserPermission(userId, checkMember.exist.projectId, "editMember");
-  if(!checkPermission.success){
-    return { success: false, message: checkPermission.message };
-  }
-
-  // Update role
-  await updateQueries.updateProjectMember(pmId, updPm);
-  return { success : true };
-
-}
-
 export async function deleteProjectAction(projectId: string, userId: string){
   
   // Validate project
@@ -462,45 +393,63 @@ export async function deleteProjectAction(projectId: string, userId: string){
 
 }
 
-export async function kickMemberAction(pmId: string, projectId: string, memberId: string, userId: string){
-  
+export async function updateMemberRoleAction(projectMemberId: string, updProjectMember: Partial<typeof projectMembers.$inferInsert>, userId: string){
+
+  // Validate data
+  const result = ServerUpdateProjectMemberRoleSchema.safeParse({
+    role: updProjectMember.role
+  });
+  if(!result.success){
+    return { success: false, message: result.error.issues[0].message };
+  }
+
   // Validate project member
-  const checkMember = await ValidProjectMember(pmId);
-  if(!checkMember.exist?.userId){
+  const checkMember = await ValidProjectMember(projectMemberId);
+  if(!checkMember.exist?.projectId){
     return { success: false, message: checkMember.message };
   }
 
-  // Validate project
-  const checkProject = await ValidProject(projectId);
-  if(!checkProject.success){
-    return { success: false, message: checkProject.message };
-  }
-
-  // Validate user
-  const checkUser = await ValidUser(memberId);
-  if(!checkUser.success){
-    return { success: false, message: checkUser.message };
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
   }
 
   // Validate user permission
-  const checkPermission = await UserPermission(userId, projectId, "editMember");
+  const checkPermission = await UserPermission(userId, checkMember.exist.projectId, "editMember");
   if(!checkPermission.success){
     return { success: false, message: checkPermission.message };
   }
 
-  // Kick the user from project
-  await deleteQueries.deleteProjectMember(pmId);
-  await deleteQueries.deleteAllTaskAssignee(projectId, memberId);
-  await deleteQueries.deleteAllComment(projectId, memberId)
-  return { success: true }
+  // Update role
+  await updateQueries.updateProjectMember(projectMemberId, updProjectMember);
+  return { success : true };
 
 }
+
 export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, userId: string){
+
+  // Validate data
+  const result = ServerCreateProjectSchema.safeParse({
+    name: updProject.name,
+    description: updProject.description,
+    dueDate: updProject.dueDate,
+    updatedAt: updProject.updatedAt,
+  });
+  if(!result.success){
+    return { success: false, message: result.error.issues[0].message };
+  }
 
   // Validate project
   const checkProject = await ValidProject(projectId);
   if(!checkProject.success){
     return { success: false, message: checkProject.message };
+  }
+
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
   }
 
   // Validate user permission
@@ -514,11 +463,12 @@ export async function updateProjectAction(projectId: string, updProject: Partial
   return {success: true};
 
 }
-export async function leaveProjectAction(pmId: string, projectId: string, memberId: string){
+
+export async function leaveProjectAction(projectMemberId: string, projectId: string, userId: string){
   
   // Validate project member
-  const checkMember = await ValidProjectMember(pmId);
-  if(!checkMember.exist?.userId){
+  const checkMember = await ValidProjectMember(projectMemberId);
+  if(!checkMember.exist){
     return { success: false, message: checkMember.message };
   }
 
@@ -528,40 +478,62 @@ export async function leaveProjectAction(pmId: string, projectId: string, member
     return { success: false, message: checkProject.message };
   }
 
-  // Validate user
-  const checkUser = await ValidUser(memberId);
-  if(!checkUser.success){
-    return { success: false, message: checkUser.message };
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
   }
 
   // Leave the project
-  await deleteQueries.deleteProjectMember(pmId);
-  await deleteQueries.deleteAllTaskAssignee(projectId, memberId);
-  await deleteQueries.deleteAllComment(projectId, memberId)
+  await deleteQueries.deleteProjectMember(projectMemberId);
+  await deleteQueries.deleteAllTaskAssignee(projectId, userId);
+  await deleteQueries.deleteAllComment(projectId, userId)
   return { success: true }
 
 }
 
+export async function kickMemberAction(projectMemberId: string, projectId: string, memberUserId: string, userId: string){
+  
+  // Validate project member
+  const checkMember = await ValidProjectMember(projectMemberId);
+  if(!checkMember.success){
+    return { success: false, message: checkMember.message };
+  }
+  
+  // Validate project
+  const checkProject = await ValidProject(projectId);
+  if(!checkProject.success){
+    return { success: false, message: checkProject.message };
+  }
 
+  // Validate user
+  const checkUser = await ValidUser(memberUserId);
+  if(!checkUser.success){
+    return { success: false, message: checkUser.message };
+  }
 
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
 
+  // Validate user permission
+  const checkPermission = await UserPermission(userId, projectId, "editMember");
+  if(!checkPermission.success){
+    return { success: false, message: checkPermission.message };
+  }
 
+  // Kick the user from project
+  await deleteQueries.deleteProjectMember(projectMemberId);
+  await deleteQueries.deleteAllTaskAssignee(projectId, projectMemberId);
+  await deleteQueries.deleteAllComment(projectId, projectMemberId)
+  return { success: true }
 
+}
+/* ================ MAIN ACTIONS ================ */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// KANBAN ACTIONS
+/* ================ KANBAN ACTIONS ================ */
 export async function KanbanUpdateProjectAction
   (projectId: string, updProject: Partial<typeof projects.$inferInsert>){
 
@@ -689,22 +661,22 @@ export async function KanbanDeleteTaskAction
 
 export async function KanbanCreateAssigneeAction(newTaskAssignee: NewTaskAssignee){
 
-  if (!newTaskAssignee) return { success : false, message: "error" }
-
-  await createQueries.createTaskAssignee(newTaskAssignee);
+  // Validate
+  if (!newTaskAssignee) return { success : false, message: "No assignee added." };
 
   // Return success
+  await createQueries.createTaskAssignee(newTaskAssignee);
   return { success : true }
 
 }
 
-export async function KanbanDeleteAssigneeAction(taId: string){
+export async function KanbanDeleteAssigneeAction(taskAssigneeId: string){
 
-  if (!taId) return { success : false, message: "error" }
-
-  await deleteQueries.deleteTaskAssignee(taId);
+  // Validate
+  if (!taskAssigneeId) return { success : false, message: "No assignee deleted." }
 
   // Return success
+  await deleteQueries.deleteTaskAssignee(taskAssigneeId);
   return { success : true }
 
 }
@@ -713,11 +685,11 @@ export async function createCommentAction(newComment: NewComment){
   await createQueries.createComment(newComment);
 }
 
-export async function deleteCommentAction(cId: string){
-  await deleteQueries.deleteComment(cId);
+export async function deleteCommentAction(commentId: string){
+  await deleteQueries.deleteComment(commentId);
 }
 
-export async function updateCommentAction(cId: string, updComment: Partial<typeof comments.$inferInsert>){
-  await updateQueries.updateComment(cId, updComment);
+export async function updateCommentAction(commentId: string, updComment: Partial<typeof comments.$inferInsert>){
+  await updateQueries.updateComment(commentId, updComment);
 }
-
+/* ================ KANBAN ACTIONS ================ */

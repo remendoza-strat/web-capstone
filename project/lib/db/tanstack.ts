@@ -3,7 +3,7 @@ import { getUserImageAction } from "@/lib/clerk/user-image"
 import * as Actions from "@/lib/db/actions"
 import * as Schema from "@/lib/db/schema"
 
-/* ===================== GET QUERIES ===================== */ 
+/* ================ MAIN QUERIES ================ */
 export function getUserId(clerkId: string, options: { enabled: boolean }){
   return useQuery({
     queryKey: ["user-id", clerkId],
@@ -100,9 +100,6 @@ export function getTaskData(taskId: string, userId: string, options: { enabled: 
     enabled: options.enabled
   });
 }
-/* ===================== GET QUERIES ===================== */ 
-
-
 
 export function createProject(){
   return useMutation({
@@ -194,33 +191,6 @@ export function deleteProjectMember(){
   });
 }
 
-
-
-
-/* ========================================== */ 
-// params order
-
-
-
-
-
-
-
-
-
-
-
-export function updateMemberRole(){
-  return useMutation({
-    mutationFn: async ({ pmId, updPm, userId } : { pmId: string, updPm: Partial<typeof Schema.projectMembers.$inferInsert>, userId: string }) => {
-      const result = await Actions.updateMemberRoleAction(pmId, updPm, userId);
-      if(!result.success){
-        throw { message: result.message };
-      }
-    }
-  });
-}
-
 export function deleteProject(){
   return useMutation({
     mutationFn: async ({ projectId, userId } : { projectId: string, userId: string }) => {
@@ -232,17 +202,16 @@ export function deleteProject(){
   });
 }
 
-export function kickMember(){
+export function updateMemberRole(){
   return useMutation({
-    mutationFn: async ({ pmId, projectId, memberId, userId } : { pmId: string, projectId: string, memberId: string, userId: string }) => {
-      const result = await Actions.kickMemberAction(pmId, projectId, memberId, userId);
+    mutationFn: async ({ projectMemberId, updProjectMember, userId } : { projectMemberId: string, updProjectMember: Partial<typeof Schema.projectMembers.$inferInsert>, userId: string }) => {
+      const result = await Actions.updateMemberRoleAction(projectMemberId, updProjectMember, userId);
       if(!result.success){
         throw { message: result.message };
       }
     }
   });
 }
-
 
 export function updateProject(){
   return useMutation({
@@ -257,8 +226,8 @@ export function updateProject(){
 
 export function leaveProject(){
   return useMutation({
-    mutationFn: async ({ pmId, projectId, memberId } : { pmId: string, projectId: string, memberId: string }) => {
-      const result = await Actions.leaveProjectAction(pmId, projectId, memberId);
+    mutationFn: async ({ projectMemberId, projectId, userId } : { projectMemberId: string, projectId: string, userId: string }) => {
+      const result = await Actions.leaveProjectAction(projectMemberId, projectId, userId);
       if(!result.success){
         throw { message: result.message };
       }
@@ -266,18 +235,19 @@ export function leaveProject(){
   });
 }
 
-export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["member-icon", clerkId],
-    queryFn: async () => {
-      const data = await getUserImageAction(clerkId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!clerkId
+export function kickMember(){
+  return useMutation({
+    mutationFn: async ({ projectMemberId, projectId, memberUserId, userId } : { projectMemberId: string, projectId: string, memberUserId: string, userId: string }) => {
+      const result = await Actions.kickMemberAction(projectMemberId, projectId, memberUserId, userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+    }
   });
 }
+/* ================ MAIN QUERIES ================ */
 
-// KANBAN QUERIES
+/* ================ KANBAN QUERIES ================ */
 export function KanbanUpdateProject(){
   return useMutation({
     mutationFn: async ({ projectId, updProject } : 
@@ -343,8 +313,8 @@ export function KanbanCreateAssignee(){
 
 export function KanbanDeleteAssignee(){
   return useMutation({
-    mutationFn: async (taId: string) => {
-      const result = await Actions.KanbanDeleteAssigneeAction(taId);
+    mutationFn: async (taskAssigneeId: string) => {
+      const result = await Actions.KanbanDeleteAssigneeAction(taskAssigneeId);
       if(!result.success){
         throw { message: result.message };
       }
@@ -367,8 +337,8 @@ export function createComment(taskId: string){
 export function updateComment(taskId: string){
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ cId, updComment } : { cId: string, updComment: Partial<typeof Schema.comments.$inferInsert> }) => {
-      await Actions.updateCommentAction(cId, updComment);
+    mutationFn: async ({ commentId, updComment } : { commentId: string, updComment: Partial<typeof Schema.comments.$inferInsert> }) => {
+      await Actions.updateCommentAction(commentId, updComment);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["task-data", taskId] });
@@ -379,11 +349,23 @@ export function updateComment(taskId: string){
 export function deleteComment(taskId: string){
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ cId } : { cId: string }) => {
-      await Actions.deleteCommentAction(cId);
+    mutationFn: async (commentId: string) => {
+      await Actions.deleteCommentAction(commentId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["task-data", taskId] });
     }
+  });
+}
+/* ================ KANBAN QUERIES ================ */
+
+export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["member-icon", clerkId],
+    queryFn: async () => {
+      const data = await getUserImageAction(clerkId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!clerkId
   });
 }

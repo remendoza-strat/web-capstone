@@ -167,8 +167,8 @@ export const updateQueries = {
     await db.update(projects).set({...updProject}).where(eq(projects.id, projectId));
   },
 
-  updateComment: async (cId: string, updComment: Partial<typeof comments.$inferInsert>) => {
-    await db.update(comments).set({...updComment}).where(eq(comments.id, cId));
+  updateComment: async (commentId: string, updComment: Partial<typeof comments.$inferInsert>) => {
+    await db.update(comments).set({...updComment}).where(eq(comments.id, commentId));
   },
 
   updateUser: async (clerkId: string, updUser: Partial<typeof users.$inferInsert>) => {
@@ -183,16 +183,16 @@ export const deleteQueries = {
     await db.delete(projects).where(eq(projects.id, projectId));
   },
 
-  deleteProjectMember: async (pmId: string) => {
-    await db.delete(projectMembers).where(eq(projectMembers.id, pmId));
+  deleteProjectMember: async (projectMemberId: string) => {
+    await db.delete(projectMembers).where(eq(projectMembers.id, projectMemberId));
   },
 
-  deleteTaskAssignee: async (taId: string) => {
-    await db.delete(taskAssignees).where(eq(taskAssignees.id, taId));
+  deleteTaskAssignee: async (taskAssigneeId: string) => {
+    await db.delete(taskAssignees).where(eq(taskAssignees.id, taskAssigneeId));
   },
 
-  deleteComment: async (cId: string) => {
-    await db.delete(comments).where(eq(comments.id, cId));
+  deleteComment: async (commentId: string) => {
+    await db.delete(comments).where(eq(comments.id, commentId));
   },
 
   deleteUser: async (clerkId: string) => {
