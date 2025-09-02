@@ -204,7 +204,7 @@ export default function ProfilePage(){
     <DashboardLayout>
       {isOpen && modalType === "deleteUser" && userId && <DeleteUser userId={userId} userProjs={userProjs ?? []}/>}
       {isLoading ? (<LoadingPage/>) : 
-      isError ? (<ErrorPage code={400} message={isError.message || "Fetching data error."}/>) : 
+      isError ? (<ErrorPage message={isError.message || "Fetching data error."}/>) : 
         (
           <div className="bg-gray-50 dark:bg-gray-900">
             <div className="max-w-3xl p-2 mx-auto lg:p-8">

@@ -127,7 +127,7 @@ export default function TeamPage(){
   return(
     <DashboardLayout>
       {isLoading ? (<LoadingPage/>) : 
-      isError ? (<ErrorPage code={400} message={isError.message || "Fetching data error."}/>) : 
+      isError ? (<ErrorPage message={isError.message || "Fetching data error."}/>) : 
         (
           <>
             {isOpen && modalType === "createMember" && userId && <CreateProjectMember userId={userId} projectsData={projectsData} onProjectSelect={(projId) => setModifiedAt(projId)}/>}

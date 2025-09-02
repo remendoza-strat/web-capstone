@@ -45,7 +45,7 @@ export default function CalendarPage(){
   return(
     <DashboardLayout>
       {isLoading ? (<LoadingPage/>) : 
-      isError ? (<ErrorPage code={400} message={isError.message || "Fetching data error."}/>) : 
+      isError ? (<ErrorPage message={isError.message || "Fetching data error."}/>) : 
         (
           <>
             <div className="mb-8">

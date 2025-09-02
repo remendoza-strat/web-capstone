@@ -153,7 +153,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
   return(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
-        {allUsersLoading? (<LoadingPage/>) : allUsersError? (<ErrorPage code={400} message={allUsersError.message || "Fetching data error."}/>) :
+        {allUsersLoading? (<LoadingPage/>) : allUsersError? (<ErrorPage message={allUsersError.message || "Fetching data error."}/>) :
           (
             <>
               <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">

@@ -42,7 +42,7 @@ export default function ProjectPage(){
 
   // Check if valid project id
   if(!projectId || !isUuid(projectId)){
-    return <ErrorPage code={404} message="Invalid project ID"/>;
+    return <ErrorPage message="Invalid project ID"/>;
   }
 
   // Get user id
@@ -63,13 +63,13 @@ export default function ProjectPage(){
   if (!userLoaded || userIdLoading || projectDataLoading) return <LoadingPage/>;
 
   // Display error for queries
-  if (userIdError || !userId) return <ErrorPage code={403} message="User not found"/>;
-  if (projectDataError || !projectData) return <ErrorPage code={404} message={projectDataError?.message || "Fetching data error."}/>;
+  if (userIdError || !userId) return <ErrorPage message="User not found"/>;
+  if (projectDataError || !projectData) return <ErrorPage message={projectDataError?.message || "Fetching data error."}/>;
 
   // Check if the user is member of the project
   const isMember = projectData.members.some((m) => m.userId === userId && m.approved) ?? false;
   if(!isMember){
-    return <ErrorPage code={403} message="Not a project member"/>;
+    return <ErrorPage message="Not a project member"/>;
   }
   
   // User role

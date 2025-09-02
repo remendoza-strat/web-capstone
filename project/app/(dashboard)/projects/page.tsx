@@ -85,7 +85,7 @@ export default function ProjectsPage(){
   return(
     <DashboardLayout>
       {isLoading ? (<LoadingPage/>) : 
-      isError ? (<ErrorPage code={400} message={isError.message || "Fetching data error."}/>) : 
+      isError ? (<ErrorPage message={isError.message || "Fetching data error."}/>) : 
         (
           <> 
             {isOpen && modalType === "createProject" && userId && <CreateProject userId={userId}/>}

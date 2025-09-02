@@ -37,8 +37,9 @@ export default function DeleteProjectMember(
             onProjectSelect?.(member.projectId);
             queryClient.invalidateQueries({ queryKey: ["project-members", userId] });
           },
-          onError: () => {
-            toast.error("Error leaving project.");
+          onError: (err) => {
+            const error = err as { message?: string };
+            toast.error(error.message ?? "Error leaving project.");
             closeModal();
           }
         })

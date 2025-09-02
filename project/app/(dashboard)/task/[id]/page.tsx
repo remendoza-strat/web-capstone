@@ -62,7 +62,7 @@ export default function TaskPage(){
 
   // Check if valid task id
   if(!taskId || !isUuid(taskId)){
-    return <ErrorPage code={404} message="Invalid task ID"/>;
+    return <ErrorPage message="Invalid task ID"/>;
   }
 
   // Get user id with clerk id
@@ -265,13 +265,13 @@ export default function TaskPage(){
   if (!userLoaded || userIdLoading || taskDataLoading) return <LoadingPage/>;
 
   // Display error for queries
-  if (userIdError || !userId) return <ErrorPage code={403} message="User not found"/>;
-  if (taskDataError || !taskData) return <ErrorPage code={404} message="Task not found"/>;
+  if (userIdError || !userId) return <ErrorPage message="User not found"/>;
+  if (taskDataError || !taskData) return <ErrorPage message="Task not found"/>;
 
   // Check if the user is member of the project
   const isMember = taskData.project.members.some((m) => m.userId === userId) ?? false;
   if(!isMember){
-    return <ErrorPage code={403} message="Not a project member"/>;
+    return <ErrorPage message="Not a project member"/>;
   }
 
   // User role
