@@ -52,7 +52,7 @@ export default function UpdateProjectMember(
     }
       
     // Update member  
-    updateMutation.mutate({ pmId: member.id, updPm: updPm, userId: userId }, {
+    updateMutation.mutate({ projectMemberId: member.id, updProjectMember: updPm, userId: userId }, {
       onSuccess: () => {
         toast.success("Project member role updated successfully.");
         closeModal();

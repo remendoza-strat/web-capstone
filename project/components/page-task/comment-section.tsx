@@ -76,7 +76,7 @@ export default function CommentSection(
       const updComment: Partial<typeof comments.$inferInsert> = { content: inputUpdateComment, updatedAt: new Date() };
 
       // Update comment
-      updateCommentMutation.mutate({ cId: id, updComment: updComment }, {
+      updateCommentMutation.mutate({ commentId: id, updComment: updComment }, {
         onSuccess: () => {
           toast.success("Comment successfully updated.");
           setCommentsList(prev =>
@@ -91,9 +91,9 @@ export default function CommentSection(
   }
 
   // Delete comment
-  function deleteUserComment(id: string){
-    if(id){
-      deleteCommentMutation.mutate({cId: id}, {
+  function deleteUserComment(commentId: string){
+    if(commentId){
+      deleteCommentMutation.mutate(commentId, {
         onSuccess: () => {
           toast.success("Comment successfully deleted.");
         },

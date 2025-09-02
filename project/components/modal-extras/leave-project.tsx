@@ -54,7 +54,7 @@ export default function LeaveProject({ userId, projectData } : { userId: string,
     }
 
     // Leave project
-    leaveProjectMutation.mutate({pmId: user.id, projectId: projectData.id, memberId: userId}, {
+    leaveProjectMutation.mutate({projectMemberId: user.id, projectId: projectData.id, userId: userId}, {
       onSuccess: () => {
         toast.success("You have successfully left the project.");
         queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });

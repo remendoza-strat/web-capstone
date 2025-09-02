@@ -52,7 +52,7 @@ export default function DeleteProjectMember(
     }
 
     // Kick member
-    kickMemberMutation.mutate({ pmId: member.id, projectId: member.projectId, memberId: member.userId, userId: userId }, {
+    kickMemberMutation.mutate({ projectMemberId: member.id, projectId: member.projectId, memberUserId: member.userId, userId: userId }, {
       onSuccess: () => {
         toast.success("User successfully kicked.");
         closeModal();

@@ -1,7 +1,7 @@
 import { useModal } from "@/lib/states"
 import { useQueryClient } from "@tanstack/react-query"
 import { KanbanUpdateProject } from "@/lib/db/tanstack"
-import { ClientColumnNameSchema } from "@/lib/validations"
+import { ClientUpdateProjectColumnSchema } from "@/lib/validations"
 import { projects } from "@/lib/db/schema"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -25,7 +25,7 @@ export default function CreateColumn({ columnNames, projectId } : { columnNames:
     e.preventDefault();
 
     // Validate input
-    const result = ClientColumnNameSchema.safeParse({ columnName: columnName });
+    const result = ClientUpdateProjectColumnSchema.safeParse({ columnName: columnName });
   
     // Display error from validation
     if(!result.success){

@@ -81,7 +81,7 @@ export const ServerCreateProjectSchema = ProjectSchema.pick({ name: true, descri
 export const ServerUpdateProjectSchema = ProjectSchema.pick({ name: true, description: true, dueDate: true, updatedAt: true});
 
 export const ServerUpdateProjectTimeSchema = ProjectSchema.pick({ updatedAt: true });
-export const ClientColumnNameSchema = ProjectSchema.pick({ columnName: true });
+export const ClientUpdateProjectColumnSchema = ProjectSchema.pick({ columnName: true });
 
 // Project member data schema
 export const ProjectMemberSchema = z.object({
