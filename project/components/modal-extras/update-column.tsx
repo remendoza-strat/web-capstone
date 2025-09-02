@@ -44,7 +44,7 @@ export default function UpdateColumn({ columnIndex, columnNames, projectId } : {
     }
         
     // Update project  
-    updateMutation.mutate({ projectId: projectId, updProject }, {
+    updateMutation.mutate({ projectId: projectId, updProject: updProject }, {
       onSuccess: () => {
         toast.success("Column updated successfully.");
         queryClient.invalidateQueries({ queryKey: ["project-data", projectId] });

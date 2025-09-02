@@ -52,7 +52,7 @@ export default function CreateProject({ userId } : {  userId: string }){
 
     try{
       // Create project
-      const projectId = await createProjectMutation.mutateAsync({ newProject });
+      const projectId = await createProjectMutation.mutateAsync({ newProject: newProject });
       if (!projectId) return;
 
       // Create project member
@@ -64,7 +64,7 @@ export default function CreateProject({ userId } : {  userId: string }){
       };
 
       // Create user as project member
-      createProjectMemberMutation.mutate({ newProjectMember }, {
+      createProjectMemberMutation.mutate({ newProjectMember: newProjectMember }, {
         onSuccess: () => {
           toast.success("Project created successfully.");
           queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });

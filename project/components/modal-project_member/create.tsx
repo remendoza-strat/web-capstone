@@ -135,7 +135,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
           role: role,
           approved: false,
         };
-        await createMutation.mutateAsync({ newProjectMember, userId });
+        await createMutation.mutateAsync({ newProjectMember: newProjectMember, userId: userId });
       }
       toast.success("Project membership invitation sent.");
       closeModal();

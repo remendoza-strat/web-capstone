@@ -41,7 +41,7 @@ export default function CreateColumn({ columnNames, projectId } : { columnNames:
     }
         
     // Update project  
-    createMutation.mutate({ projectId: projectId, updProject }, {
+    createMutation.mutate({ projectId: projectId, updProject: updProject }, {
       onSuccess: () => {
         toast.success("Column created successfully.");
         queryClient.invalidateQueries({ queryKey: ["project-data", projectId] });

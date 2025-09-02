@@ -6,7 +6,7 @@ import { db } from "@/lib/db/connection"
 import { eq } from "drizzle-orm"
 import { pusherServer } from "@/lib/pusher/server"
 import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema, ServerUpdateProjectMemberApprovalSchema, 
-ServerUpdateProjectMemberRoleSchema, ServerUpdateProjectTimeSchema } from "@/lib/validations"
+ServerUpdateProjectMemberRoleSchema, ServerUpdateProjectTimeSchema, ServerUpdateProjectSchema } from "@/lib/validations"
 import { ClerkIdMatcher, UserAuthValidation, UserIdValidator, UserPermission, UserProjectMembership, UserTaskMembership, ValidProject, ValidProjectMember, ValidTask, 
   ValidUser } from "@/lib/db/actions_validations"
 
@@ -430,7 +430,7 @@ export async function updateMemberRoleAction(projectMemberId: string, updProject
 export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, userId: string){
 
   // Validate data
-  const result = ServerCreateProjectSchema.safeParse({
+  const result = ServerUpdateProjectSchema.safeParse({
     name: updProject.name,
     description: updProject.description,
     dueDate: updProject.dueDate,
