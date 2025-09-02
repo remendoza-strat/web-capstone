@@ -526,8 +526,8 @@ export async function kickMemberAction(projectMemberId: string, projectId: strin
 
   // Kick the user from project
   await deleteQueries.deleteProjectMember(projectMemberId);
-  await deleteQueries.deleteAllTaskAssignee(projectId, projectMemberId);
-  await deleteQueries.deleteAllComment(projectId, projectMemberId)
+  await deleteQueries.deleteAllTaskAssignee(projectId, memberUserId);
+  await deleteQueries.deleteAllComment(projectId, memberUserId)
   return { success: true }
 
 }

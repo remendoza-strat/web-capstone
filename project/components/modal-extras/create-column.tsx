@@ -35,7 +35,7 @@ export default function CreateColumn({ columnNames, projectId } : { columnNames:
 
     // Setup project data to update
     const updProject: Partial<typeof projects.$inferInsert> = {
-			columnCount: (columnName.length + 1),
+			columnCount: (columnNames.length + 1),
 			columnNames: [...columnNames, columnName],
 			updatedAt: new Date()
     }

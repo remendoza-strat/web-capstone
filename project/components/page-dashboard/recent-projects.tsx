@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Calendar, Users, CheckSquare } from "lucide-react"
+import { Calendar, Users, CheckSquare, FolderOpen } from "lucide-react"
 import { UserProjects } from "@/lib/customtype"
 import { ByRecentProjects, ComputeProgress, DateTimeFormatter, LimitChar } from "@/lib/utils"
 
@@ -38,44 +38,56 @@ export default function RecentProjects({ userId, userProjs } : { userId: string,
         <Link href="/projects" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">View all</Link>
       </div>
       <div className="grid grid-cols-1 gap-4 auto-rows-fr">
-        {projects?.map((project) => (
-          <Link href={`projects/${project.id}`} key={project.id} className="h-full">
-            <div className="flex flex-col justify-between h-full p-5 my-2 transition-colors border border-gray-200 rounded-xl dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <h4 className="mb-1 font-semibold text-gray-900 dark:text-white">{project.name}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{project.briefDesc}</p>
-                </div>
+        {projects.length === 0? 
+          (
+            <div className="py-12 text-center">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full dark:bg-gray-700">
+                <FolderOpen className="w-8 h-8 text-gray-400 dark:text-gray-500"/>
               </div>
-              <div className="flex flex-wrap items-center mb-3 text-sm text-gray-600 gap-x-4 gap-y-2 dark:text-gray-300">
-                <div className="flex items-center space-x-1">
-                  <Calendar className="w-4 h-4"/>
-                  <span>{project.detailedDate}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Users className="w-4 h-4"/>
-                  <span>{project.memberCount} {project.memberCount > 1 ? "members" : "member"}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <CheckSquare className="w-4 h-4"/>
-                  <span>{project.taskCount} {project.taskCount > 1 ? "tasks" : "task"}</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-300">Progress</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{project.progress}%</span>
-                </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
-                  <div 
-                    className={`h-2 rounded-full transition-all duration-300 ${project.progColor}`}
-                    style={{ width: `${project.progress}%` }}
-                  />
-                </div>
-              </div>
+              <p className="text-gray-600 dark:text-gray-300">Create or join projects now to get started</p>
             </div>
-          </Link>
-        ))}
+          ) : 
+          (
+            projects.map((project) => (
+              <Link href={`projects/${project.id}`} key={project.id} className="h-full">
+                <div className="flex flex-col justify-between h-full p-5 my-2 transition-colors border border-gray-200 rounded-xl dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h4 className="mb-1 font-semibold text-gray-900 dark:text-white">{project.name}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{project.briefDesc}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center mb-3 text-sm text-gray-600 gap-x-4 gap-y-2 dark:text-gray-300">
+                    <div className="flex items-center space-x-1">
+                      <Calendar className="w-4 h-4"/>
+                      <span>{project.detailedDate}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Users className="w-4 h-4"/>
+                      <span>{project.memberCount} {project.memberCount > 1 ? "members" : "member"}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <CheckSquare className="w-4 h-4"/>
+                      <span>{project.taskCount} {project.taskCount > 1 ? "tasks" : "task"}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-300">Progress</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{project.progress}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-300 ${project.progColor}`}
+                        style={{ width: `${project.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))
+          )
+        }
       </div>
     </div>
   );
