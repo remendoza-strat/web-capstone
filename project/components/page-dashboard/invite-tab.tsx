@@ -38,7 +38,7 @@ export default function InviteTab({ userId, userProjs } : { userId: string, user
 		if(!pmId || !projectId) return;
 
 		// Accept membership invite
-		updateProjectMemberMutation.mutate({ pmId: pmId, updPm: { approved: true } }, {
+		updateProjectMemberMutation.mutate({ projectMemberId: pmId, updProjectMember: { approved: true } }, {
 			onSuccess: () => {
 				updateProjectMutation.mutate({ projectId: projectId, updProject: { updatedAt: new Date() }}, {
 					onSuccess: () => {
@@ -63,7 +63,7 @@ export default function InviteTab({ userId, userProjs } : { userId: string, user
 		if(!pmId || !projectId) return;
 
 		// Delete membership invite
-		deleteProjectMemberMutation.mutate({pmId: pmId}, {
+		deleteProjectMemberMutation.mutate({projectMemberId: pmId}, {
       onSuccess: () => {
         toast.success("Project membership declined.");
 				queryClient.invalidateQueries({ queryKey: ["user-projects", userId] });

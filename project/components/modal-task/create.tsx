@@ -174,7 +174,7 @@ export default function CreateTask({ userId, projectsData } : { userId: string; 
           taskId: taskId,
           userId: user.id
         };
-        await createTaskAssigneeMutation.mutateAsync({ newTaskAssignee: newTaskAssignee, userId: userId, projectId: project.id });
+        await createTaskAssigneeMutation.mutateAsync({ newTaskAssignee: newTaskAssignee, userId: userId });
       }
     } 
     catch(err){

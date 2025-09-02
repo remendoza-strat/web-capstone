@@ -147,7 +147,7 @@ export async function ValidTask(taskId: string){
   }
 
 	// Return success
-  return { success: true };
+  return { success: true, exist };
 
 }
 

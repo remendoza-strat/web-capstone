@@ -104,8 +104,6 @@ export function getTaskData(taskId: string, userId: string, options: { enabled: 
 
 
 
-
-
 export function createProject(){
   return useMutation({
     mutationFn: async ({ newProject } : { newProject: Schema.NewProject }) => {
@@ -140,8 +138,6 @@ export function addProjectMember(){
   });
 }
 
-
-
 export function createTask(){
   return useMutation({
     mutationFn: async ({ newTask, userId } : { newTask: Schema.NewTask, userId: string }) => {
@@ -156,8 +152,8 @@ export function createTask(){
 
 export function createTaskAssignee(){
   return useMutation({
-    mutationFn: async ({ newTaskAssignee, userId, projectId } : { newTaskAssignee: Schema.NewTaskAssignee, userId: string, projectId: string })  => {
-      const result = await Actions.createTaskAssigneeAction(newTaskAssignee, userId, projectId);
+    mutationFn: async ({ newTaskAssignee, userId } : { newTaskAssignee: Schema.NewTaskAssignee, userId: string })  => {
+      const result = await Actions.createTaskAssigneeAction(newTaskAssignee, userId);
       if(!result.success){
         throw { message: result.message };
       }
@@ -176,10 +172,10 @@ export function updateProjectTime(){
   });
 }
 
-export function deleteProjectMember(){
+export function updateProjectMember(){
   return useMutation({
-    mutationFn: async ({ pmId } : { pmId: string }) => {
-      const result = await Actions.deleteProjectMemberAction(pmId);
+    mutationFn: async ({ projectMemberId, updProjectMember } : { projectMemberId: string, updProjectMember: Partial<typeof Schema.projectMembers.$inferInsert> }) => {
+      const result = await Actions.updateProjectMemberAction(projectMemberId, updProjectMember);
       if(!result.success){
         throw { message: result.message };
       }
@@ -187,16 +183,29 @@ export function deleteProjectMember(){
   });
 }
 
-export function updateProjectMember(){
+export function deleteProjectMember(){
   return useMutation({
-    mutationFn: async ({ pmId, updPm } : { pmId: string, updPm: Partial<typeof Schema.projectMembers.$inferInsert> }) => {
-      const result = await Actions.updateProjectMemberAction(pmId, updPm);
+    mutationFn: async ({ projectMemberId } : { projectMemberId: string }) => {
+      const result = await Actions.deleteProjectMemberAction(projectMemberId);
       if(!result.success){
         throw { message: result.message };
       }
     }
   });
 }
+
+
+
+
+/* ========================================== */ 
+// params order
+
+
+
+
+
+
+
 
 
 
@@ -257,7 +266,16 @@ export function leaveProject(){
   });
 }
 
-
+export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
+  return useQuery({
+    queryKey: ["member-icon", clerkId],
+    queryFn: async () => {
+      const data = await getUserImageAction(clerkId);
+      return data ?? null;
+    },
+    enabled: options?.enabled ?? !!clerkId
+  });
+}
 
 // KANBAN QUERIES
 export function KanbanUpdateProject(){
@@ -331,17 +349,6 @@ export function KanbanDeleteAssignee(){
         throw { message: result.message };
       }
     }
-  });
-}
-
-export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["member-icon", clerkId],
-    queryFn: async () => {
-      const data = await getUserImageAction(clerkId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!clerkId
   });
 }
 

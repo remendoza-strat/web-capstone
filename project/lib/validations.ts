@@ -112,6 +112,7 @@ export const ProjectMemberSchema = z.object({
 
 });
 export const ServerCreateProjectMemberSchema = ProjectMemberSchema.pick({ projectId: true, userId: true, role: true, approved: true});
+export const ServerUpdateProjectMemberRoleSchema = ProjectMemberSchema.pick({ role: true });
 
 // Task data input validation
 export const TaskSchema = z.object({

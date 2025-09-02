@@ -159,8 +159,8 @@ export const createQueries = {
 
 export const updateQueries = {
 
-  updateProjectMember: async (pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>) => {
-    await db.update(projectMembers).set({...updPm}).where(eq(projectMembers.id, pmId));
+  updateProjectMember: async (projectMemberId: string, updProjectMember: Partial<typeof projectMembers.$inferInsert>) => {
+    await db.update(projectMembers).set({...updProjectMember}).where(eq(projectMembers.id, projectMemberId));
   },
 
   updateProject: async (projectId: string, updProject: Partial<typeof projects.$inferInsert>) => {
