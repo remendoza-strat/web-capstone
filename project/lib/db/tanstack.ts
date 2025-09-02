@@ -3,6 +3,7 @@ import { getUserImageAction } from "@/lib/clerk/user-image"
 import * as Actions from "@/lib/db/actions"
 import * as Schema from "@/lib/db/schema"
 
+/* ===================== GET QUERIES ===================== */ 
 export function getUserId(clerkId: string, options: { enabled: boolean }){
   return useQuery({
     queryKey: ["user-id", clerkId],
@@ -30,6 +31,80 @@ export function getUserProjects(userId: string, options: { enabled: boolean }){
     enabled: options.enabled
   });
 }
+
+export function getUserProjectsWithMembers(userId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["project-members", userId],
+    queryFn: async () => {
+      const result = await Actions.getUserProjectsWithMembersAction(userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.userProjectsMembers;
+    },
+    enabled: options.enabled
+  });
+}
+
+export function getUserTasks(userId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["user-tasks", userId],
+    queryFn: async () => {
+      const result = await Actions.getUserTasksAction(userId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.userTasks;
+    },
+    enabled: options.enabled
+  });
+}
+
+export function getAllUsers(){
+  return useQuery({
+    queryKey: ["all-users"],
+    queryFn: async () => {
+      const result = await Actions.getAllUsersAction();
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.allUsers;
+    }
+  });
+}
+
+export function getProjectData(projectId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["project-data", projectId],
+    queryFn: async () => {
+      const result = await Actions.getProjectDataAction(projectId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.projectData;
+    },
+    enabled: options.enabled
+  });
+}
+
+export function getTaskData(taskId: string, options: { enabled: boolean }){
+  return useQuery({
+    queryKey: ["task-data", taskId],
+    queryFn: async () => {
+      const result = await Actions.getTaskDataAction(taskId);
+      if(!result.success){
+        throw { message: result.message };
+      }
+      return result.taskData;
+    },
+    enabled: options.enabled
+  });
+}
+/* ===================== GET QUERIES ===================== */ 
+
+
+
+
 
 export function createProject(){
   return useMutation({
@@ -65,18 +140,7 @@ export function addProjectMember(){
   });
 }
 
-export function getAllUsers(){
-  return useQuery({
-    queryKey: ["all-users"],
-    queryFn: async () => {
-      const result = await Actions.getAllUsersAction();
-      if(!result.success){
-        throw { message: result.message };
-      }
-      return result.allUsers;
-    }
-  });
-}
+
 
 export function createTask(){
   return useMutation({
@@ -134,33 +198,8 @@ export function updateProjectMember(){
   });
 }
 
-export function getUserTasks(userId: string, options: { enabled: boolean }){
-  return useQuery({
-    queryKey: ["user-tasks", userId],
-    queryFn: async () => {
-      const result = await Actions.getUserTasksAction(userId);
-      if(!result.success){
-        throw { message: result.message };
-      }
-      return result.userTasks;
-    },
-    enabled: options.enabled
-  });
-}
 
-export function getUserProjectsWithMembers(userId: string, options: { enabled: boolean }){
-  return useQuery({
-    queryKey: ["project-members", userId],
-    queryFn: async () => {
-      const result = await Actions.getUserProjectsWithMembersAction(userId);
-      if(!result.success){
-        throw { message: result.message };
-      }
-      return result.userProjectsMembers;
-    },
-    enabled: options.enabled
-  });
-}
+
 
 export function updateMemberRole(){
   return useMutation({
@@ -195,19 +234,6 @@ export function kickMember(){
   });
 }
 
-export function getProjectData(projectId: string, options: { enabled: boolean }){
-  return useQuery({
-    queryKey: ["project-data", projectId],
-    queryFn: async () => {
-      const result = await Actions.getProjectDataAction(projectId);
-      if(!result.success){
-        throw { message: result.message };
-      }
-      return result.projectData;
-    },
-    enabled: options.enabled
-  });
-}
 
 export function updateProject(){
   return useMutation({
@@ -230,6 +256,8 @@ export function leaveProject(){
     }
   });
 }
+
+
 
 // KANBAN QUERIES
 export function KanbanUpdateProject(){
@@ -314,17 +342,6 @@ export function getUserImage(clerkId: string, options? : { enabled?: boolean }){
       return data ?? null;
     },
     enabled: options?.enabled ?? !!clerkId
-  });
-}
-
-export function getTaskData(taskId: string, options? : { enabled?: boolean }){
-  return useQuery({
-    queryKey: ["task-data", taskId],
-    queryFn: async () => {
-      const data = await Actions.getTaskDataAction(taskId);
-      return data ?? null;
-    },
-    enabled: options?.enabled ?? !!taskId
   });
 }
 

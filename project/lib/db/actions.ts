@@ -1,181 +1,13 @@
 "use server"
 import { createQueries, deleteQueries, getQueries, updateQueries } from "@/lib/db/queries"
-import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment, comments } from "@/lib/db/schema"
+import type { NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment, comments } from "@/lib/db/schema"
 import { projects, taskAssignees, tasks, users } from "@/lib/db/schema"
 import { db } from "@/lib/db/connection"
 import { pusherServer } from "../pusher/server"
 import { eq } from "drizzle-orm"
 import { projectMembers } from './schema';
-import { auth } from "@clerk/nextjs/server"
-import { validate as isUuid } from "uuid"
 import { ServerCreateProjectMemberSchema, ServerCreateProjectSchema, ServerCreateTaskAssigneeSchema, ServerCreateTaskSchema, ServerUpdateProjectTimeSchema } from "../validations"
-import { hasPermission, Permissions } from "../permissions"
-
-// Checking for:
-// is parameter clerkId === current clerkId?
-export async function ClerkIdMatcher(clerkId: string){
-
-  // Get clerkId of current user
-  const { userId: currentId } = await auth();
-
-	// Check if current user clerkId and passed clerkId matches
-  if(currentId !== clerkId){
-    return { success: false, message: "Unauthorized action." };
-  }
-
-  // Return true
-  return {success: true};
-
-}
-
-// Checking for:
-// is userId format correct?
-// does userId's clerkId exist in db?
-// ClerkIdMatcher()
-export async function UserIdValidator(userId: string){
-
-  // Check format of userId
-  if(!isUuid(userId)){
-    return { success: false, message: "Invalid ID." };
-  }
-
-	// Try to get clerkId with userId
-  const clerkId = await getQueries.getClerkId(userId);
-  if(!clerkId){
-    return { success: false, message: "User not found." };
-  }
-
-  // Validate clerkId
-  const checkClerk = await ClerkIdMatcher(clerkId);
-  if(!checkClerk.success){
-    return { success: false, message: checkClerk.message };
-  }
-
-  // Return true
-  return { success: true };
-
-}
-
-// Checking for:
-// is user authenticated?
-export async function UserAuthValidation(){
-
-  // Get clerkId of current user
-  const { userId: currentId } = await auth();
-
-	// Check if authenticated
-	if(!currentId){
-    return { success: false, message: "Unauthorized action." };
-  }
-
-  // Return true
-  return { success: true};
-
-}
-
-// Checking for:
-// is projectId format correct?
-// does the project exist?
-export async function ValidProject(projectId: string){
-  
-  // Check projectId format
-   if(!isUuid(projectId)){
-    return { success: false, message: "Invalid ID." };
-  }
-
-  // Check if project exist
-  const exist = await getQueries.getProject(projectId);
-  if(!exist){
-    return { success: false, message: "Project not found." };
-  }
-
-  // Return true
-  return { success: true };
-
-}
-
-// Checking for:
-// is taskId format correct?
-// does the task exist?
-export async function ValidTask(taskId: string){
-  
-  // Check taskId format
-   if(!isUuid(taskId)){
-    return { success: false, message: "Invalid ID." };
-  }
-
-  // Check if task exist
-  const exist = await getQueries.getTask(taskId);
-  if(!exist){
-    return { success: false, message: "Task not found." };
-  }
-
-  // Return true
-  return { success: true };
-
-}
-
-// Checking for:
-// is pmId format correct?
-// does the project member exist?
-export async function ValidProjecMember(pmId: string){
-  
-  // Check pmId format
-   if(!isUuid(pmId)){
-    return { success: false, message: "Invalid ID." };
-  }
-
-  // Check if project member exist
-  const exist = await getQueries.getProjectMember(pmId);
-  if(!exist){
-    return { success: false, message: "Project member not found." };
-  }
-
-  // Return true
-  return { success: true, exist };
-
-}
-
-// Checking for:
-// is userId format correct?
-// does the user exist?
-export async function ValidUser(userId: string){
-
-  // Check userId format
-  if(!isUuid(userId)){
-    return { success: false, message: "Invalid ID." };
-  }
-  
-  // Check if user exist
-  const exist = await getQueries.getClerkId(userId);
-  if(!exist){
-    return { success: false, message: "User not found." };
-  }
-
-  // Return true
-  return {success: true};
-}
-
-// Checking for:
-// are ids formar correct?
-// can user perform the action?
-export async function UserPermission(userId: string, projectId: string, action: keyof Permissions){
-
-  // Check formats
-  if(!isUuid(userId) || !isUuid(projectId)){
-    return { success: false, message: "Invalid ID." };
-  }
-  
-  // Validate user permission
-  const getUser = await getQueries.getMember(userId, projectId);
-  if(!getUser || !hasPermission(getUser.role, action)){
-    return { success: false, message: "Unauthorized action." }; 
-  }
-
-  // Return true
-  return {success: true};
-
-}
+import { ClerkIdMatcher, UserAuthValidation, UserIdValidator, UserPermission, ValidProject, ValidProjectMember, ValidTask, ValidUser } from "./actions_validations"
 
 export async function getUserIdAction(clerkId: string){
 
@@ -204,6 +36,82 @@ export async function getUserProjectsAction(userId: string){
 	return { success: true, userProjects };
 
 }
+
+export async function getUserProjectsWithMembersAction(userId: string){
+  
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
+
+  // Return userProjectsMembers
+  const userProjectsMembers = await getQueries.getUserProjectsWithMembers(userId);
+  return { success: true, userProjectsMembers};
+
+}
+
+export async function getUserTasksAction(userId: string){
+ 
+  // Validate userId
+  const checkUserId = await UserIdValidator(userId);
+  if(!checkUserId.success){
+    return { success: false, message: checkUserId.message };
+  }
+
+  // Return userTasks
+  const userTasks = await getQueries.getUserTasks(userId);
+  return { success: true, userTasks };
+  
+}
+
+export async function getAllUsersAction(){
+
+  // Validate user authentication
+  const checkAuth = await UserAuthValidation();
+  if(!checkAuth.success){
+    return { success: false, message: checkAuth.message };
+  }
+
+  // Return allUsers
+  const allUsers = await getQueries.getAllUsers();
+  return { success: true, allUsers };
+
+}
+
+// TO ADD USERIDVALIDATOR
+export async function getProjectDataAction(projectId: string){
+
+  // Validate user authentication
+  const checkAuth = await UserAuthValidation();
+  if(!checkAuth.success){
+    return { success: false, message: checkAuth.message };
+  }
+  
+  // Return projectData
+  const projectData = await getQueries.getProjectData(projectId);
+  return { success : true, projectData };
+
+}
+export async function getTaskDataAction(taskId: string){
+
+  // Validate user authentication
+  const checkAuth = await UserAuthValidation();
+  if(!checkAuth.success){
+    return { success: false, message: checkAuth.message };
+  }
+
+  // Return taskData
+  const taskData =  await getQueries.getTaskData(taskId);
+  return { success : true, taskData };
+}
+// TO ADD USERIDVALIDATOR
+
+
+
+
+
+
 
 export async function createProjectAction(newProject: NewProject){
   
@@ -305,19 +213,6 @@ export async function addProjectMemberAction(newProjectMember: NewProjectMember,
 
 }
 
-export async function getAllUsersAction(){
-
-  // Validate user authentication
-  const checkAuth = await UserAuthValidation();
-  if(!checkAuth.success){
-    return { success: false, message: checkAuth.message };
-  }
-
-  // Return allUsers
-  const allUsers = await getQueries.getAllUsers();
-  return { success: true, allUsers };
-
-}
 
 export async function createTaskAction(newTask: NewTask, userId: string){
 
@@ -432,7 +327,7 @@ return {success: true};
 export async function deleteProjectMemberAction(pmId: string){
   
   // Validate project member
-  const checkMember = await ValidProjecMember(pmId);
+  const checkMember = await ValidProjectMember(pmId);
   if(!checkMember.exist?.userId){
     return { success: false, message: checkMember.message };
   }
@@ -452,7 +347,7 @@ export async function deleteProjectMemberAction(pmId: string){
 export async function updateProjectMemberAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>){
 
   // Validate project member
-  const checkMember = await ValidProjecMember(pmId);
+  const checkMember = await ValidProjectMember(pmId);
   if(!checkMember.exist?.userId){
     return { success: false, message: checkMember.message };
   }
@@ -469,38 +364,12 @@ export async function updateProjectMemberAction(pmId: string, updPm: Partial<typ
 
 }
 
-export async function getUserTasksAction(userId: string){
- 
-  // Validate userId
-  const checkUserId = await UserIdValidator(userId);
-  if(!checkUserId.success){
-    return { success: false, message: checkUserId.message };
-  }
 
-  // Return userTasks
-  const userTasks = await getQueries.getUserTasks(userId);
-  return { success: true, userTasks };
-  
-}
-
-export async function getUserProjectsWithMembersAction(userId: string){
-  
-  // Validate userId
-  const checkUserId = await UserIdValidator(userId);
-  if(!checkUserId.success){
-    return { success: false, message: checkUserId.message };
-  }
-
-  // Return userProjectsMembers
-  const userProjectsMembers = await getQueries.getUserProjectsWithMembers(userId);
-  return { success: true, userProjectsMembers};
-
-}
 
 export async function updateMemberRoleAction(pmId: string, updPm: Partial<typeof projectMembers.$inferInsert>, userId: string){
 
   // Validate project member
-  const checkMember = await ValidProjecMember(pmId);
+  const checkMember = await ValidProjectMember(pmId);
   if(!checkMember.exist?.userId){
     return { success: false, message: checkMember.message };
   }
@@ -552,7 +421,7 @@ export async function deleteProjectAction(projectId: string, userId: string){
 export async function kickMemberAction(pmId: string, projectId: string, memberId: string, userId: string){
   
   // Validate project member
-  const checkMember = await ValidProjecMember(pmId);
+  const checkMember = await ValidProjectMember(pmId);
   if(!checkMember.exist?.userId){
     return { success: false, message: checkMember.message };
   }
@@ -583,19 +452,6 @@ export async function kickMemberAction(pmId: string, projectId: string, memberId
 
 }
 
-export async function getProjectDataAction(projectId: string){
-
-  // Validate user authentication
-  const checkAuth = await UserAuthValidation();
-  if(!checkAuth.success){
-    return { success: false, message: checkAuth.message };
-  }
-  
-  // Return projectData
-  const projectData = await getQueries.getProjectData(projectId);
-  return { success : true, projectData };
-
-}
 
 export async function updateProjectAction(projectId: string, updProject: Partial<typeof projects.$inferInsert>, userId: string){
 
@@ -620,7 +476,7 @@ export async function updateProjectAction(projectId: string, updProject: Partial
 export async function leaveProjectAction(pmId: string, projectId: string, memberId: string){
   
   // Validate project member
-  const checkMember = await ValidProjecMember(pmId);
+  const checkMember = await ValidProjectMember(pmId);
   if(!checkMember.exist?.userId){
     return { success: false, message: checkMember.message };
   }
@@ -644,6 +500,25 @@ export async function leaveProjectAction(pmId: string, projectId: string, member
   return { success: true }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // KANBAN ACTIONS
 export async function KanbanUpdateProjectAction
@@ -805,6 +680,3 @@ export async function updateCommentAction(cId: string, updComment: Partial<typeo
   await updateQueries.updateComment(cId, updComment);
 }
 
-export async function getTaskDataAction(taskId: string){
-  return await getQueries.getTaskData(taskId);
-}

@@ -3,6 +3,63 @@ import { db } from "@/lib/db/connection"
 import { users, projects, projectMembers, tasks, taskAssignees, comments } from "@/lib/db/schema"
 import type { NewUser, NewProject, NewProjectMember, NewTask, NewTaskAssignee, NewComment } from "@/lib/db/schema"
 
+export const checkQueries = {
+
+  getUser: async (userId: string) => {
+    const result = await db.query.users.findFirst({
+      where: eq(users.id, userId)
+    });
+    return result;
+  },
+
+  getProject: async (projectId: string) => {
+    const result = await db.query.projects.findFirst({
+      where: eq(projects.id, projectId)
+    });
+    return result;
+  },
+
+  getProjectMember: async (projectMemberId: string) => {
+    const result = await db.query.projectMembers.findFirst({
+      where: eq(projectMembers.id, projectMemberId)
+    });
+    return result;
+  },
+
+  getTask: async (taskId: string) => {
+    const result = await db.query.tasks.findFirst({
+      where: eq(tasks.id, taskId)
+    });
+    return result;
+  },
+
+  getTaskAssignee: async (taskAssigneeId: string) => {
+    const result = await db.query.taskAssignees.findFirst({
+      where: eq(taskAssignees.id, taskAssigneeId)
+    });
+    return result;
+  },
+
+  getComment: async (commentId: string) => {
+    const result = await db.query.comments.findFirst({
+      where: eq(comments.id, commentId)
+    });
+    return result;
+  },
+
+  getPermission: async (userId: string, projectId: string) => {
+    const result = await db.query.projectMembers.findFirst({
+      where: (pm, {eq, and}) => and(
+        eq(pm.userId, userId),
+        eq(pm.projectId, projectId),
+        eq(pm.approved, true)
+      )
+    });
+    return result;
+  },
+
+}
+
 export const getQueries = {
 
   getUserId: async (clerkId: string) => {
@@ -10,13 +67,6 @@ export const getQueries = {
       where: eq(users.clerkId, clerkId)
     });
     return result?.id;
-  },
-
-  getClerkId: async (userId: string) => {
-    const result = await db.query.users.findFirst({
-      where: eq(users.id, userId)
-    });
-    return result?.clerkId;
   },
 
   getUserProjectsWithMembers: async (userId: string) => {
@@ -38,38 +88,6 @@ export const getQueries = {
       with: {project: {with: {members: {with: {user: true}}, tasks: true}}}
     })
     const result = query.map((q) => ({...q.project}));
-    return result;
-  },
-
-  getProject: async (projectId: string) => {
-    const result = await db.query.projects.findFirst({
-      where: (p, {eq}) => eq(p.id, projectId)
-    });
-    return result;
-  },
-
-  getTask: async (taskId: string) => {
-    const result = await db.query.tasks.findFirst({
-      where: (t, {eq}) => eq(t.id, taskId)
-    });
-    return result;
-  },
-
-  getProjectMember: async (pmId: string) => {
-    const result = await db.query.projectMembers.findFirst({
-      where: (pm, {eq}) => eq(pm.id, pmId)
-    });
-    return result;
-  },
-
-  getMember: async (userId: string, projectId: string) => {
-    const result = await db.query.projectMembers.findFirst({
-      where: (pm, { eq, and }) => and(
-        eq(pm.userId, userId),
-        eq(pm.projectId, projectId),
-        eq(pm.approved, true)
-      )
-    });
     return result;
   },
 
