@@ -150,7 +150,7 @@ export default function TaskPage(){
         },
         onError: (err) => {
           const error = err as { message?: string };
-          toast.error(error.message ?? "Error creating project.");
+          toast.error(error.message ?? "Error deleting task.");
         }
       });
     }
@@ -223,7 +223,7 @@ export default function TaskPage(){
       }
       catch(err){
         const error = err as { message?: string };
-        toast.error(error.message ?? "Error creating project.");
+        toast.error(error.message ?? "Error updating assignees.");
         return;
       }
 
@@ -240,7 +240,7 @@ export default function TaskPage(){
       updateTaskMutation.mutate({ projectId: taskData.projectId, taskId: taskData.id, updTask: updTask},{
         onError: (err) => {
           const error = err as { message?: string };
-          toast.error(error.message ?? "Error creating project.");
+          toast.error(error.message ?? "Error updating task.");
           return;
         }
       });   
@@ -248,14 +248,14 @@ export default function TaskPage(){
       // Update project  
       updateProjectMutation.mutate({ projectId: taskData.project.id, updProject: { updatedAt: new Date() } },{
         onSuccess: () => {
-          toast.success("Task created successfully.");
+          toast.success("Task updated successfully.");
           setIsEditing(false);
           queryClient.invalidateQueries({ queryKey: ["project-data", taskData.projectId] });
           queryClient.invalidateQueries({ queryKey: ["task-data", taskData.id] });
         },
         onError: (err) => {
           const error = err as { message?: string };
-          toast.error(error.message ?? "Error creating project.");
+          toast.error(error.message ?? "Error updating task.");
         }
       });
     }        

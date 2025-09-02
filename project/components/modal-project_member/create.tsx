@@ -145,7 +145,7 @@ export default function CreateProjectMember({ userId, projectsData, onProjectSel
     } 
     catch(err){
       const error = err as { message?: string };
-      toast.error(error.message ?? "Error creating project member.");
+      toast.error(error.message ?? "Error inviting user to the project.");
       closeModal();
     }
   };

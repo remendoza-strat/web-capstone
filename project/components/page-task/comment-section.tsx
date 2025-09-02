@@ -57,7 +57,7 @@ export default function CommentSection(
         setInputCreateComment("");
       },
       onError: () => {
-        toast.error("Error occured.");
+        toast.error("Error posting comment.");
       }
     });
   }
@@ -84,7 +84,7 @@ export default function CommentSection(
           setEditingCommentId(null);
         },
         onError: () => {
-          toast.error("Error occured.");
+          toast.error("Error updating comment.");
         }
       });
     }
@@ -98,7 +98,7 @@ export default function CommentSection(
           toast.success("Comment successfully deleted.");
         },
         onError: () => {
-          toast.error("Error occured.");
+          toast.error("Error deleting comment.");
         }
       });
     }

@@ -52,7 +52,7 @@ export default function UpdateColumn({ columnIndex, columnNames, projectId } : {
       },
       onError: (err) => {
         const error = err as { message?: string };
-        toast.error(error.message ?? "Error updating project.");
+        toast.error(error.message ?? "Error updating column.");
         closeModal();
       }
     });

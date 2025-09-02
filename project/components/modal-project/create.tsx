@@ -72,7 +72,7 @@ export default function CreateProject({ userId } : {  userId: string }){
         },
         onError: (err) => {
           const error = err as { message?: string };
-          toast.error(error.message ?? "Error creating project member.");
+          toast.error(error.message ?? "Error creating project.");
           closeModal();
         }
       });

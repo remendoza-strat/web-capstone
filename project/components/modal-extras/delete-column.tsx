@@ -40,7 +40,7 @@ export default function DeleteColumn({ columnIndex, columnNames, boardTasks, pro
       } 
       catch(err){
         const error = err as { message?: string };
-        toast.error(error.message ?? "Error creating task.");
+        toast.error(error.message ?? "Error deleting task.");
         return;
       }
 
@@ -64,7 +64,7 @@ export default function DeleteColumn({ columnIndex, columnNames, boardTasks, pro
           } 
         catch(err){
           const error = err as { message?: string };
-          toast.error(error.message ?? "Error creating task.");
+          toast.error(error.message ?? "Error updating task.");
           return;
         }
       }

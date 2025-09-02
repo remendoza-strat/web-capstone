@@ -183,7 +183,7 @@ export default function ProfilePage(){
         body: JSON.stringify({ newPassword: newPass })
       });
       if(res.ok){
-        toast.success("Password changed.");
+        toast.success("Password changed successfully.");
         setNewPass("");
         setConfirmPass("");
       }

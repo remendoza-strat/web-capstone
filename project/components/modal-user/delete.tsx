@@ -64,7 +64,7 @@ export default function DeleteUser({ userId, userProjs } : { userId: string, use
       router.push("/");
     } 
     catch{
-      toast.error("Failed to delete account.");
+      toast.error("Account deletion error.");
       setLoading(false);
       closeModal();
     }
