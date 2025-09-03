@@ -76,7 +76,7 @@ export async function POST(req: Request){
     const { id, first_name, last_name } = evt.data;
     
     // Update user
-    updateUserAction(id, {fname: first_name, lname: last_name})
+    await updateUserAction(id, {fname: first_name, lname: last_name})
     return new NextResponse("User updated.", { status: 200 });
   }
 

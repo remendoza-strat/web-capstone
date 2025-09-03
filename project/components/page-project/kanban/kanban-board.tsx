@@ -1,16 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
-import { 
-  DndContext, 
-  DragOverlay, 
-  MouseSensor, 
-  TouchSensor, 
-  useSensor, 
-  useSensors 
-} from "@dnd-kit/core";
-
+import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { Plus } from "lucide-react"
-
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import KanbanColumn from "@/components/page-project/kanban/kanban-column"
 import { useModal } from "@/lib/states"
@@ -274,7 +265,6 @@ export default function KanbanBoard({ userId, editProject, addTask, editTask, pr
   });
 
   const sensors = useSensors(mouseSensor, touchSensor);
-
 
   return(
     <div>
