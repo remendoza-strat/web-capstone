@@ -57,13 +57,7 @@ export function ComputeProgress(tasks: Task[], columnCount: number){
 
   for(const t of tasks){
     const position = t.position;
-
-    if(position === (columnCount - 1)){
-      total += 100;
-    }
-    else{
-      total += Math.round((position/columnCount) * 100);
-    }
+    total += Math.round((position / (columnCount - 1)) * 100);
   }
 
   return Math.round(total/taskCount);

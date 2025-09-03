@@ -60,6 +60,7 @@ export default function DeleteUser({ userId, userProjs } : { userId: string, use
         closeModal();
       }
       toast.success("Account deleted.");
+      closeModal();
       await signOut();
       router.push("/");
     } 

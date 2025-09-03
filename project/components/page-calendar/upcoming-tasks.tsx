@@ -22,7 +22,7 @@ export default function UpcomingTasks({ tasks } : { tasks: UserTask[] }){
       const description = LimitChar(StripHTML(t.task.description), 100);
       const deadline = DateTimeFormatter(t.task.dueDate);
       const name = t.task.project.name;
-      const progress = Math.round((t.task.position / t.task.project.columnCount) * 100);
+      const progress = Math.round((t.task.position / (t.task.project.columnCount - 1)) * 100);
       const status = new Date(t.task.dueDate) < new Date()? "Overdue" : "Active";
       const duedate = t.task.dueDate;
       return { 
