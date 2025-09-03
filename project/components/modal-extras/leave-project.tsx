@@ -21,7 +21,7 @@ export default function LeaveProject({ userId, projectData } : { userId: string,
   const leaveProjectMutation = leaveProject();  
 
   // Handle submit
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
       // Get data needed

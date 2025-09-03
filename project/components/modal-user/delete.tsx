@@ -58,6 +58,7 @@ export default function DeleteUser({ userId, userProjs } : { userId: string, use
         toast.error("Account deletion error.");
         setLoading(false);
         closeModal();
+        return;
       }
       toast.success("Account deleted.");
       closeModal();

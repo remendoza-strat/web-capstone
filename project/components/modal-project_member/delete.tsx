@@ -21,7 +21,7 @@ export default function DeleteProjectMember(
   const kickMemberMutation = kickMember();
 
   // Handle submit
-  async function handleSubmit(e: React.FormEvent){
+  function handleSubmit(e: React.FormEvent){
     e.preventDefault()
 
     // Approved member checking and kicking

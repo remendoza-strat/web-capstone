@@ -25,7 +25,7 @@ export default function UpdateProject({ userId, projectData } : { userId: string
   const updateMutation = updateProject();
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Check if there are tasks due beyond new project due date

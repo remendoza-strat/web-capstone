@@ -27,7 +27,7 @@ export default function UpdateProjectMember(
   const updateMutation = updateMemberRole();
   
   // Handle update
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // No change in role

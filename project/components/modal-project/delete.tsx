@@ -21,7 +21,7 @@ export default function DeleteProject({ userId, projectData } : { userId: string
 	const deleteMutation = deleteProject();
 
 	// Handle form submission
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 	
 		// Delete project

@@ -182,13 +182,13 @@ export default function ProfilePage(){
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newPassword: newPass })
       });
+      const data = await res.json();
       if(res.ok){
         toast.success("Password changed successfully.");
         setNewPass("");
         setConfirmPass("");
       }
       else{
-        const data = await res.json();
         toast.error(data.error);
         setIsChangePassword(false);
       }

@@ -21,7 +21,7 @@ export default function UpdateColumn({ columnIndex, columnNames, projectId } : {
   const updateMutation = KanbanUpdateProject();
     
   // Handle update
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate input
